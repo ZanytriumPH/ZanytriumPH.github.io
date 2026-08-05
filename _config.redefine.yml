@@ -420,10 +420,10 @@ footer:
 # Docs: https://redefine-docs.ohevan.com/inject
 inject:
   # Whether to enable inject
-  enable: false
+  enable: true
   # Inject custom head html code
   head:
-    -
+    - '<style>mark { background: linear-gradient(180deg, transparent 60%, #ffe066 60%); color: inherit; padding: 0 0.15em; } .dark-mode mark { background: linear-gradient(180deg, transparent 60%, #8b7a2e 60%); }</style>'
     -
     # Inject custom footer html code
   footer:
@@ -456,7 +456,7 @@ plugins:
       # .... you can add more audios here
   # Mermaid JS. Requires hexo-filter-mermaid-diagrams (npm i hexo-filter-mermaid-diagrams). See https://mermaid.js.org/
   mermaid:
-    enable: false # enable mermaid or not
+    enable: enable # enable mermaid or not
     version: "11.4.1" # default v11.4.1
 # PLUGINS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< end
 

@@ -230,7 +230,7 @@ int main()
 
 #### 1.3.3 类继承与 Visitor 模式
 
-```mermaid
+```Mermaid
 classDiagram
     class Shape {
         <<Abstract>>
