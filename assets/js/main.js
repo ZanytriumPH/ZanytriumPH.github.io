@@ -73,6 +73,36 @@
     updateBlur();
   }
 
+  // ---- busuanzi 计数基数：显示值 = 实时值 + 旧博客累计基数（data-base）----
+  // busuanzi 脚本填充 span 后，把 data-base 加上去；重写期间断开观察避免自触发
+  document.querySelectorAll('#busuanzi_value_site_uv, #busuanzi_value_site_pv').forEach((el) => {
+    const base = parseInt(el.dataset.base || '0', 10);
+    if (!base) return;
+    const cfg = { childList: true, characterData: true, subtree: true };
+    let obs;
+    const rewrite = () => {
+      obs.disconnect();
+      const n = parseInt(el.textContent, 10);
+      if (!isNaN(n) && n > 0) el.textContent = String(n + base);
+      obs.observe(el, cfg);
+    };
+    obs = new MutationObserver(rewrite);
+    obs.observe(el, cfg);
+  });
+
+  // ---- 已运行天数：基准时间取 config.siteStart，整日计数 ----
+  const uptime = document.getElementById('uptime');
+  if (uptime && uptime.dataset.start) {
+    const start = new Date(uptime.dataset.start).getTime();
+    const DAY = 86400000;
+    const update = () => {
+      const days = Math.floor((Date.now() - start) / DAY);
+      uptime.textContent = days > 0 ? String(days) : '0';
+    };
+    update();
+    setInterval(update, 60000); // 每分钟静默刷新，捕捉跨天
+  }
+
   // ---- 首页 hero：打字机动画（打出 → 停顿 → 删除 → 下一句）----
   const typewriter = document.getElementById('typewriter');
   if (typewriter && typewriter.dataset.phrases) {

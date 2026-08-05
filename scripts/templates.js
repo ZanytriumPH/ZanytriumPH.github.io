@@ -30,6 +30,7 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
         </button>
         <ul class="nav-menu" id="nav-menu">
           <li><a href="${url('')}">首页</a></li>
+          <li><a href="${url('archives.html')}">归档</a></li>
           <li><a href="${url('tags.html')}">标签</a></li>
           <li><a href="${url('categories.html')}">分类</a></li>
           <li><a href="${url('about.html')}">关于</a></li>
@@ -75,7 +76,7 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
 <meta name="description" content="${esc(description || config.description)}">
 <link rel="stylesheet" href="${url('assets/css/style.css')}">
 <link rel="stylesheet" href="${url('assets/css/hljs.css')}" id="hljs-style">
-<link rel="icon" type="image/svg+xml" href="${url('assets/img/favicon.svg')}">
+<link rel="icon" type="image/png" href="${url('assets/img/logo.png')}">
 ${themeInit}
 </head>
 <body>
@@ -88,6 +89,7 @@ ${body}
 </footer>
 <script src="${url('assets/js/main.js')}" defer></script>
 <script src="${url('assets/js/search.js')}" defer></script>
+${config.busuanzi && config.busuanzi.enabled ? `<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>` : ''}
 ${isPost ? `
 <script>window.MathJax = { tex: { inlineMath: [['\\\\(', '\\\\)']], displayMath: [['\\\\[', '\\\\]']] } };</script>
 <script defer src="${url('assets/vendor/mathjax/tex-svg.js')}"></script>
@@ -113,6 +115,56 @@ function indexPage({ config, url, posts }) {
   const bgDark = hero.bgDark ? url(hero.bgDark) : '';
   const phrases = JSON.stringify(hero.phrases || ['欢迎来到我的博客']);
 
+  // 首页侧栏：作者卡片 + 标签云 + 分类列表（Redefine 风格）
+  const side = config.sidebar || {};
+  const sideAvatar = side.avatar ? url(side.avatar) : '';
+  const announcement = side.announcement || config.description || '';
+  const tagCounts = {}, catCounts = {};
+  for (const p of posts) {
+    for (const t of p.tags) tagCounts[t] = (tagCounts[t] || 0) + 1;
+    for (const c of p.categories) catCounts[c] = (catCounts[c] || 0) + 1;
+  }
+  const gh = config.social && config.social.github;
+  const totalWords = posts.reduce((s, p) => s + (p.words || 0), 0);
+  // 访问人数 / 总访问量由不蒜子 busuanzi 统计（config.busuanzi.enabled 关闭时显示 0）；
+  // siteUvBase / sitePvBase 为旧博客累计基数：初始即显示基数，实时值由 main.js 累加上去
+  const bsz = config.busuanzi && config.busuanzi.enabled;
+  const uvBase = (config.busuanzi && config.busuanzi.siteUvBase) || 0;
+  const pvBase = (config.busuanzi && config.busuanzi.sitePvBase) || 0;
+  const statCard = `
+    <div class="side-card side-stats-card">
+      <div class="stat-row"><span class="stat-label">文章总字数</span><span class="stat-value">${totalWords.toLocaleString('zh-CN')}</span></div>
+      <div class="stat-row"><span class="stat-label">访问人数</span><span class="stat-value">${bsz ? `<span id="busuanzi_value_site_uv" data-base="${uvBase}">${uvBase}</span>` : '0'}</span></div>
+      <div class="stat-row"><span class="stat-label">总访问量</span><span class="stat-value">${bsz ? `<span id="busuanzi_value_site_pv" data-base="${pvBase}">${pvBase}</span>` : '0'}</span></div>
+      <div class="stat-row"><span class="stat-label">已运行天数</span><span class="stat-value uptime" id="uptime" data-start="${esc(config.siteStart || '')}">--</span></div>
+    </div>`;
+  const stats = `
+    <div class="side-stats">
+      <a class="side-stat" href="${url('tags.html')}" title="跳转标签页">
+        <span class="side-stat-num">${Object.keys(tagCounts).length}</span>
+        <span class="side-stat-label">标签</span>
+      </a>
+      <a class="side-stat" href="${url('categories.html')}" title="跳转分类页">
+        <span class="side-stat-num">${Object.keys(catCounts).length}</span>
+        <span class="side-stat-label">分类</span>
+      </a>
+      <a class="side-stat" href="${url('archives.html')}" title="跳转归档页">
+        <span class="side-stat-num">${posts.length}</span>
+        <span class="side-stat-label">文章</span>
+      </a>
+    </div>`;
+  const sidebar = `
+    <aside class="sidebar">
+      <div class="side-card side-profile">
+        ${sideAvatar ? `<img class="side-avatar" src="${sideAvatar}" alt="${esc(config.author)}">` : ''}
+        <div class="side-name">${esc(config.author)}</div>
+        <p class="side-announcement">${esc(announcement)}</p>
+        ${stats}
+        ${gh ? `<a class="side-link" href="${esc(gh)}" target="_blank" rel="noopener">GitHub ↗</a>` : ''}
+      </div>
+      ${statCard}
+    </aside>`;
+
   const body = `
     <section class="hero">
       ${bgLight ? `<img class="hero-bg" src="${bgLight}" data-bg-light="${bgLight}" data-bg-dark="${bgDark || bgLight}" alt="" fetchpriority="high">` : ''}
@@ -122,9 +174,12 @@ function indexPage({ config, url, posts }) {
       <a class="hero-scroll" href="#posts" aria-label="向下滚动">↓</a>
     </section>
     <div class="container">
-      <section class="post-list" id="posts">
-        ${cards || '<p class="empty">还没有文章，去 <code>source/_posts/</code> 里写一篇吧。</p>'}
-      </section>
+      <div class="home-layout">
+        ${sidebar}
+        <section class="post-list" id="posts">
+          ${cards || '<p class="empty">还没有文章，去 <code>source/_posts/</code> 里写一篇吧。</p>'}
+        </section>
+      </div>
     </div>`;
   return layout({ config, url, title: config.siteName, description: config.description, body, isHome: true });
 }
@@ -151,6 +206,7 @@ function postPage({ config, url, post, prev, next }) {
           <time datetime="${post.date}">${post.dateText}</time>
           ${post.categories.map(c => `<a class="meta-link" href="${url('categories.html')}#${esc(c)}">${esc(c)}</a>`).join(' ')}
           ${post.tags.map(t => `<a class="tag-chip" href="${url('tags.html')}#${esc(t)}"># ${esc(t)}</a>`).join('')}
+          ${config.busuanzi && config.busuanzi.enabled ? `<span class="meta-views">本文访问量 <span id="busuanzi_value_page_pv">0</span></span>` : ''}
         </div>
       </header>
       <div class="post-body markdown-body">${post.html}</div>

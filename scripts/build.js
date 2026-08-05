@@ -25,6 +25,19 @@ function dateText(iso) {
   return `${y} 年 ${Number(m)} 月 ${Number(d)} 日`;
 }
 
+/** 统计字数：中文按字符计、英文/数字按单词计；剔除代码块、行内代码与链接语法 */
+function countWords(mdText) {
+  let t = mdText
+    .replace(/```[\s\S]*?```/g, ' ')          // 代码围栏块
+    .replace(/`[^`]*`/g, ' ')                  // 行内代码
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')     // 图片
+    .replace(/\[[^\]]*\]\([^)]*\)/g, ' ')      // 链接
+    .replace(/[*_#>~|]/g, ' ');                // markdown 标记符
+  const cjk = (t.match(/[一-鿿㐀-䶿]/g) || []).length;
+  const words = (t.match(/[A-Za-z0-9]+/g) || []).length;
+  return cjk + words;
+}
+
 /** 从渲染后的 HTML 提取 h2/h3 标题生成 TOC */
 function buildToc(html) {
   const lines = [];
@@ -67,6 +80,7 @@ async function main() {
       description: data.description || '',
       html,
       toc: buildToc(html),
+      words: countWords(content),
       path: `posts/${baseName}.html`
     });
   }
@@ -137,8 +151,9 @@ async function main() {
     await write(`posts/${post.slug}.html`, page);
   }
 
-  // 首页 / 标签 / 分类（归档页已按需求移除，如要恢复在 templates.js 中启用 archivesPage）
+  // 首页 / 归档 / 标签 / 分类
   await write('index.html', T.indexPage({ config, url, posts }));
+  await write('archives.html', T.archivesPage({ config, url, posts }));
   await write('tags.html', T.tagsPage({ config, url, posts }));
   await write('categories.html', T.categoriesPage({ config, url, posts }));
 

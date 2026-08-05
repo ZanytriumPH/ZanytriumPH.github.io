@@ -237,10 +237,11 @@ code, pre, kbd {
   animation: heroContentUp 0.9s ease;
 }
 
-/* 首页滚动内容叠加在固定背景之上 */
+/* 首页滚动内容叠加在固定背景之上；加宽以容纳左侧栏 */
 .main-home .container {
   position: relative;
   z-index: 1;
+  max-width: 1084px;
 }
 @keyframes heroContentUp {
   from { opacity: 0; transform: translateY(18px); }
@@ -351,6 +352,120 @@ code, pre, kbd {
   border: 1px solid var(--border);
 }
 .tag-chip:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ---------- 首页侧栏（Redefine 风格） ---------- */
+.home-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding-bottom: 40px;
+}
+
+.sidebar {
+  position: sticky;
+  top: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.side-card {
+  padding: 22px 20px;
+  /* 与文章卡片一致的半透明毛玻璃 */
+  background: var(--card-glass);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.side-profile { text-align: center; }
+.side-avatar {
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-glass);
+  box-shadow: var(--shadow);
+}
+.side-name { margin-top: 12px; font-size: 1.15rem; font-weight: 700; }
+.side-announcement {
+  margin-top: 8px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.side-link {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 6px 18px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--accent);
+  border: 1px solid var(--border);
+  transition: border-color 0.15s, color 0.15s;
+}
+.side-link:hover { border-color: var(--accent); }
+
+/* 作者卡片统计栏：标签 / 分类 / 文章 */
+.side-stats {
+  display: flex;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.side-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+.side-stat:hover { background: var(--bg-soft); }
+.side-stat-num {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  transition: color 0.15s;
+}
+.side-stat:hover .side-stat-num { color: var(--accent); }
+.side-stat-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* 统计卡片：字数 / 访问人数 / 总访问量 / 运行时间 */
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 0.88rem;
+}
+.stat-row + .stat-row { border-top: 1px dashed var(--border); }
+.stat-label { color: var(--text-muted); white-space: nowrap; }
+.stat-value {
+  color: var(--text);
+  font-weight: 600;
+  /* 等宽数字：秒表每秒跳动时宽度不抖动 */
+  font-variant-numeric: tabular-nums;
+}
+.stat-value.uptime { font-size: 0.82rem; }
+
+/* 文章页：单篇访问量 */
+.meta-views { color: var(--text-muted); }
+
+/* 窄屏：侧栏折叠到文章列表下方 */
+@media (max-width: 900px) {
+  .home-layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; order: 2; }
+  .post-list { order: 1; }
+}
 
 /* ---------- 文章页 ---------- */
 .post { padding-bottom: 40px; }
