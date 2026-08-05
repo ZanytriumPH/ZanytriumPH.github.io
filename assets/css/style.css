@@ -24,7 +24,10 @@ html[data-theme="light"] {
   --text-muted: #8c959f;
   --border: #e4e7ec;
   --border-strong: #d0d7de;
-  --nav-bg: rgba(255, 255, 255, 0.58);
+  --nav-bg: rgba(255, 255, 255, 0.5);
+  --card-glass: rgba(255, 255, 255, 0.55);
+  --card-glass-hover: rgba(255, 255, 255, 0.72);
+  --border-glass: rgba(255, 255, 255, 0.55);
   --shadow: 0 1px 3px rgba(31, 35, 40, 0.06), 0 8px 24px rgba(31, 35, 40, 0.04);
   --shadow-hover: 0 2px 6px rgba(31, 35, 40, 0.08), 0 12px 32px rgba(31, 35, 40, 0.08);
   --code-bg: #f6f8fa;
@@ -46,7 +49,10 @@ html[data-theme="dark"] {
   --text-muted: #6e7681;
   --border: #30363d;
   --border-strong: #3d444d;
-  --nav-bg: rgba(13, 17, 23, 0.58);
+  --nav-bg: rgba(13, 17, 23, 0.5);
+  --card-glass: rgba(13, 17, 23, 0.55);
+  --card-glass-hover: rgba(13, 17, 23, 0.72);
+  --border-glass: rgba(255, 255, 255, 0.14);
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
   --shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.35);
   --code-bg: #161b22;
@@ -194,13 +200,14 @@ code, pre, kbd {
 }
 
 .hero-bg {
-  position: absolute;
+  /* 固定铺满视口：滚动时背景不动，模糊程度随滚动加深（main.js 控制） */
+  position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
   object-fit: cover;
   object-position: center;
+  z-index: 0;
   animation: heroFadeIn 1.4s ease;
+  will-change: filter;
 }
 @keyframes heroFadeIn {
   from { opacity: 0; transform: scale(1.04); }
@@ -214,6 +221,12 @@ code, pre, kbd {
   color: #fff;
   padding: 0 20px;
   animation: heroContentUp 0.9s ease;
+}
+
+/* 首页滚动内容叠加在固定背景之上 */
+.main-home .container {
+  position: relative;
+  z-index: 1;
 }
 @keyframes heroContentUp {
   from { opacity: 0; transform: translateY(18px); }
@@ -277,15 +290,19 @@ code, pre, kbd {
 
 .post-card {
   padding: 24px 28px;
-  background: var(--card);
-  border: 1px solid var(--border);
+  /* 半透明毛玻璃卡片，透过模糊后的背景图 */
+  background: var(--card-glass);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--border-glass);
   border-radius: var(--radius);
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
 }
 .post-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-hover);
-  border-color: var(--border-strong);
+  background: var(--card-glass-hover);
 }
 
 .post-card-meta {
@@ -684,9 +701,12 @@ pre.mermaid {
 
 /* ---------- 页脚 ---------- */
 .site-footer {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-glass);
   padding: 24px 0 32px;
   margin-top: 40px;
+  background: var(--card-glass);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
 }
 .footer-inner {
   max-width: var(--content-width);

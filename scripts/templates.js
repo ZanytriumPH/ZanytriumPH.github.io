@@ -118,10 +118,6 @@ function indexPage({ config, url, posts }) {
       ${bgLight ? `<img class="hero-bg" src="${bgLight}" data-bg-light="${bgLight}" data-bg-dark="${bgDark || bgLight}" alt="" fetchpriority="high">` : ''}
       <div class="hero-content">
         <p class="hero-typewriter" id="typewriter" data-phrases='${phrases}'></p>
-        <div class="hero-social">
-          ${config.social && config.social.github
-            ? `<a class="social-link" href="${esc(config.social.github)}" target="_blank" rel="noopener">GitHub</a>` : ''}
-        </div>
       </div>
       <a class="hero-scroll" href="#posts" aria-label="向下滚动">↓</a>
     </section>

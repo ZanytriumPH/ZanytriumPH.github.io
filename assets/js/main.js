@@ -42,6 +42,21 @@
   }
   applyHeroBg(htmlEl.getAttribute('data-theme') || 'light');
 
+  // ---- 首页滚动渐模糊：滚动越深背景越模糊，衬托文章内容 ----
+  if (heroBg) {
+    const MAX_BLUR = 22;
+    let ticking = false;
+    const updateBlur = () => {
+      const blur = Math.min((window.scrollY / 900) * MAX_BLUR, MAX_BLUR);
+      heroBg.style.filter = blur > 0.5 ? `blur(${blur.toFixed(1)}px)` : '';
+      ticking = false;
+    };
+    window.addEventListener('scroll', () => {
+      if (!ticking) { requestAnimationFrame(updateBlur); ticking = true; }
+    }, { passive: true });
+    updateBlur();
+  }
+
   // ---- 首页 hero：打字机动画（打出 → 停顿 → 删除 → 下一句）----
   const typewriter = document.getElementById('typewriter');
   if (typewriter && typewriter.dataset.phrases) {
