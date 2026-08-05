@@ -122,12 +122,72 @@ function createMd(env) {
     }
   });
 
-  // === 3. PlantUML：fence 块渲染 ===
+  // === 3. MathJax 公式：$...$ 行内 / $$...$$ 块级 ===
+  // 公式内容直接作为原文输出（不经过 Markdown 解析，避免 `_`/`*` 被误判），
+  // 由运行时 MathJax 渲染成 SVG。挂在 escape 之前，`\$` 转义优先。
+  md.inline.ruler.before('escape', 'math_inline', (state, silent) => {
+    const src = state.src;
+    const start = state.pos;
+    if (src[start] !== '$') return false;
+    // `$ ` 开头视为普通货币/文本，不做公式
+    if (src[start + 1] === ' ' || src[start + 1] === '\n') return false;
+
+    let j = start + 1;
+    let closed = -1;
+    while (j < src.length) {
+      const c = src[j];
+      if (c === '\\') { j += 2; continue; }   // 跳过转义序列
+      if (c === '\n') return false;            // 行内公式不跨行
+      if (c === '$') { closed = j; break; }
+      j++;
+    }
+    if (closed === -1) return false;
+    const content = src.slice(start + 1, closed);
+    if (!content.trim()) return false;
+    if (silent) return true;
+
+    state.pos = start + 1;
+    const token = state.push('math_inline', 'span', 0);
+    token.content = content;
+    state.pos = closed + 1;
+    return true;
+  });
+
+  md.block.ruler.before('paragraph', 'math_block', (state, startLine, endLine, silent) => {
+    const start = state.bMarks[startLine] + state.tShift[startLine];
+    if (state.src.slice(start, start + 2) !== '$$') return false;
+    if (silent) return true;
+
+    // 在 startLine..endLine 范围内查找闭合 $$
+    let closePos = -1, closeLine = -1;
+    for (let l = startLine; l < endLine && closePos === -1; l++) {
+      const from = l === startLine ? start + 2 : state.bMarks[l] + state.tShift[l];
+      const idx = state.src.indexOf('$$', from);
+      if (idx !== -1 && idx < state.eMarks[l]) { closePos = idx; closeLine = l; }
+    }
+    if (closePos === -1) return false;
+
+    const token = state.push('math_block', 'div', 0);
+    token.content = state.src.slice(start + 2, closePos);
+    state.line = closeLine + 1;
+    return true;
+  });
+
+  md.renderer.rules.math_inline = (tokens, idx) => `\\(${tokens[idx].content}\\)`;
+  md.renderer.rules.math_block = (tokens, idx) => `<div class="math-block">\\[${tokens[idx].content}\\]</div>\n`;
+
+  // === 4. Mermaid 图：fence 块原样输出，由客户端 mermaid.js 渲染 ===
+  // === 5. PlantUML：fence 块渲染 ===
   // 渲染时收集源码交给 env.puml 处理，返回占位容器，构建完成后替换为 <img>
   const defaultFence = md.renderer.rules.fence;
   md.renderer.rules.fence = (tokens, idx, options, env2, self) => {
     const token = tokens[idx];
-    if (token.info.trim().toLowerCase() !== 'plantuml') {
+    const info = token.info.trim().toLowerCase();
+    if (info === 'mermaid') {
+      // 原样输出（不转义），mermaid.js 按 pre.mermaid 渲染为 SVG
+      return `<pre class="mermaid">${token.content}</pre>\n`;
+    }
+    if (info !== 'plantuml') {
       return defaultFence(tokens, idx, options, env2, self);
     }
     const puml = env2.puml || env.puml;

@@ -89,6 +89,10 @@ ${body}
 </footer>
 <script src="${url('assets/js/main.js')}" defer></script>
 <script src="${url('assets/js/search.js')}" defer></script>
+${isPost ? `
+<script>window.MathJax = { tex: { inlineMath: [['\\\\(', '\\\\)']], displayMath: [['\\\\[', '\\\\]']] } };</script>
+<script defer src="${url('assets/vendor/mathjax/tex-svg.js')}"></script>
+<script defer src="${url('assets/vendor/mermaid/mermaid.min.js')}"></script>` : ''}
 </body>
 </html>`;
 }

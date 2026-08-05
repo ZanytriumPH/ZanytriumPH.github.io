@@ -429,6 +429,46 @@ code, pre, kbd {
 }
 .copy-btn:hover { color: var(--accent); background: var(--bg-soft); }
 
+/* ---------- MathJax 公式 ---------- */
+.math-block {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 6px 0;
+}
+.math-block mjx-container {
+  display: block;
+  margin: 0.4em 0;
+}
+.markdown-body mjx-container { overflow-x: auto; }
+
+/* ---------- Mermaid 图 ---------- */
+pre.mermaid {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+}
+.mermaid-svg {
+  margin: 1.5em 0;
+  padding: 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+  overflow-x: auto;
+}
+.mermaid-svg svg { max-width: 100%; height: auto; }
+.mermaid-error {
+  padding: 14px 18px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  background: var(--bg-soft);
+}
+
 /* ---------- PlantUML ---------- */
 .plantuml-figure { text-align: center; margin: 1.5em 0; }
 .plantuml-figure img {

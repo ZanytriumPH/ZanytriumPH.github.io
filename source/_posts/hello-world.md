@@ -84,11 +84,44 @@ function hello(name) {
 }
 ```
 
-## 数学公式（纯文本示例）
+## 数学公式（MathJax）
 
-行内公式 `E = mc^2`，块级公式：
+行内公式用单个 `$` 包裹，例如 `$E = mc^2$` 是最著名的质能方程。
 
-$$ E = mc^2 $$
+块级公式用 `$$` 包裹，自动居中显示：
+
+$$ \int_{-\infty}^{+\infty} e^{-x^2} dx = \sqrt{\pi} $$
+
+欧拉恒等式：
+
+$$ e^{i\pi} + 1 = 0 $$
 
 > [!note] 说明
-> 如需 MathJax 数学公式渲染，可以在后续迭代中接入，构建脚本已预留扩展位。
+> 公式内下划线不会触发 Markdown 斜体，`\$` 可转义为普通美元符号。
+
+## Mermaid 图
+
+用 ` ```mermaid ` 代码块画图，部署后自动渲染（跟随明暗主题）：
+
+```mermaid
+flowchart TD
+    A[开始] --> B{是否已登录?}
+    B -- 是 --> C[进入首页]
+    B -- 否 --> D[跳转登录页]
+    D --> E{登录成功?}
+    E -- 是 --> C
+    E -- 否 --> D
+```
+
+时序图：
+
+```mermaid
+sequenceDiagram
+    participant 用户
+    participant 浏览器
+    participant GitHub Pages
+    用户->>浏览器: 访问博客
+    浏览器->>GitHub Pages: 请求 HTML
+    GitHub Pages-->>浏览器: 返回页面
+    浏览器-->>用户: 渲染完成
+```

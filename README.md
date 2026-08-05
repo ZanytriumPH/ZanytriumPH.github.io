@@ -33,7 +33,12 @@ description: 文章摘要（显示在首页卡片和搜索索引）
 |---|---|
 | `==文本==` | 荧光笔高亮 |
 | `> [!note] 标题` | MPE 风格提示框（支持 note/info/tip/success/question/warning/example/quote/important 9 种） |
-| ` ```plantuml ` 代码块 | 部署时渲染为 SVG 图片（本地无 Java 时降级显示源码） |
+| ` ```plantuml ` 代码块 | 构建时渲染为 SVG 图片（本地无 Java 时降级显示源码，部署时自动渲染） |
+| `$公式$` / `$$公式$$` | MathJax 数学公式（行内 / 块级，本地渲染无 CDN 依赖） |
+| ` ```mermaid ` 代码块 | Mermaid 图（客户端渲染，跟随明暗主题） |
+
+> [!note] 提示
+> 数学公式与 Mermaid 脚本仅加载在文章页，体积较大（约 5MB），不影响首页速度。
 
 ## 部署
 
