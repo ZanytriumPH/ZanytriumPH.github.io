@@ -1,0 +1,20 @@
+{
+  "siteName": "Zwing's blog",
+  "author": "Zwing",
+  "description": "Zwing 的个人博客，记录技术与生活。",
+  "base": "/",
+  "url": "https://zanytriumph.github.io",
+  "social": {
+    "github": "https://github.com/ZanytriumPH"
+  },
+  "giscus": {
+    "enabled": false,
+    "repo": "ZanytriumPH/ZanytriumPH.github.io",
+    "repoId": "",
+    "category": "Announcements",
+    "categoryId": "",
+    "mapping": "pathname",
+    "lang": "zh-CN"
+  },
+  "footer": "© 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine"
+}

@@ -1,0 +1,90 @@
+/**
+ * main.js — 导航 / 主题切换 / 代码块增强 / TOC 高亮
+ */
+(() => {
+  'use strict';
+
+  // ---- 移动端导航 ----
+  const navToggle = document.getElementById('nav-toggle');
+  const navMenu = document.getElementById('nav-menu');
+  if (navToggle && navMenu) {
+    navToggle.addEventListener('click', () => {
+      const open = navMenu.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', String(open));
+    });
+    navMenu.addEventListener('click', (e) => {
+      if (e.target.tagName === 'A') {
+        navMenu.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  // ---- 主题切换（明/暗，持久化到 localStorage）----
+  const themeToggle = document.getElementById('theme-toggle');
+  const hljsStyle = document.getElementById('hljs-style');
+  const htmlEl = document.documentElement;
+
+  function applyHljsTheme(theme) {
+    if (!hljsStyle) return;
+    hljsStyle.setAttribute(
+      'href',
+      hljsStyle.getAttribute('href').replace(/hljs(-dark)?\.css/, theme === 'dark' ? 'hljs-dark.css' : 'hljs.css')
+    );
+  }
+  applyHljsTheme(htmlEl.getAttribute('data-theme') || 'light');
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      htmlEl.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      applyHljsTheme(next);
+    });
+  }
+
+  // ---- 代码块：语言标签 + 复制按钮 ----
+  document.querySelectorAll('.markdown-body pre').forEach((pre) => {
+    const code = pre.querySelector('code');
+    const lang = (code.className.match(/language-(\w+)/) || [])[1] || 'code';
+
+    const header = document.createElement('div');
+    header.className = 'code-header';
+    const langLabel = document.createElement('span');
+    langLabel.textContent = lang;
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.textContent = '复制';
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(code.textContent);
+        copyBtn.textContent = '已复制 ✓';
+        setTimeout(() => { copyBtn.textContent = '复制'; }, 1500);
+      } catch (e) {
+        copyBtn.textContent = '复制失败';
+      }
+    });
+    header.appendChild(langLabel);
+    header.appendChild(copyBtn);
+    pre.parentNode.insertBefore(header, pre);
+  });
+
+  // ---- TOC 滚动高亮 ----
+  const tocLinks = document.querySelectorAll('.toc li a');
+  if (tocLinks.length) {
+    const ids = [...tocLinks].map(a => a.getAttribute('href').slice(1));
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          tocLinks.forEach(a => a.classList.remove('active'));
+          const link = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+          if (link) link.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+  }
+})();
