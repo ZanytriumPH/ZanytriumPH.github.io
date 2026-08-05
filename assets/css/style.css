@@ -200,11 +200,14 @@ code, pre, kbd {
 }
 
 .hero-bg {
-  /* 固定铺满视口：滚动时背景不动，模糊程度随滚动加深（main.js 控制） */
+  /* 固定铺满视口：滚动时背景不动，模糊程度随滚动加深（main.js 控制）。
+     contain 完整显示整张图（不被裁剪），深色底与暗色星空图融合；
+     四周外扩 24px 防止 blur 后边缘透出背景造成白边 */
   position: fixed;
-  inset: 0;
-  object-fit: cover;
+  inset: -24px;
+  object-fit: contain;
   object-position: center;
+  background: #060a12;
   z-index: 0;
   animation: heroFadeIn 1.4s ease;
   will-change: filter;
