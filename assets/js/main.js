@@ -34,6 +34,34 @@
   }
   applyHljsTheme(htmlEl.getAttribute('data-theme') || 'light');
 
+  // ---- 首页 hero：明暗主题切换背景图 ----
+  const heroBg = document.querySelector('.hero-bg');
+  function applyHeroBg(theme) {
+    if (!heroBg) return;
+    heroBg.src = theme === 'dark' ? heroBg.dataset.bgDark : heroBg.dataset.bgLight;
+  }
+  applyHeroBg(htmlEl.getAttribute('data-theme') || 'light');
+
+  // ---- 首页 hero：打字机动画（打出 → 停顿 → 删除 → 下一句）----
+  const typewriter = document.getElementById('typewriter');
+  if (typewriter && typewriter.dataset.phrases) {
+    let phrases = [];
+    try { phrases = JSON.parse(typewriter.dataset.phrases); } catch (e) { /* 保持空 */ }
+    if (phrases.length) {
+      let pi = 0, ci = 0, deleting = false;
+      const tick = () => {
+        const phrase = phrases[pi];
+        ci += deleting ? -1 : 1;
+        typewriter.textContent = phrase.slice(0, ci);
+        let delay = deleting ? 45 : 110;
+        if (!deleting && ci === phrase.length) { deleting = true; delay = 2000; }
+        else if (deleting && ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; delay = 500; }
+        setTimeout(tick, delay);
+      };
+      tick();
+    }
+  }
+
   // ---- Mermaid 图渲染（跟随明暗主题，切换时自动重渲染）----
   if (window.mermaid) {
     const renderMermaid = async () => {

@@ -19,7 +19,7 @@ function esc(s) {
 }
 
 /** 布局骨架：导航 + 内容 + 页脚 + 暗色模式初始化（防闪烁） */
-function layout({ config, url, title, description, body, isPost = false }) {
+function layout({ config, url, title, description, body, isPost = false, isHome = false }) {
   const themeInit = `<script>(function(){var t=localStorage.getItem('theme');if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);})();</script>`;
   const nav = `
     <nav class="navbar">
@@ -81,7 +81,7 @@ ${themeInit}
 </head>
 <body>
 ${nav}
-<main class="container">
+<main class="${isHome ? 'main-home' : 'container'}">
 ${body}
 </main>
 <footer class="site-footer">
@@ -97,7 +97,7 @@ ${isPost ? `
 </html>`;
 }
 
-/** 首页：hero + 文章卡片列表 */
+/** 首页：全屏 hero（背景图 + 打字机动画）+ 文章卡片列表 */
 function indexPage({ config, url, posts }) {
   const cards = posts.map(p => `
     <article class="post-card">
@@ -109,20 +109,32 @@ function indexPage({ config, url, posts }) {
       <p class="post-card-excerpt">${esc(p.description || '')}</p>
     </article>`).join('');
 
+  const hero = config.hero || {};
+  const bgLight = hero.bgLight ? url(hero.bgLight) : '';
+  const bgDark = hero.bgDark ? url(hero.bgDark) : '';
+  const phrases = JSON.stringify(hero.phrases || ['欢迎来到我的博客']);
+
   const body = `
     <section class="hero">
-      <h1 class="hero-title">${esc(config.siteName)}</h1>
-      <p class="hero-subtitle">${esc(config.description)}</p>
-      <div class="hero-social">
-        ${config.social && config.social.github
-          ? `<a class="social-link" href="${esc(config.social.github)}" target="_blank" rel="noopener">GitHub</a>` : ''}
+      ${bgLight ? `<img class="hero-bg" src="${bgLight}" data-bg-light="${bgLight}" data-bg-dark="${bgDark || bgLight}" alt="" fetchpriority="high">` : ''}
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <p class="hero-greet">${esc(hero.greeting || '')}</p>
+        <h1 class="hero-title">${esc(config.siteName)}</h1>
+        <p class="hero-typewriter" id="typewriter" data-phrases='${phrases}'></p>
+        <div class="hero-social">
+          ${config.social && config.social.github
+            ? `<a class="social-link" href="${esc(config.social.github)}" target="_blank" rel="noopener">GitHub</a>` : ''}
+        </div>
       </div>
-      <div class="hero-scroll">↓</div>
+      <a class="hero-scroll" href="#posts" aria-label="向下滚动">↓</a>
     </section>
-    <section class="post-list">
-      ${cards || '<p class="empty">还没有文章，去 <code>source/_posts/</code> 里写一篇吧。</p>'}
-    </section>`;
-  return layout({ config, url, title: config.siteName, description: config.description, body });
+    <div class="container">
+      <section class="post-list" id="posts">
+        ${cards || '<p class="empty">还没有文章，去 <code>source/_posts/</code> 里写一篇吧。</p>'}
+      </section>
+    </div>`;
+  return layout({ config, url, title: config.siteName, description: config.description, body, isHome: true });
 }
 
 /** 文章页：标题、元信息、TOC、正文、上下篇、评论 */

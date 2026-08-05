@@ -7,6 +7,16 @@
   "social": {
     "github": "https://github.com/ZanytriumPH"
   },
+  "hero": {
+    "bgLight": "assets/img/bg.webp",
+    "bgDark": "assets/img/bg-dark.webp",
+    "greeting": "你好，我是",
+    "phrases": [
+      "记录技术，分享生活",
+      "热爱开源的开发者",
+      "用文字连接世界"
+    ]
+  },
   "giscus": {
     "enabled": false,
     "repo": "ZanytriumPH/ZanytriumPH.github.io",
