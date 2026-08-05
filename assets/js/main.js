@@ -42,13 +42,19 @@
   }
   applyHeroBg(htmlEl.getAttribute('data-theme') || 'light');
 
-  // ---- 首页滚动渐模糊：滚动越深背景越模糊，衬托文章内容 ----
+  // ---- 首页背景模糊（Redefine 效果）----
+  // 帖子条目列表顶部到达屏幕中间时，背景直接切换为模糊（无渐变过程）
   if (heroBg) {
-    const MAX_BLUR = 22;
+    const BLUR = 18;
     let ticking = false;
     const updateBlur = () => {
-      const blur = Math.min((window.scrollY / 900) * MAX_BLUR, MAX_BLUR);
-      heroBg.style.filter = blur > 0.5 ? `blur(${blur.toFixed(1)}px)` : '';
+      const posts = document.getElementById('posts');
+      let blur = '';
+      if (posts) {
+        const postsTop = posts.getBoundingClientRect().top + window.scrollY;
+        if (window.scrollY + window.innerHeight * 0.5 >= postsTop) blur = BLUR;
+      }
+      heroBg.style.filter = blur ? `blur(${blur}px)` : '';
       ticking = false;
     };
     window.addEventListener('scroll', () => {
