@@ -18,11 +18,23 @@ const CALLOUT_TYPES = [
   'question', 'warning', 'example', 'quote', 'important'
 ];
 
-/** 各类型提示框的图标（emoji，跨平台无字体依赖） */
+/** 各类型提示框的图标（内联 SVG，feather 风格，stroke 随标题色 currentColor 渲染） */
 const CALLOUT_ICONS = {
-  note: '📝', info: 'ℹ️', tip: '💡', success: '✅',
-  question: '❓', warning: '⚠️', example: '📌', quote: '💬', important: '⭐'
+  note: svgIcon('<path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>'), // 铅笔
+  info: svgIcon('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'),
+  tip: svgIcon('<path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/>'), // 灯泡
+  success: svgIcon('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/>'), // 对勾圆
+  question: svgIcon('<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>'),
+  warning: svgIcon('<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/>'), // 三角叹号
+  example: svgIcon('<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>'), // 剪贴板
+  quote: svgIcon('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'), // 对话气泡
+  important: svgIcon('<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>') // 圆形叹号
 };
+
+/** 组装 feather 风格的内联 SVG（24×24，stroke 随 currentColor） */
+function svgIcon(inner) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+}
 
 /** 为标题生成带序号防重复的锚点 id（保留中文） */
 function slugify(text, used) {
@@ -114,7 +126,11 @@ function createMd(env) {
         const titleOpen = new state.Token('callout_title_open', 'div', 1);
         titleOpen.attrs = [['class', 'callout-title']];
         const titleInline = new state.Token('inline', '', 0);
-        const parsedTitle = state.md.parseInline(`${CALLOUT_ICONS[type] || '📝'} ${title}`, state.env);
+        // 图标以 html_inline token 原样注入（SVG），标题本身正常走 Markdown 解析
+        const parsedTitle = state.md.parseInline(title, state.env);
+        const iconToken = new state.Token('html_inline', '', 0);
+        iconToken.content = CALLOUT_ICONS[type] || CALLOUT_ICONS.note;
+        parsedTitle[0].children.unshift(iconToken);
         titleInline.children = parsedTitle[0].children;
         const titleClose = new state.Token('callout_title_close', 'div', -1);
         tokens.splice(inner, 0, titleOpen, titleInline, titleClose);

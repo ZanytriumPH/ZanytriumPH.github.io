@@ -546,13 +546,13 @@ code, pre, kbd {
 }
 
 /* ===== MPE 提示框 callout ===== */
+/* 整框填充各类型的浅色调背景（--callout-soft） */
 .callout {
   position: relative;
   padding: 16px 20px 16px 20px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--callout-border);
-  background: var(--callout-bg);
-  border-left: 4px solid var(--callout-color, var(--accent));
+  border: 1px solid var(--callout-soft-border, var(--callout-border));
+  background: var(--callout-soft, var(--callout-bg));
 }
 .callout + .callout { margin-top: 1.1em; }
 
@@ -561,22 +561,38 @@ code, pre, kbd {
   font-size: 1rem;
   margin-bottom: 6px;
   display: flex; align-items: center; gap: 8px;
+  color: var(--callout-color, var(--text));
+}
+.callout-title svg {
+  width: 1em; height: 1em;
+  flex-shrink: 0;
 }
 
 .callout p { margin: 0.35em 0; }
 .callout > *:first-child { margin-top: 0; }
 .callout > *:last-child { margin-bottom: 0; }
 
-/* 各类型配色 */
-.callout-note     { --callout-color: #4f7cff; }
-.callout-info    { --callout-color: #0ea5e9; }
-.callout-tip     { --callout-color: #22c55e; }
-.callout-success { --callout-color: #16a34a; }
-.callout-question{ --callout-color: #a855f7; }
-.callout-warning { --callout-color: #f59e0b; }
-.callout-example { --callout-color: #06b6d4; }
-.callout-quote   { --callout-color: #64748b; }
-.callout-important { --callout-color: #ef4444; }
+/* 各类型配色（浅色主题：淡彩底 + 同色系描边） */
+.callout-note     { --callout-color: #4f7cff; --callout-soft: #eaf0ff; --callout-soft-border: #cfddff; }
+.callout-info    { --callout-color: #0ea5e9; --callout-soft: #e1f3fc; --callout-soft-border: #bfe4f7; }
+.callout-tip     { --callout-color: #22c55e; --callout-soft: #e3f7ea; --callout-soft-border: #c3edd1; }
+.callout-success { --callout-color: #16a34a; --callout-soft: #dff4e6; --callout-soft-border: #b9e6c9; }
+.callout-question{ --callout-color: #a855f7; --callout-soft: #f3eafd; --callout-soft-border: #e0cdfa; }
+.callout-warning { --callout-color: #f59e0b; --callout-soft: #fef4dd; --callout-soft-border: #fbe4b0; }
+.callout-example { --callout-color: #06b6d4; --callout-soft: #def5f9; --callout-soft-border: #b6e9f2; }
+.callout-quote   { --callout-color: #64748b; --callout-soft: #eef1f5; --callout-soft-border: #d6dde6; }
+.callout-important { --callout-color: #ef4444; --callout-soft: #fdeaea; --callout-soft-border: #f9cdcd; }
+
+/* 暗色主题：低饱和暗调同色系底 */
+html[data-theme="dark"] .callout-note     { --callout-soft: #1a2240; --callout-soft-border: #2c3a6b; }
+html[data-theme="dark"] .callout-info    { --callout-soft: #0f2433; --callout-soft-border: #1e3f57; }
+html[data-theme="dark"] .callout-tip     { --callout-soft: #10281c; --callout-soft-border: #1e4a33; }
+html[data-theme="dark"] .callout-success { --callout-soft: #0c2b1c; --callout-soft-border: #1d5230; }
+html[data-theme="dark"] .callout-question{ --callout-soft: #241838; --callout-soft-border: #3d2760; }
+html[data-theme="dark"] .callout-warning { --callout-soft: #2d2110; --callout-soft-border: #4d3a1b; }
+html[data-theme="dark"] .callout-example { --callout-soft: #0e2830; --callout-soft-border: #1c4652; }
+html[data-theme="dark"] .callout-quote   { --callout-soft: #1c2128; --callout-soft-border: #313a45; }
+html[data-theme="dark"] .callout-important { --callout-soft: #331818; --callout-soft-border: #572a2a; }
 
 /* ---------- 代码块 ---------- */
 .markdown-body pre {
