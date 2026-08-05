@@ -35,15 +35,25 @@
   applyHljsTheme(htmlEl.getAttribute('data-theme') || 'light');
 
   // ---- 首页 hero：明暗主题切换背景图 ----
+  // 切换时先淡出（opacity 过渡），新图加载完成再淡入；首屏初始化不淡出
   const heroBg = document.querySelector('.hero-bg');
-  function applyHeroBg(theme) {
+  function applyHeroBg(theme, { fade = false } = {}) {
     if (!heroBg) return;
-    heroBg.src = theme === 'dark' ? heroBg.dataset.bgDark : heroBg.dataset.bgLight;
+    const src = theme === 'dark' ? heroBg.dataset.bgDark : heroBg.dataset.bgLight;
+    if (heroBg.getAttribute('src') === src) return;
+    if (fade) {
+      heroBg.style.opacity = 0;
+      const restore = () => { heroBg.style.opacity = ''; };
+      heroBg.addEventListener('load', restore, { once: true });
+      heroBg.addEventListener('error', restore, { once: true }); // 加载失败也不留黑屏
+    }
+    heroBg.src = src;
   }
   applyHeroBg(htmlEl.getAttribute('data-theme') || 'light');
 
   // ---- 首页背景模糊（Redefine 效果）----
-  // 帖子条目列表顶部到达屏幕中间时，背景直接切换为模糊（无渐变过程）
+  // 帖子条目列表顶部到达屏幕中间时切换模糊；0↔18px 的突变由
+  // CSS 的 transition: filter 平滑过渡（见 style.css .hero-bg）
   if (heroBg) {
     const BLUR = 18;
     let ticking = false;
@@ -123,6 +133,7 @@
       htmlEl.setAttribute('data-theme', next);
       localStorage.setItem('theme', next);
       applyHljsTheme(next);
+      applyHeroBg(next, { fade: true }); // 背景图跟随明暗主题切换
       if (window.mermaid) renderMermaid(); // 明暗切换后按新主题重渲染图表
     });
   }

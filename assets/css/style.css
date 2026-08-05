@@ -188,6 +188,9 @@ code, pre, kbd {
 
 /* ---------- 首页 hero：全屏背景 + 打字机 ---------- */
 .main-home { min-height: 100vh; }
+/* 导航 sticky 占文档流 61px（60 + 1px 边框），把 hero 上移回去，
+   打字机才能以「屏幕中心」而非「导航下方盒子的中心」垂直居中 */
+.main-home .hero { margin-top: -61px; }
 
 .hero {
   position: relative;
@@ -202,15 +205,23 @@ code, pre, kbd {
 .hero-bg {
   /* 固定铺满视口（Redefine 效果）：cover 裁剪铺满；
      帖子条目到达屏幕中间时由 main.js 直接切换模糊；
-     四周外扩 24px 防止 blur 后边缘透出背景造成白边 */
+     四周外扩 24px 防止 blur 后边缘透出背景造成白边。
+     注意：img 是替换元素，仅靠 inset 不会被拉伸（会保持图片
+     固有尺寸锚定左上角），必须显式指定宽高 object-fit 才生效 */
   position: fixed;
-  inset: -24px;
+  top: -24px;
+  left: -24px;
+  width: calc(100vw + 48px);
+  height: calc(100svh + 48px);
   object-fit: cover;
   object-position: center;
   background: #060a12;
   z-index: 0;
   animation: heroFadeIn 1.4s ease;
   will-change: filter;
+  /* main.js 阈值切换 0↔18px 时，由浏览器平滑过渡而非突变；
+     opacity 用于明暗主题切换背景图时淡出淡入 */
+  transition: filter 0.6s ease, opacity 0.3s ease;
 }
 @keyframes heroFadeIn {
   from { opacity: 0; transform: scale(1.04); }
