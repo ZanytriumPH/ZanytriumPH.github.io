@@ -24,7 +24,7 @@ html[data-theme="light"] {
   --text-muted: #8c959f;
   --border: #e4e7ec;
   --border-strong: #d0d7de;
-  --nav-bg: rgba(255, 255, 255, 0.8);
+  --nav-bg: rgba(255, 255, 255, 0.58);
   --shadow: 0 1px 3px rgba(31, 35, 40, 0.06), 0 8px 24px rgba(31, 35, 40, 0.04);
   --shadow-hover: 0 2px 6px rgba(31, 35, 40, 0.08), 0 12px 32px rgba(31, 35, 40, 0.08);
   --code-bg: #f6f8fa;
@@ -46,7 +46,7 @@ html[data-theme="dark"] {
   --text-muted: #6e7681;
   --border: #30363d;
   --border-strong: #3d444d;
-  --nav-bg: rgba(13, 17, 23, 0.8);
+  --nav-bg: rgba(13, 17, 23, 0.58);
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
   --shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.35);
   --code-bg: #161b22;
@@ -207,19 +207,6 @@ code, pre, kbd {
   to { opacity: 1; transform: scale(1); }
 }
 
-/* 遮罩：保证文字可读，底部渐隐过渡到文章列表 */
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.38) 0%,
-    rgba(0, 0, 0, 0.46) 55%,
-    rgba(0, 0, 0, 0.42) 78%,
-    var(--bg) 100%
-  );
-}
-
 .hero-content {
   position: relative;
   z-index: 2;
@@ -233,30 +220,12 @@ code, pre, kbd {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.hero-greet {
-  font-size: clamp(1rem, 3vw, 1.2rem);
-  letter-spacing: 4px;
-  opacity: 0.85;
-  margin-bottom: 14px;
-}
-
-.hero-title {
-  font-size: clamp(2.6rem, 8vw, 4rem);
-  font-weight: 800;
-  letter-spacing: 2px;
-  line-height: 1.2;
-  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45);
-}
-
-/* 打字机动画行 */
+/* 打字机动画行（首页正中唯一文字） */
 .hero-typewriter {
-  margin-top: 20px;
-  font-size: clamp(1.3rem, 4.5vw, 1.9rem);
-  font-weight: 500;
+  font-size: clamp(1.4rem, 5vw, 2.2rem);
+  font-weight: 600;
   min-height: 1.7em;
   color: #fff;
-  opacity: 0.95;
-  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.4);
 }
 .hero-typewriter::after {
   content: '|';

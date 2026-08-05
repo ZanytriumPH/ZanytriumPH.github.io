@@ -30,7 +30,6 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
         </button>
         <ul class="nav-menu" id="nav-menu">
           <li><a href="${url('')}">首页</a></li>
-          <li><a href="${url('archives.html')}">归档</a></li>
           <li><a href="${url('tags.html')}">标签</a></li>
           <li><a href="${url('categories.html')}">分类</a></li>
           <li><a href="${url('about.html')}">关于</a></li>
@@ -117,10 +116,7 @@ function indexPage({ config, url, posts }) {
   const body = `
     <section class="hero">
       ${bgLight ? `<img class="hero-bg" src="${bgLight}" data-bg-light="${bgLight}" data-bg-dark="${bgDark || bgLight}" alt="" fetchpriority="high">` : ''}
-      <div class="hero-overlay"></div>
       <div class="hero-content">
-        <p class="hero-greet">${esc(hero.greeting || '')}</p>
-        <h1 class="hero-title">${esc(config.siteName)}</h1>
         <p class="hero-typewriter" id="typewriter" data-phrases='${phrases}'></p>
         <div class="hero-social">
           ${config.social && config.social.github

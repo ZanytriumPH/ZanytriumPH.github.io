@@ -137,9 +137,8 @@ async function main() {
     await write(`posts/${post.slug}.html`, page);
   }
 
-  // 首页 / 归档 / 标签 / 分类
+  // 首页 / 标签 / 分类（归档页已按需求移除，如要恢复在 templates.js 中启用 archivesPage）
   await write('index.html', T.indexPage({ config, url, posts }));
-  await write('archives.html', T.archivesPage({ config, url, posts }));
   await write('tags.html', T.tagsPage({ config, url, posts }));
   await write('categories.html', T.categoriesPage({ config, url, posts }));
 
