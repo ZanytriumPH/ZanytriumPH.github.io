@@ -11,7 +11,7 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
     "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace;
-  --content-width: 780px;
+  --content-width: 860px;
 }
 
 html[data-theme="light"] {
@@ -92,6 +92,7 @@ code, pre, kbd {
   margin: 0 auto;
   padding: 0 20px;
   min-height: calc(100vh - 200px);
+  transition: max-width 0.25s ease; /* 目录展开时容器平滑加宽 */
 }
 
 /* ---------- 导航栏 ---------- */
@@ -468,7 +469,26 @@ code, pre, kbd {
 }
 
 /* ---------- 文章页 ---------- */
-.post { padding-bottom: 40px; }
+.post { padding-bottom: 0; } /* 底部由版权块 → 翻页按钮直接衔接 */
+
+/* 文章末尾版权声明：正文下方独立 --- 分隔线，与版权块间隔 20px；下方直接接翻页按钮 */
+.post-copyright-sep {
+  height: 1px;
+  background: var(--border);
+  margin-top: 40px;
+}
+.post-copyright {
+  margin-top: 20px;
+  padding: 14px 18px;
+  font-size: 1rem; /* 与正文同字号 */
+  color: var(--text-secondary);
+  line-height: 1.9;
+  background: var(--bg-soft);
+  border-radius: var(--radius-sm);
+}
+.post-copyright p { margin: 0; }
+.post-copyright strong { color: var(--text); font-weight: 600; }
+.post-copyright a { color: var(--accent); }
 
 .post-header { padding: 40px 0 24px; border-bottom: 1px solid var(--border); }
 
@@ -627,7 +647,8 @@ html[data-theme="dark"] .callout-important { --callout-soft: #331818; --callout-
   font-size: 0.8rem;
   color: var(--text-muted);
 }
-.code-header + pre { border-top-left-radius: 0; border-top-right-radius: 0; }
+/* 去掉 pre 顶边框，语言栏与代码连成一体 */
+.code-header + pre { border-top-left-radius: 0; border-top-right-radius: 0; border-top: none; }
 .copy-btn {
   border: none; background: transparent;
   color: var(--text-muted); cursor: pointer;
@@ -693,42 +714,98 @@ pre.mermaid {
   margin-bottom: 10px;
 }
 
-/* ---------- 目录 TOC ---------- */
-.toc {
+/* ---------- 目录 TOC：右侧浮动按钮 + 贴文章右侧的折叠抽屉 ---------- */
+.toc-toggle {
   position: fixed;
-  top: 90px;
-  right: max(20px, calc(50% - 560px));
-  width: 220px;
+  top: 180px;
+  right: 40px;
+  z-index: 95;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-secondary);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: color 0.15s;
+}
+.toc-toggle:hover { color: var(--accent); }
+.toc-toggle svg { width: 20px; height: 20px; }
+
+/* 抽屉贴在文章右侧、靠上（sticky 随滚动保持在视口内）；无边框无背景的纯文本目录 */
+.toc {
+  position: sticky;
+  top: 80px;
+  flex: 0 0 220px;
+  align-self: flex-start;
   max-height: calc(100vh - 140px);
   overflow-y: auto;
-  padding: 12px 0;
+  padding: 0;
   font-size: 0.85rem;
-  border-left: 1px solid var(--border);
   display: none;
 }
-.toc-title { font-weight: 700; margin-bottom: 8px; color: var(--text-muted); font-size: 0.8rem; }
-.toc ul { list-style: none; }
-.toc li { margin: 4px 0; }
+body.toc-open .toc { display: block; }
+
+/* 文章 + 目录整体：flex 让两者贴在一起，作为整体居中 */
+.post-wrap {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+.post-wrap .post { flex: 1 1 0; min-width: 0; }
+
+/* Redefine 风格：小标题 + 文章标题 + 点线层级列表 */
+/* 小标题紧贴文章标题上方：行高收紧且无 margin */
+.toc-title { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); line-height: 1.2; margin-bottom: 0; }
+.toc .page-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+.toc ul { list-style: none; padding: 0 2px 12px 10px; }
+.toc li {
+  line-height: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
 .toc li a {
-  color: var(--text-secondary);
   display: block;
-  padding: 3px 0 3px 16px;
+  color: var(--text-secondary);
   border-left: 2px solid transparent;
-  line-height: 1.5;
+  padding-left: 8px;
+  transition: all 0.3s ease;
 }
 .toc li a:hover { color: var(--accent); }
-.toc li a.active { color: var(--toc-active); border-left-color: var(--toc-active); }
-.toc .toc-l2 { padding-left: 8px; }
-.toc .toc-l3 { padding-left: 20px; }
+.toc li a.active {
+  color: var(--toc-active);
+  font-weight: 700;
+  border-left-color: var(--toc-active);
+}
+/* 子级：点线左边界缩进（对应 Redefine 的 ol ol 嵌套线） */
+.toc .toc-l2 { padding-left: 14px; border-left: 2px dotted var(--border-strong); }
+.toc .toc-l3 { padding-left: 26px; border-left: 2px dotted var(--border-strong); }
 
-@media (min-width: 1400px) { .toc { display: block; } }
-@media (max-width: 1399px) { .toc { display: none; } }
+/* 目录展开时：容器加宽以容纳「文章 + 目录」整体居中（244 = 24 间距 + 220 目录宽） */
+body.toc-open main.container { max-width: calc(var(--content-width) + 244px); }
+
+/* 窄屏隐藏目录抽屉（避免挤压文章） */
+@media (max-width: 900px) {
+  .toc-toggle { display: none; }
+  body.toc-open .toc { display: none; }
+}
 
 /* ---------- 上下篇 ---------- */
 .post-pager {
   display: flex; justify-content: space-between; gap: 16px;
-  padding: 24px 0 40px;
-  border-top: 1px solid var(--border);
+  padding: 20px 0 40px;
 }
 .post-pager a {
   color: var(--text-secondary);

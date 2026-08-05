@@ -74,6 +74,7 @@ async function main() {
       slug: baseName,
       title: data.title || baseName,
       date,
+      updated: data.updated ? new Date(data.updated).toISOString().slice(0, 10) : null,
       dateText: dateText(date),
       tags: Array.isArray(data.tags) ? data.tags : [],
       categories: Array.isArray(data.categories) ? data.categories : [],

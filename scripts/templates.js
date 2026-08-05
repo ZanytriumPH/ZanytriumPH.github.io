@@ -187,8 +187,12 @@ function indexPage({ config, url, posts }) {
 /** 文章页：标题、元信息、TOC、正文、上下篇、评论 */
 function postPage({ config, url, post, prev, next }) {
   const toc = post.toc ? `
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
     <nav class="toc">
       <div class="toc-title">目录</div>
+      <div class="page-title">${esc(post.title)}</div>
       <ul>${post.toc}</ul>
     </nav>` : '';
 
@@ -198,20 +202,37 @@ function postPage({ config, url, post, prev, next }) {
       ${next ? `<a class="pager-next" href="${url(next.path)}">${esc(next.title)} →</a>` : ''}
     </nav>` : '';
 
+  // 文章末尾版权声明（blockquote 格式，更新于缺失时回退为创建日期）
+  const siteUrl = config.url.replace(/\/+$/, '');
+  const postUrl = `${siteUrl}${url(post.path)}`;
+  const copyright = `
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：${esc(post.title)}</p>
+      <p><strong>作者</strong>：${esc(config.author)}</p>
+      <p><strong>创建于</strong>：${esc(post.date)}</p>
+      <p><strong>更新于</strong>：${esc(post.updated || post.date)}</p>
+      <p><strong>链接</strong>：${postUrl}</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>`;
+
   const body = `
-    <article class="post">
-      <header class="post-header">
-        <h1 class="post-title">${esc(post.title)}</h1>
-        <div class="post-meta">
-          <time datetime="${post.date}">${post.dateText}</time>
-          ${post.categories.map(c => `<a class="meta-link" href="${url('categories.html')}#${esc(c)}">${esc(c)}</a>`).join(' ')}
-          ${post.tags.map(t => `<a class="tag-chip" href="${url('tags.html')}#${esc(t)}"># ${esc(t)}</a>`).join('')}
-          ${config.busuanzi && config.busuanzi.enabled ? `<span class="meta-views">本文访问量 <span id="busuanzi_value_page_pv">0</span></span>` : ''}
-        </div>
-      </header>
-      <div class="post-body markdown-body">${post.html}</div>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          <h1 class="post-title">${esc(post.title)}</h1>
+          <div class="post-meta">
+            <time datetime="${post.date}">${post.dateText}</time>
+            ${post.categories.map(c => `<a class="meta-link" href="${url('categories.html')}#${esc(c)}">${esc(c)}</a>`).join(' ')}
+            ${post.tags.map(t => `<a class="tag-chip" href="${url('tags.html')}#${esc(t)}"># ${esc(t)}</a>`).join('')}
+            ${config.busuanzi && config.busuanzi.enabled ? `<span class="meta-views">本文访问量 <span id="busuanzi_value_page_pv">0</span></span>` : ''}
+          </div>
+        </header>
+        <div class="post-body markdown-body">${post.html}</div>
+        ${copyright}
+      </article>
       ${toc}
-    </article>
+    </div>
     ${pager}
     ${config.giscus && config.giscus.enabled ? `<section class="post-comments" id="comments"><div id="giscus"></div></section>` : ''}`;
   return layout({ config, url, title: post.title, description: post.description, body, isPost: true });

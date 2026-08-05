@@ -171,6 +171,7 @@
   // ---- 代码块：语言标签 + 复制按钮 ----
   document.querySelectorAll('.markdown-body pre').forEach((pre) => {
     const code = pre.querySelector('code');
+    if (!code) return; // pre.mermaid 等没有 code 子元素的块跳过，避免中断后续脚本
     const lang = (code.className.match(/language-(\w+)/) || [])[1] || 'code';
 
     const header = document.createElement('div');
@@ -193,6 +194,15 @@
     header.appendChild(copyBtn);
     pre.parentNode.insertBefore(header, pre);
   });
+
+  // ---- 目录抽屉：右侧按钮展开 / 收起 ----
+  const tocToggle = document.getElementById('toc-toggle');
+  if (tocToggle) {
+    tocToggle.addEventListener('click', () => {
+      const open = document.body.classList.toggle('toc-open');
+      tocToggle.setAttribute('aria-expanded', String(open));
+    });
+  }
 
   // ---- TOC 滚动高亮 ----
   const tocLinks = document.querySelectorAll('.toc li a');
