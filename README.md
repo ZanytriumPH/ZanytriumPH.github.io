@@ -57,6 +57,55 @@ GitHub Actions 已配置自动部署（见 `.github/workflows/deploy.yml`）：
 2. 在 [giscus.app](https://giscus.app) 配置并获取 `repoId` / `categoryId`
 3. 填写 `config.json` 中的 `giscus` 字段，把 `enabled` 改为 `true`
 
+## 博文图片与搬运
+
+> 文章在别处写好（图片以 PNG 为主）后，搬运进本仓库部署。图片**必须先压缩再进仓库**：
+> GitHub Pages 对站点有 **1GB 软上限**，300-400 张原图 PNG 很容易逼近甚至超过；
+> 且 git 不压缩二进制，原图一旦提交就永久占据仓库体积。压缩后总量通常在 50-150MB。
+
+### 图片存放位置
+
+```
+assets/img/posts/<文章slug>/<文件名>.webp
+```
+
+构建时整个 `assets/` 原样复制到 `dist/assets/`，无需其他配置。
+
+### 压缩脚本
+
+```bash
+node scripts/optimize-img.js <源图片目录> <文章slug>
+# 等价命令：npm run optimize-img -- <源图片目录> <文章slug>
+```
+
+选项：`--mode auto|lossless|lossy`（默认 auto）、`--max-width 1600`、`--out <目录>`。
+
+行为：
+
+- 递归扫描源目录下的 png/jpg/jpeg → 输出到 `assets/img/posts/<slug>/<原名>.webp`；
+- 源目录里已有的 `.webp` 原样复制（视为已优化）；
+- **auto 模式**：缩到 128px 采样统计颜色数，≤2048 判定为图形/截图 → **WebP 无损**
+  （文字、纯色边缘零损失），否则按照片处理 → **有损 q80**；
+- 宽度超过 1600px 自动缩到 1600（正文容器 860px，2x 屏上限 ~1720px）；
+- **不删除源文件**（原图留在仓库外做备份），结束时打印新旧路径对照表。
+
+### markdown 引用规则
+
+```markdown
+![图片描述](/assets/img/posts/<文章slug>/<文件名>.webp)
+```
+
+**必须根路径（`/` 开头）+ `.webp` 后缀**。文章页在 `/posts/` 下，相对路径会解析成
+`/posts/assets/...` 而 404；正文图片已由构建自动加 `loading="lazy"` 懒加载。
+
+### 搬运流程（AI 执行）
+
+1. 文章 `.md` → `source/_posts/`，front matter 补全 `title / date / tags / categories / description`；
+2. 运行压缩脚本：`node scripts/optimize-img.js <源图片目录> <文章slug>`；
+3. 按脚本输出的对照表，把文章内图片引用全部改写为 `/assets/img/posts/<slug>/<原名>.webp`；
+4. **不要**把原 PNG 复制进仓库（原图留在源目录备份）；
+5. `npm run build` 验证构建通过、`dist/` 产物正常。
+
 ## 站点配置
 
 `config.json`：站点名、简介、base 路径、社交链接、页脚文案等。

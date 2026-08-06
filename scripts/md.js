@@ -212,6 +212,17 @@ function createMd(env) {
     return `<div class="plantuml-wrap" data-plantuml="${hash}" data-file="${fileName}"></div>`;
   };
 
+  // === 6. 图片：自动添加 loading="lazy"（懒加载） ===
+  // 包一层默认渲染器：先注入 loading 属性，再走原渲染（保留 alt 文本处理等）
+  const defaultImage = md.renderer.rules.image;
+  md.renderer.rules.image = (tokens, idx, options, env2, self) => {
+    const token = tokens[idx];
+    if (token.attrIndex('loading') === -1) {
+      token.attrs.push(['loading', 'lazy']);
+    }
+    return defaultImage(tokens, idx, options, env2, self);
+  };
+
   // === 标题锚点：自动添加 id（用于 TOC 跳转） ===
   const headingOpen = md.renderer.rules.heading_open ||
     ((tokens, idx, options, env2, self) => self.renderToken(tokens, idx, options));

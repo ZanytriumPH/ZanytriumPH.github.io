@@ -5,7 +5,8 @@
   "description": "Zwing's blog - custom static blog inspired by hexo-theme-redefine",
   "scripts": {
     "build": "node scripts/build.js",
-    "dev": "node scripts/dev.js"
+    "dev": "node scripts/dev.js",
+    "optimize-img": "node scripts/optimize-img.js"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
@@ -13,5 +14,8 @@
     "markdown-it": "^14.1.0",
     "markdown-it-mark": "^4.0.0",
     "markdown-it-texmath": "^1.0.0"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.3"
   }
 }
