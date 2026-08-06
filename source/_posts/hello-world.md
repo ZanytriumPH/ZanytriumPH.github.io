@@ -47,6 +47,12 @@ description: 第一篇博客，顺便演示这个博客支持的三种 Markdown 
 > [!important] 重要
 > 非常重要的信息，比如安全提示。
 
+> [!bug] 已知问题
+> 记录尚未修复的 bug 或缺陷。
+
+> [!fail] 失败
+> 表示操作失败、测试未通过等情形。
+
 ## PlantUML 图
 
 用 ` ```plantuml ` 代码块写 PlantUML 图，部署后会自动渲染为图片：
