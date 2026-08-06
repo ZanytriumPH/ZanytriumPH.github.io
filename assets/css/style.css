@@ -985,10 +985,10 @@ body.toc-open .post-pager { max-width: calc(100% - 244px); }
 .page-title { font-size: 2rem; font-weight: 800; padding: 48px 0 8px; }
 .page-subtitle { color: var(--text-muted); font-size: 0.9rem; padding-bottom: 24px; }
 
-/* 归档页时间线（参照 hexo-theme-redefine）：年份标题 + 文章数胶囊 + 竖线圆点。
-   容器整体毛玻璃（与主页卡片同款），透过固定的 hero 背景图；
+/* 毛玻璃面板（归档 / 标签 / 标签详情共用容器）：
+   与主页卡片同款，透过固定的 hero 背景图；
    z-index:1 使其绘制在 fixed 背景图（z-index:0）之上 */
-.archive-list-container {
+.glass-panel {
   position: relative;
   z-index: 1;
   margin: 28px 0 40px;
@@ -1000,6 +1000,19 @@ body.toc-open .post-pager { max-width: calc(100% - 244px); }
   border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
+/* 篇数徽标（年份胶囊 / 标签胶囊内共用）：小字圆角徽标 */
+.count-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-soft);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* 归档页时间线（参照 hexo-theme-redefine）：年份标题 + 文章数胶囊 + 竖线圆点 */
 .archive-year-block { padding: 16px 0 4px; }
 /* 年份与胶囊水平排列：年份固定 50px 宽使 4 位数字居中（中心 25px = 竖线中心），胶囊跟在其右侧 */
 .archive-item-header {
@@ -1016,16 +1029,7 @@ body.toc-open .post-pager { max-width: calc(100% - 244px); }
   color: var(--text);
   white-space: nowrap;
 }
-.archive-year-post-count {
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 2px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg-soft);
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
+.archive-year-post-count { margin-top: 4px; }
 .archive-list-container .article-list {
   list-style: none;
   margin-left: 24px; /* 竖线中心 25px = 年份数字中心 */
@@ -1089,44 +1093,73 @@ body.toc-open .post-pager { max-width: calc(100% - 244px); }
   border: 1px solid var(--border);
 }
 
-.archive-list { list-style: none; }
-.archive-item {
-  display: flex; align-items: baseline; gap: 16px;
-  padding: 10px 4px;
-  border-bottom: 1px dashed var(--border);
+/* 标签/分类胶囊云：椭圆胶囊（标签带 # 前缀 + 篇数徽标），点击跳转详情页 */
+.tag-panel { padding: 48px 32px 32px; }
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* 一行未占满时胶囊居中 */
+  gap: 14px;
+  padding: 8px 0 16px;
 }
-.archive-item time {
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  font-family: var(--font-mono);
-  flex-shrink: 0;
-  width: 110px;
-}
-.archive-item a { color: var(--text); }
-.archive-item a:hover { color: var(--accent); }
-
-.tag-cloud { display: flex; flex-wrap: wrap; gap: 10px; padding: 16px 0 8px; }
-.tag-cloud-item {
-  padding: 5px 14px;
+.tag-pill, .category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 18px;
   border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  transition: all 0.15s;
+  border-radius: 999px; /* 椭圆 */
+  color: var(--text);
+  background: var(--bg-soft);
+  transition: border-color 0.2s, color 0.2s, transform 0.2s, background 0.2s;
 }
-.tag-cloud-item:hover {
+.tag-pill:hover, .category-pill:hover {
+  color: var(--accent);
   border-color: var(--accent);
-  color: var(--accent);
-  transform: translateY(-2px);
+  background: var(--bg);
+  transform: translateY(-1px);
 }
-.tag-count { font-size: 0.75rem; color: var(--text-muted); }
+.tag-pill-name { font-size: 1.1rem; }
 
-.tag-group, .category-group { padding: 20px 0; }
-.tag-group-title, .category-group-title {
-  font-size: 1.15rem; font-weight: 700;
+/* 详情页面板大标题（标签/分类详情页左上角）：SVG 图标 + 名称 */
+.timeline-panel { padding-bottom: 12px; }
+.panel-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text);
+  padding: 4px 0 20px;
   margin-bottom: 8px;
-  color: var(--accent);
+  border-bottom: 1px solid var(--border);
 }
+.panel-heading svg {
+  width: 30px;
+  height: 30px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* 分类胶囊：每行两个、无 # 前缀、条目放大 */
+.category-panel { padding: 48px 32px 32px; }
+/* 两列 flex 布局：每行两个；总数为奇数时最后一项独占一行并居中 */
+.category-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 0 16px;
+}
+.category-pill {
+  flex-basis: calc(50% - 8px);
+  justify-content: center; /* 胶囊内文字水平居中 */
+  padding: 13px 22px;
+  gap: 12px;
+  border-radius: 12px; /* 分类胶囊圆角改小（默认椭圆 999px） */
+}
+.category-pill:nth-child(odd):last-child { flex-basis: 100%; }
+.category-pill-name { font-size: 1.15rem; }
 
 /* ---------- 搜索 ---------- */
 .search-panel {

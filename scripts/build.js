@@ -215,8 +215,38 @@ async function main() {
   // 首页 / 归档 / 标签 / 分类
   await write('index.html', T.indexPage({ config, url, posts }));
   await write('archives.html', T.archivesPage({ config, url, posts }));
-  await write('tags.html', T.tagsPage({ config, url, posts }));
-  await write('categories.html', T.categoriesPage({ config, url, posts }));
+
+  // 标签独立页：tags/<slug>.html，slug 冲突时加 -2/-3 去重
+  const slugMap = new Map();
+  const usedSlugs = new Set();
+  for (const p of posts) for (const t of p.tags) {
+    if (slugMap.has(t)) continue;
+    let s = T.tagSlug(t), u = s, n = 2;
+    while (usedSlugs.has(u)) u = `${s}-${n++}`;
+    usedSlugs.add(u);
+    slugMap.set(t, u);
+  }
+  for (const [tag, slug] of slugMap) {
+    const list = posts.filter(p => p.tags.includes(tag));
+    await write(`tags/${slug}.html`, T.tagPage({ config, url, tag, posts: list }));
+  }
+  await write('tags.html', T.tagsPage({ config, url, posts, slugMap }));
+
+  // 分类独立页：categories/<slug>.html（slug 冲突处理同标签）
+  const catSlugMap = new Map();
+  const usedCatSlugs = new Set();
+  for (const p of posts) for (const c of p.categories) {
+    if (catSlugMap.has(c)) continue;
+    let s = T.tagSlug(c), u = s, n = 2;
+    while (usedCatSlugs.has(u)) u = `${s}-${n++}`;
+    usedCatSlugs.add(u);
+    catSlugMap.set(c, u);
+  }
+  for (const [cat, slug] of catSlugMap) {
+    const list = posts.filter(p => p.categories.includes(cat));
+    await write(`categories/${slug}.html`, T.categoryPage({ config, url, category: cat, posts: list }));
+  }
+  await write('categories.html', T.categoriesPage({ config, url, posts, slugMap: catSlugMap }));
 
   // 独立页面（关于 / 友链）
   const aboutPage = pages.find(p => p.slug === 'about');

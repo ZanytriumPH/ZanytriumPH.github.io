@@ -281,8 +281,11 @@ function postPage({ config, url, post, prev, next }) {
   return layout({ config, url, title: post.title, description: post.description, body, isPost: true });
 }
 
-/** 归档页：时间线样式（参照 hexo-theme-redefine）——年份标题 + 文章数胶囊 + 竖线圆点列表 */
-function archivesPage({ config, url, posts }) {
+/**
+ * 时间线内部结构（无毛玻璃容器）：按年份分组 → 同日合并 →
+ * 年份标题 + 文章数胶囊 + 竖线圆点列表。posts 需已按日期降序。
+ */
+function timelineInner({ url, posts }) {
   const byYear = {};
   for (const p of posts) {
     const y = p.date.slice(0, 4);
@@ -303,63 +306,113 @@ function archivesPage({ config, url, posts }) {
     }
     return html + '</li>';
   };
-  const body = `
+  return `
     <div class="archive-list-container">
     ${years.map(y => `
       <section class="archive-year-block">
         <div class="archive-item-header">
           <span class="archive-year">${y}</span>
-          <span class="archive-year-post-count">${byYear[y].length}</span>
+          <span class="archive-year-post-count count-badge">${byYear[y].length}</span>
         </div>
         <ul class="article-list">${dayItems(byYear[y])}</ul>
       </section>`).join('')}
     </div>`;
+}
+
+/** 时间线组件（归档页）：毛玻璃容器 + 内部结构 */
+function timelineHtml({ url, posts }) {
+  return `<div class="glass-panel timeline-panel">${timelineInner({ url, posts })}</div>`;
+}
+
+/** 面板大标题（详情页左上角）：SVG 图标 + 名称 */
+function panelHeading(iconInner, name) {
+  return `<h1 class="panel-heading">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconInner}</svg>
+    <span>${esc(name)}</span>
+  </h1>`;
+}
+
+/** 面板标题图标：标签（feather tag）/ 分类（feather folder） */
+const PANEL_ICONS = {
+  tag: '<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
+  folder: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>'
+};
+
+/** 标签 → 文件名 slug（与锚点同规则，保留中文；空标签兜底），冲突由 build.js 去重 */
+function tagSlug(tag) {
+  const s = String(tag).toLowerCase()
+    .replace(/[^\w一-龥]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 64);
+  return s || 'tag';
+}
+
+/** 归档页：时间线组件 */
+function archivesPage({ config, url, posts }) {
+  const body = timelineHtml({ url, posts });
   return layout({ config, url, title: '归档', body, current: 'archives', heroBg: true });
 }
 
-/** 标签页：标签云 + 每个标签的文章列表 */
-function tagsPage({ config, url, posts }) {
+/**
+ * 标签页：毛玻璃容器 + 椭圆胶囊标签云（#标签名 + 篇数徽标）。
+ * slugMap 由 build.js 构建（标签 → 文件名 slug，已去重），点击跳转 tags/<slug>.html
+ */
+function tagsPage({ config, url, posts, slugMap }) {
   const tagMap = {};
   for (const p of posts) for (const t of p.tags) (tagMap[t] = tagMap[t] || []).push(p);
   const sorted = Object.keys(tagMap).sort((a, b) => tagMap[b].length - tagMap[a].length);
   const body = `
-    <h1 class="page-title">标签</h1>
-    <div class="tag-cloud">
-      ${sorted.map(t => `<a class="tag-cloud-item" href="#${esc(t)}">${esc(t)} <span class="tag-count">${tagMap[t].length}</span></a>`).join('')}
-    </div>
-    ${sorted.map(t => `
-      <section class="tag-group" id="${esc(t)}">
-        <h2 class="tag-group-title">${esc(t)}</h2>
-        <ul class="archive-list">
-          ${tagMap[t].map(p => `
-            <li class="archive-item">
-              <time>${p.dateText}</time>
-              <a href="${url(p.path)}">${esc(p.title)}</a>
-            </li>`).join('')}
-        </ul>
-      </section>`).join('')}`;
-  return layout({ config, url, title: '标签', body, current: 'tags' });
+    <div class="glass-panel tag-panel">
+      <div class="tag-cloud">
+        ${sorted.map(t => `
+          <a class="tag-pill" href="${url('tags/' + (slugMap.get(t) || tagSlug(t)) + '.html')}">
+            <span class="tag-pill-name"># ${esc(t)}</span>
+            <span class="tag-pill-count count-badge">${tagMap[t].length}</span>
+          </a>`).join('')}
+      </div>
+    </div>`;
+  return layout({ config, url, title: '标签', body, current: 'tags', heroBg: true });
 }
 
-/** 分类页 */
-function categoriesPage({ config, url, posts }) {
+/** 标签详情页：面板大标题（标签图标 + 标签名）+ 时间线 */
+function tagPage({ config, url, tag, posts }) {
+  const body = `
+    <div class="glass-panel timeline-panel">
+      ${panelHeading(PANEL_ICONS.tag, tag)}
+      ${timelineInner({ url, posts })}
+    </div>`;
+  return layout({ config, url, title: `标签：${tag}`, description: `标签「${tag}」下的全部文章`, body, current: 'tags', heroBg: true });
+}
+
+/**
+ * 分类页：与标签页同款的毛玻璃胶囊云，区别——每行两个分类、无 # 前缀、条目放大。
+ * slugMap 由 build.js 构建（分类 → 文件名 slug，已去重），点击跳转 categories/<slug>.html
+ */
+function categoriesPage({ config, url, posts, slugMap }) {
   const catMap = {};
   for (const p of posts) for (const c of p.categories) (catMap[c] = catMap[c] || []).push(p);
   const sorted = Object.keys(catMap).sort();
   const body = `
-    <h1 class="page-title">分类</h1>
-    ${sorted.map(c => `
-      <section class="category-group" id="${esc(c)}">
-        <h2 class="category-group-title">${esc(c)} <span class="tag-count">${catMap[c].length}</span></h2>
-        <ul class="archive-list">
-          ${catMap[c].map(p => `
-            <li class="archive-item">
-              <time>${p.dateText}</time>
-              <a href="${url(p.path)}">${esc(p.title)}</a>
-            </li>`).join('')}
-        </ul>
-      </section>`).join('')}`;
-  return layout({ config, url, title: '分类', body, current: 'categories' });
+    <div class="glass-panel category-panel">
+      <div class="category-cloud">
+        ${sorted.map(c => `
+          <a class="category-pill" href="${url('categories/' + (slugMap.get(c) || tagSlug(c)) + '.html')}">
+            <span class="category-pill-name">${esc(c)}</span>
+            <span class="category-pill-count count-badge">${catMap[c].length}</span>
+          </a>`).join('')}
+      </div>
+    </div>`;
+  return layout({ config, url, title: '分类', body, current: 'categories', heroBg: true });
+}
+
+/** 分类详情页：面板大标题（分类图标 + 分类名）+ 时间线 */
+function categoryPage({ config, url, category, posts }) {
+  const body = `
+    <div class="glass-panel timeline-panel">
+      ${panelHeading(PANEL_ICONS.folder, category)}
+      ${timelineInner({ url, posts })}
+    </div>`;
+  return layout({ config, url, title: `分类：${category}`, description: `分类「${category}」下的全部文章`, body, current: 'categories', heroBg: true });
 }
 
 /** 普通页面（关于、友链等） */
@@ -385,4 +438,4 @@ function notFoundPage({ config, url }) {
   return layout({ config, url, title: '404', body });
 }
 
-module.exports = { layout, indexPage, postPage, archivesPage, tagsPage, categoriesPage, pagePage, notFoundPage, makeUrl, esc };
+module.exports = { layout, indexPage, postPage, archivesPage, tagsPage, tagPage, categoriesPage, categoryPage, pagePage, notFoundPage, makeUrl, esc, tagSlug };
