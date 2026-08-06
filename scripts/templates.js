@@ -35,8 +35,13 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
           <li><a href="${url('categories.html')}">分类</a></li>
           <li><a href="${url('about.html')}">关于</a></li>
           <li class="nav-actions">
-            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式">🌓</button>
-            <button class="icon-btn" id="search-toggle" aria-label="搜索">🔍</button>
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
           </li>
         </ul>
       </div>
@@ -87,13 +92,13 @@ ${body}
 <footer class="site-footer">
   <div class="footer-inner">${esc(config.footer)}</div>
 </footer>
+${isPost ? `<script defer src="${url('assets/vendor/mermaid/mermaid.min.js')}"></script>` : ''}
 <script src="${url('assets/js/main.js')}" defer></script>
 <script src="${url('assets/js/search.js')}" defer></script>
 ${config.busuanzi && config.busuanzi.enabled ? `<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>` : ''}
 ${isPost ? `
 <script>window.MathJax = { tex: { inlineMath: [['\\\\(', '\\\\)']], displayMath: [['\\\\[', '\\\\]']] } };</script>
-<script defer src="${url('assets/vendor/mathjax/tex-svg.js')}"></script>
-<script defer src="${url('assets/vendor/mermaid/mermaid.min.js')}"></script>` : ''}
+<script defer src="${url('assets/vendor/mathjax/tex-svg.js')}"></script>` : ''}
 </body>
 </html>`;
 }

@@ -124,38 +124,38 @@
   }
 
   // ---- Mermaid 图渲染（跟随明暗主题，切换时自动重渲染）----
-  if (window.mermaid) {
-    const renderMermaid = async () => {
-      const theme = htmlEl.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-      mermaid.initialize({ startOnLoad: false, theme, securityLevel: 'strict' });
-      // 恢复此前渲染过的图，然后统一重渲染
-      document.querySelectorAll('.mermaid-svg').forEach((el) => {
-        const pre = document.createElement('pre');
-        pre.className = 'mermaid';
-        pre.textContent = el.dataset.code;
-        el.replaceWith(pre);
-      });
-      let counter = 0;
-      for (const pre of [...document.querySelectorAll('pre.mermaid')]) {
-        const code = pre.textContent;
-        try {
-          const id = 'mmd-' + (counter++) + '-' + Math.random().toString(36).slice(2, 8);
-          const { svg } = await mermaid.render(id, code);
-          const holder = document.createElement('div');
-          holder.className = 'mermaid-svg';
-          holder.dataset.code = code;
-          holder.innerHTML = svg;
-          pre.replaceWith(holder);
-        } catch (e) {
-          const err = document.createElement('div');
-          err.className = 'mermaid-error';
-          err.textContent = '⚠️ Mermaid 渲染失败：' + e.message;
-          pre.replaceWith(err);
-        }
+  // 定义在模块作用域：下方主题切换回调也要调用它；
+  // 若定义在 if 块内，块级作用域会让回调处抛 ReferenceError，重渲染静默失败
+  const renderMermaid = async () => {
+    const theme = htmlEl.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+    mermaid.initialize({ startOnLoad: false, theme, securityLevel: 'strict' });
+    // 恢复此前渲染过的图，然后统一重渲染
+    document.querySelectorAll('.mermaid-svg').forEach((el) => {
+      const pre = document.createElement('pre');
+      pre.className = 'mermaid';
+      pre.textContent = el.dataset.code;
+      el.replaceWith(pre);
+    });
+    let counter = 0;
+    for (const pre of [...document.querySelectorAll('pre.mermaid')]) {
+      const code = pre.textContent;
+      try {
+        const id = 'mmd-' + (counter++) + '-' + Math.random().toString(36).slice(2, 8);
+        const { svg } = await mermaid.render(id, code);
+        const holder = document.createElement('div');
+        holder.className = 'mermaid-svg';
+        holder.dataset.code = code;
+        holder.innerHTML = svg;
+        pre.replaceWith(holder);
+      } catch (e) {
+        const err = document.createElement('div');
+        err.className = 'mermaid-error';
+        err.textContent = '⚠️ Mermaid 渲染失败：' + e.message;
+        pre.replaceWith(err);
       }
-    };
-    renderMermaid();
-  }
+    }
+  };
+  if (window.mermaid) renderMermaid();
 
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
@@ -177,6 +177,7 @@
     const header = document.createElement('div');
     header.className = 'code-header';
     const langLabel = document.createElement('span');
+    langLabel.className = 'code-lang';
     langLabel.textContent = lang;
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-btn';

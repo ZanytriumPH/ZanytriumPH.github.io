@@ -151,6 +151,10 @@ code, pre, kbd {
   font-size: 1rem; color: var(--text-secondary);
 }
 .icon-btn:hover { background: var(--bg-soft); color: var(--text); }
+.icon-btn svg { width: 18px; height: 18px; }
+/* 明暗切换按钮：白天显示月亮（点击进入夜晚），夜晚显示太阳（点击回到白天） */
+html[data-theme="light"] .icon-sun { display: none; }
+html[data-theme="dark"] .icon-moon { display: none; }
 
 .nav-toggle {
   display: none;
@@ -492,7 +496,7 @@ code, pre, kbd {
 
 .post-header { padding: 40px 0 24px; border-bottom: 1px solid var(--border); }
 
-.post-title { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 800; line-height: 1.35; }
+.post-title { font-size: clamp(1.8rem, 4.5vw, 2.6rem); font-weight: 800; line-height: 1.35; }
 
 .post-meta {
   margin-top: 14px;
@@ -515,9 +519,12 @@ code, pre, kbd {
   line-height: 1.4;
   scroll-margin-top: 90px;
 }
-.markdown-body h2 { font-size: 1.5rem; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-.markdown-body h3 { font-size: 1.25rem; }
-.markdown-body h4 { font-size: 1.1rem; }
+.markdown-body h1 { font-size: 1.9rem; }
+.markdown-body h2 { font-size: 1.75rem; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.markdown-body h3 { font-size: 1.6rem; }
+.markdown-body h4 { font-size: 1.45rem; }
+.markdown-body h5 { font-size: 1.3rem; }
+.markdown-body h6 { font-size: 1.15rem; }
 
 .markdown-body a { border-bottom: 1px dashed var(--border-strong); }
 .markdown-body a:hover { border-bottom-color: var(--accent); }
@@ -642,13 +649,20 @@ html[data-theme="dark"] .callout-important { --callout-soft: #331818; --callout-
   padding: 6px 14px;
   background: var(--bg-soft);
   border: 1px solid var(--border);
-  border-bottom: none;
+  border-bottom: 1px solid var(--border); /* 与代码之间用线分隔 */
   border-radius: var(--radius) var(--radius) 0 0;
   font-size: 0.8rem;
   color: var(--text-muted);
 }
-/* 去掉 pre 顶边框，语言栏与代码连成一体 */
-.code-header + pre { border-top-left-radius: 0; border-top-right-radius: 0; border-top: none; }
+/* 语言名称：等宽字体 + 高对比色（--text），与浅背景和灰色复制按钮区分 */
+.code-lang {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text);
+}
+/* 语言栏与代码无间距连成一体（抵消 .markdown-body > * + * 的 margin-top），
+   分隔线由 .code-header 的 border-bottom 提供，故 pre 不再画顶边框 */
+.code-header + pre { margin-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; border-top: none; }
 .copy-btn {
   border: none; background: transparent;
   color: var(--text-muted); cursor: pointer;
@@ -686,7 +700,10 @@ pre.mermaid {
   text-align: center;
   overflow-x: auto;
 }
-.mermaid-svg svg { max-width: 100%; height: auto; }
+/* mermaid 输出的 svg 是替换元素，text-align 管不住它，转成块级 + 左右 auto 居中 */
+.mermaid-svg svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+/* 兜底：若 mermaid 以默认 auto-run 方式把 svg 注入 pre 内（未走 main.js 流程），同样居中 */
+pre.mermaid svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
 .mermaid-error {
   padding: 14px 18px;
   border: 1px dashed var(--border-strong);
@@ -795,11 +812,16 @@ body.toc-open .toc { display: block; }
 
 /* 目录展开时：容器加宽以容纳「文章 + 目录」整体居中（244 = 24 间距 + 220 目录宽） */
 body.toc-open main.container { max-width: calc(var(--content-width) + 244px); }
+/* 目录展开时：上下篇 pager 是容器的直接子元素，会被一起加宽而伸到目录栏下方，
+   限制其宽度与文章列（post-wrap 的 article 列）对齐 */
+body.toc-open .post-pager { max-width: calc(100% - 244px); }
 
 /* 窄屏隐藏目录抽屉（避免挤压文章） */
 @media (max-width: 900px) {
   .toc-toggle { display: none; }
   body.toc-open .toc { display: none; }
+  /* 窄屏目录已隐藏，pager 恢复全宽，避免缩进失效 */
+  body.toc-open .post-pager { max-width: none; }
 }
 
 /* ---------- 上下篇 ---------- */
