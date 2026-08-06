@@ -19,7 +19,23 @@ function esc(s) {
 }
 
 /** 布局骨架：导航 + 内容 + 页脚 + 暗色模式初始化（防闪烁） */
-function layout({ config, url, title, description, body, isPost = false, isHome = false }) {
+function layout({ config, url, title, description, body, isPost = false, isHome = false, current = '', heroBg = false }) {
+  // 导航项：current 命中时加 active 类，样式为标签下方横线
+  const navItems = [
+    { key: 'home', href: url(''), label: '首页' },
+    { key: 'archives', href: url('archives.html'), label: '归档' },
+    { key: 'tags', href: url('tags.html'), label: '标签' },
+    { key: 'categories', href: url('categories.html'), label: '分类' },
+    { key: 'about', href: url('about.html'), label: '关于' },
+  ];
+  // hero 背景图（与首页共用同一文件）：heroBg=true 的页面注入 .hero-bg，
+  // themeInit 的 setHeroSrc 与 main.js 的 applyHeroBg 会自动接管明暗图切换
+  const hero = config.hero || {};
+  const bgLight = hero.bgLight ? url(hero.bgLight) : '';
+  const bgDark = hero.bgDark ? url(hero.bgDark) : '';
+  const heroImg = heroBg && bgLight
+    ? `<img class="hero-bg" data-bg-light="${bgLight}" data-bg-dark="${bgDark || bgLight}" alt="" fetchpriority="high">`
+    : '';
   // 主题初始化必须放在 <link rel="stylesheet"> 之前：CSS 应用时就已是正确主题，
   // 避免"先按白天渲染、脚本执行后再切换"的闪烁（含 hero 背景图，见 hero 模板）
   const themeInit = `<script>(function(){
@@ -43,11 +59,7 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
           <span></span><span></span><span></span>
         </button>
         <ul class="nav-menu" id="nav-menu">
-          <li><a href="${url('')}">首页</a></li>
-          <li><a href="${url('archives.html')}">归档</a></li>
-          <li><a href="${url('tags.html')}">标签</a></li>
-          <li><a href="${url('categories.html')}">分类</a></li>
-          <li><a href="${url('about.html')}">关于</a></li>
+          ${navItems.map(i => `<li><a href="${i.href}"${i.key === current ? ' class="active"' : ''}>${i.label}</a></li>`).join('')}
           <li class="nav-actions">
             <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
               <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -99,6 +111,7 @@ ${themeInit}
 <link rel="icon" type="image/png" href="${url('assets/img/logo.png')}">
 </head>
 <body>
+${heroImg}
 ${nav}
 <main class="${isHome ? 'main-home' : 'container'}">
 ${body}
@@ -193,7 +206,9 @@ function indexPage({ config, url, posts }) {
       <div class="hero-content">
         <p class="hero-typewriter" id="typewriter" data-phrases='${phrases}'></p>
       </div>
-      <a class="hero-scroll" href="#posts" aria-label="向下滚动">↓</a>
+      <a class="hero-scroll" href="#posts" aria-label="向下滚动">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </a>
     </section>
     <div class="container">
       <div class="home-layout">
@@ -203,7 +218,7 @@ function indexPage({ config, url, posts }) {
         </section>
       </div>
     </div>`;
-  return layout({ config, url, title: config.siteName, description: config.description, body, isHome: true });
+  return layout({ config, url, title: config.siteName, description: config.description, body, isHome: true, current: 'home' });
 }
 
 /** 文章页：标题、元信息、TOC、正文、上下篇、评论 */
@@ -266,7 +281,7 @@ function postPage({ config, url, post, prev, next }) {
   return layout({ config, url, title: post.title, description: post.description, body, isPost: true });
 }
 
-/** 归档页：按年份分组 */
+/** 归档页：时间线样式（参照 hexo-theme-redefine）——年份标题 + 文章数胶囊 + 竖线圆点列表 */
 function archivesPage({ config, url, posts }) {
   const byYear = {};
   for (const p of posts) {
@@ -274,21 +289,32 @@ function archivesPage({ config, url, posts }) {
     (byYear[y] = byYear[y] || []).push(p);
   }
   const years = Object.keys(byYear).sort((a, b) => b - a);
+  // 同一天的文章合并进同一条目（li），日期只显示一次（posts 已按日期降序）
+  const dayItems = (list) => {
+    let html = '', lastDay = '';
+    for (const p of list) {
+      const day = p.date.slice(5, 10); // MM-DD
+      if (day !== lastDay) {
+        if (lastDay) html += '</li>';
+        html += `<li class="article-item" data-date="${day}">`;
+        lastDay = day;
+      }
+      html += `<a class="article-link" href="${url(p.path)}"><span class="article-title">${esc(p.title)}</span></a>`;
+    }
+    return html + '</li>';
+  };
   const body = `
-    <h1 class="page-title">归档</h1>
-    <p class="page-subtitle">共 ${posts.length} 篇文章</p>
+    <div class="archive-list-container">
     ${years.map(y => `
-      <section class="archive-year">
-        <h2 class="archive-year-title">${y}</h2>
-        <ul class="archive-list">
-          ${byYear[y].map(p => `
-            <li class="archive-item">
-              <time>${p.dateText}</time>
-              <a href="${url(p.path)}">${esc(p.title)}</a>
-            </li>`).join('')}
-        </ul>
-      </section>`).join('')}`;
-  return layout({ config, url, title: '归档', body });
+      <section class="archive-year-block">
+        <div class="archive-item-header">
+          <span class="archive-year">${y}</span>
+          <span class="archive-year-post-count">${byYear[y].length}</span>
+        </div>
+        <ul class="article-list">${dayItems(byYear[y])}</ul>
+      </section>`).join('')}
+    </div>`;
+  return layout({ config, url, title: '归档', body, current: 'archives', heroBg: true });
 }
 
 /** 标签页：标签云 + 每个标签的文章列表 */
@@ -312,7 +338,7 @@ function tagsPage({ config, url, posts }) {
             </li>`).join('')}
         </ul>
       </section>`).join('')}`;
-  return layout({ config, url, title: '标签', body });
+  return layout({ config, url, title: '标签', body, current: 'tags' });
 }
 
 /** 分类页 */
@@ -333,7 +359,7 @@ function categoriesPage({ config, url, posts }) {
             </li>`).join('')}
         </ul>
       </section>`).join('')}`;
-  return layout({ config, url, title: '分类', body });
+  return layout({ config, url, title: '分类', body, current: 'categories' });
 }
 
 /** 普通页面（关于、友链等） */
@@ -345,7 +371,7 @@ function pagePage({ config, url, page }) {
       </header>
       <div class="post-body markdown-body">${page.html}</div>
     </article>`;
-  return layout({ config, url, title: page.title, description: page.description, body });
+  return layout({ config, url, title: page.title, description: page.description, body, current: page.slug === 'about' ? 'about' : '' });
 }
 
 /** 404 页面 */
