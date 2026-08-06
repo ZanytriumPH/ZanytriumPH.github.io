@@ -3,5 +3,8 @@ dist/
 *.log
 .DS_Store
 
+# PlantUML 渲染临时目录（build 时自动清理，兜底忽略）
+.puml-tmp/
+
 # 本地 PlantUML（部署时由 GitHub Actions 自动下载）
 plantuml.jar

@@ -52,32 +52,35 @@ class PlantUMLBuilder {
   async renderAll() {
     await fsp.mkdir(this.svgDir, { recursive: true });
     await fsp.mkdir(this.tmpDir, { recursive: true });
-    const ok = [], failed = [];
-    for (const [hash, { source, fileName }] of this.collected) {
-      const out = path.join(this.svgDir, fileName);
-      if (fs.existsSync(out)) { ok.push(fileName); continue; } // 增量构建：已存在则跳过
-      const pumlFile = path.join(this.tmpDir, `puml-${hash}.puml`);
-      await fsp.writeFile(pumlFile, '@startuml\n' + source.replace(/^\s*@startuml\s*$/i, '').trim() + '\n@enduml\n', 'utf8');
-      try {
-        execFileSync(this.javaCmd, ['-jar', this.jarPath, '-tsvg', '-charset', 'UTF-8', '-o', this.svgDir, pumlFile],
-          { stdio: 'pipe', timeout: 60000 });
-        // plantuml 输出文件名为 puml-<hash>.svg（与 puml 文件同名）
-        const produced = path.join(this.svgDir, `puml-${hash}.svg`);
-        if (!fs.existsSync(produced)) {
-          // 文件名不一致时尝试重命名
-          const files = fs.readdirSync(this.svgDir).filter(f => f.endsWith('.svg'));
-          if (files.length) {
-            await fsp.rename(path.join(this.svgDir, files[0]), out);
-          } else { throw new Error('PlantUML 未生成输出文件'); }
+    try {
+      const ok = [], failed = [];
+      for (const [hash, { source, fileName }] of this.collected) {
+        const out = path.join(this.svgDir, fileName);
+        if (fs.existsSync(out)) { ok.push(fileName); continue; } // 增量构建：已存在则跳过
+        const pumlFile = path.join(this.tmpDir, `puml-${hash}.puml`);
+        await fsp.writeFile(pumlFile, '@startuml\n' + source.replace(/^\s*@startuml\s*$/i, '').trim() + '\n@enduml\n', 'utf8');
+        try {
+          execFileSync(this.javaCmd, ['-jar', this.jarPath, '-tsvg', '-charset', 'UTF-8', '-o', this.svgDir, pumlFile],
+            { stdio: 'pipe', timeout: 60000 });
+          // plantuml 输出文件名为 puml-<hash>.svg（与 puml 文件同名）
+          const produced = path.join(this.svgDir, `puml-${hash}.svg`);
+          if (!fs.existsSync(produced)) {
+            // 文件名不一致时尝试重命名
+            const files = fs.readdirSync(this.svgDir).filter(f => f.endsWith('.svg'));
+            if (files.length) {
+              await fsp.rename(path.join(this.svgDir, files[0]), out);
+            } else { throw new Error('PlantUML 未生成输出文件'); }
+          }
+          ok.push(fileName);
+        } catch (e) {
+          failed.push({ fileName, error: e.message });
         }
-        ok.push(fileName);
-      } catch (e) {
-        failed.push({ fileName, error: e.message });
       }
+      return { ok, failed };
+    } finally {
+      // 无论成功、失败还是异常中断，都清理临时目录，不留残留
+      await fsp.rm(this.tmpDir, { recursive: true, force: true }).catch(() => {});
     }
-    // 清理临时目录
-    await fsp.rm(this.tmpDir, { recursive: true, force: true });
-    return { ok, failed };
   }
 }
 

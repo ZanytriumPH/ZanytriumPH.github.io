@@ -3,10 +3,10 @@
  * optimize-img.js — 博文图片压缩工具（AI 搬运图片时使用）
  *
  * 用法：
- *   node scripts/optimize-img.js <源图片目录> <文章slug> [选项]
+ *   node scripts/optimize-img.js <源图片目录> <文章slug> [<文章md路径>] [选项]
  *
  * 示例：
- *   node scripts/optimize-img.js D:/素材/某篇文章/截图 hello-world
+ *   node scripts/optimize-img.js D:/素材/某篇文章/截图 hello-world source/_posts/hello-world.md
  *
  * 选项：
  *   --mode auto|lossless|lossy   压缩模式（默认 auto）
@@ -15,6 +15,8 @@
  *
  * 行为：
  *   - 递归扫描源目录下 png/jpg/jpeg，输出到 <out>/<slug>/<原名>.webp
+ *   - 传入文章 md 路径后，只压缩文章实际引用的图片（markdown ![]() 与 <img>），
+ *     未被引用的孤儿图片自动跳过，不进入仓库
  *   - 源目录里已有的 .webp 原样复制（视为已优化）
  *   - auto 模式：缩到 128px 采样统计颜色数，≤2048 判定为图形/截图 → WebP lossless
  *     （纯色大块 + 文字边缘无损），否则按照片处理 → 有损 q80
@@ -37,7 +39,8 @@ const EXT_PHOTO = new Set(['.png', '.jpg', '.jpeg']);
 const MODES = new Set(['auto', 'lossless', 'lossy']);
 
 function usage() {
-  console.log(`用法：node scripts/optimize-img.js <源图片目录> <文章slug> [选项]
+  console.log(`用法：node scripts/optimize-img.js <源图片目录> <文章slug> [<文章md路径>] [选项]
+  传入文章 md 路径（如 source/_posts/xxx.md）时，只压缩被文章引用的图片，跳过孤儿图片
 选项：
   --mode auto|lossless|lossy   压缩模式（默认 auto）
   --max-width 1600             最长边上限（默认 1600）
@@ -45,7 +48,7 @@ function usage() {
 }
 
 function parseArgs(argv) {
-  const args = { src: null, slug: null, mode: 'auto', maxWidth: MAX_WIDTH, out: DEFAULT_OUT };
+  const args = { src: null, slug: null, post: null, mode: 'auto', maxWidth: MAX_WIDTH, out: DEFAULT_OUT };
   const rest = [];
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
@@ -56,7 +59,27 @@ function parseArgs(argv) {
   }
   if (rest.length >= 1) args.src = path.resolve(rest[0]);
   if (rest.length >= 2) args.slug = rest[1];
+  if (rest.length >= 3) args.post = path.resolve(ROOT, rest[2]);
   return args;
+}
+
+/**
+ * 从文章 md 中提取引用的图片文件名主干集合（markdown ![]() 与 <img src> 形式）。
+ * 路径中的目录部分被忽略；忽略扩展名（引用 .png 或 .webp 均可匹配同名源文件）；
+ * 大小写不敏感。
+ */
+function referencedImages(postPath) {
+  const md = fs.readFileSync(postPath, 'utf8');
+  const refs = new Set();
+  const re = /!\[[^\]]*\]\(\s*([^)\s]+)\s*\)|<img[^>]*src=["']([^"']+)["']/gi;
+  let m;
+  while ((m = re.exec(md))) {
+    const p = (m[1] || m[2]).replace(/\\/g, '/');
+    const base = path.basename(p);
+    const ext = path.extname(base).toLowerCase();
+    if (EXT_PHOTO.has(ext) || ext === '.webp') refs.add(base.slice(0, -ext.length).toLowerCase());
+  }
+  return refs;
 }
 
 /** 递归收集源目录下的图片文件（png/jpg/jpeg/webp） */
@@ -96,7 +119,7 @@ async function decideMode(file, mode) {
   return colors <= COLOR_THRESHOLD ? 'lossless' : 'lossy';
 }
 
-/** 输出文件名：去扩展名 + 防重（同 slug 下重名追加序号） */
+/** 输出文件名：去扩展名 + 防重（仅当本次运行中源目录有多个同名文件时追加序号；磁盘上已有同名文件会被 toFile 直接覆盖，即重跑安全） */
 function uniqueName(base, ext, used) {
   let name = `${base}.webp`;
   let n = 2;
@@ -121,13 +144,28 @@ async function main() {
     console.error(`✗ 源目录不存在：${args.src}`);
     process.exit(1);
   }
+  if (args.post && !fs.existsSync(args.post)) {
+    console.error(`✗ 文章 md 不存在：${args.post}`);
+    process.exit(1);
+  }
 
   const outDir = path.join(args.out, args.slug);
   await fsp.mkdir(outDir, { recursive: true });
 
-  const files = await collectImages(args.src);
+  let files = await collectImages(args.src);
+  if (args.post) {
+    const stem = (f) => path.basename(f).replace(/\.[^.]+$/, '').toLowerCase();
+    const refs = referencedImages(args.post);
+    const orphans = files.filter(f => !refs.has(stem(f)));
+    if (orphans.length > 0) {
+      console.log(`🧹 跳过 ${orphans.length} 张未被文章引用的孤儿图片：`);
+      for (const f of orphans) console.log(`   - ${path.relative(args.src, f)}`);
+      console.log('');
+    }
+    files = files.filter(f => refs.has(stem(f)));
+  }
   if (files.length === 0) {
-    console.log(`⚠ 源目录下没有找到图片：${args.src}`);
+    console.log(`⚠ 没有需要处理的图片${args.post ? '（文章未引用任何图片）' : ''}：${args.src}`);
     return;
   }
 

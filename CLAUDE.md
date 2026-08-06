@@ -13,8 +13,9 @@
 用户先在别处写文章（图片以 PNG 为主），由 AI 搬运进本仓库部署。**必须遵守：**
 
 1. 文章 `.md` → `source/_posts/`，front matter 补全 `title / date / tags / categories / description`；
-2. 图片先压缩再进仓库：`node scripts/optimize-img.js <源图片目录> <文章slug>`
-   （auto 模式：图形/截图 → WebP 无损，照片 → 有损 q80；超 1600px 自动缩放；源文件不删除）；
+2. 图片先压缩再进仓库：`node scripts/optimize-img.js <源图片目录> <文章slug> <文章md路径>`
+   （传入文章路径后**只压缩文章引用的图片，未被引用的孤儿图片自动跳过**、不进仓库；
+   auto 模式：图形/截图 → WebP 无损，照片 → 有损 q80；超 1600px 自动缩放；源文件不删除）；
 3. markdown 图片引用**必须根路径 + .webp**：`![描述](/assets/img/posts/<slug>/<文件名>.webp)`
    ——文章页在 `/posts/` 下，相对路径会 404；
 4. **禁止**把原 PNG 直接复制进仓库（Pages 有 1GB 软上限，git 不压缩二进制）；

@@ -37,7 +37,7 @@ build();
 
 // 文件监听：防抖 300ms
 let timer = null;
-const watchers = ['source', 'assets', 'config.json'].map(p => {
+const watchers = ['source', 'assets'].map(p => {
   const target = path.join(ROOT, p);
   if (!fs.existsSync(target)) return null;
   return fs.watch(target, { recursive: true }, () => {
@@ -45,6 +45,22 @@ const watchers = ['source', 'assets', 'config.json'].map(p => {
     timer = setTimeout(build, 300);
   });
 });
+
+// config.json 改用 mtime 轮询监听（每 2s 一次 stat）：
+// Windows 上 fs.watch 对单个文件监听有个已知缺陷——文件被读取（构建每次读 config）
+// 也会误报 change，导致“构建 → 触发重建 → 再构建”的无限循环；
+// 而 stat 的 mtime 只在真正修改时变化，读取不影响
+const configPath = path.join(ROOT, 'config.json');
+let configMtime = fs.existsSync(configPath) ? fs.statSync(configPath).mtimeMs : 0;
+const configTimer = setInterval(() => {
+  if (!fs.existsSync(configPath)) return;
+  const m = fs.statSync(configPath).mtimeMs;
+  if (m !== configMtime) {
+    configMtime = m;
+    clearTimeout(timer);
+    timer = setTimeout(build, 300);
+  }
+}, 2000);
 
 http.createServer((req, res) => {
   const urlPath = decodeURIComponent(new URL(req.url, 'http://x').pathname);
@@ -61,4 +77,8 @@ http.createServer((req, res) => {
   console.log('📝 修改 source/ 或 assets/ 后自动重建，手动刷新浏览器');
 });
 
-process.on('SIGINT', () => { watchers.forEach(w => w && w.close()); process.exit(0); });
+process.on('SIGINT', () => {
+  watchers.forEach(w => w && w.close());
+  clearInterval(configTimer);
+  process.exit(0);
+});

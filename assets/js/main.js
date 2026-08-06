@@ -205,22 +205,49 @@
     });
   }
 
-  // ---- TOC 滚动高亮 ----
+  // ---- TOC 滚动高亮 + 目录跟随滚动 ----
+  // 以视口 20% 高度为参考线：滚动文章时，高亮参考线上方最近的标题，
+  // 并让目录自身滚动到该条目（当前阅读位置始终在目录中可见）
   const tocLinks = document.querySelectorAll('.toc li a');
   if (tocLinks.length) {
+    const toc = document.querySelector('.toc');
     const ids = [...tocLinks].map(a => a.getAttribute('href').slice(1));
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          tocLinks.forEach(a => a.classList.remove('active'));
-          const link = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
-          if (link) link.classList.add('active');
-        }
-      });
-    }, { rootMargin: '-20% 0px -70% 0px' });
-    ids.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
+    const elMap = new Map(ids.map(id => [id, document.getElementById(id)]).filter(([, el]) => el));
+    let currentId = null;
+
+    function setActive(id) {
+      if (id === currentId || !elMap.has(id)) return;
+      currentId = id;
+      tocLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${id}`));
+      const link = document.querySelector(`.toc a[href="#${id}"]`);
+      if (!link || !toc) return;
+      // 目录跟随滚动：活动条目保持在目录垂直中心（内容不足一屏时浏览器自动 clamp，无副作用）
+      const lTop = link.offsetTop;
+      const lH = link.offsetHeight;
+      const tH = toc.clientHeight;
+      toc.scrollTop = lTop - (tH - lH) / 2;
+    }
+
+    function onScroll() {
+      const refLine = window.innerHeight * 0.2;
+      let bestId = null, bestTop = -Infinity;
+      for (const [id, el] of elMap) {
+        const top = el.getBoundingClientRect().top;
+        if (top <= refLine && top > bestTop) { bestTop = top; bestId = id; }
+      }
+      // 页首尚未越过参考线 → 高亮第一个条目
+      if (!bestId) { setActive(ids[0]); return; }
+      // 接近文末 → 高亮最后一个条目（否则末尾标题可能够不到参考线）
+      const lastEl = elMap.get(ids[ids.length - 1]);
+      if (lastEl && lastEl.getBoundingClientRect().top < 0
+        && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 8) {
+        setActive(ids[ids.length - 1]);
+      } else {
+        setActive(bestId);
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // 初始化：定位当前章节
   }
 })();

@@ -763,8 +763,15 @@ pre.mermaid svg { display: block; margin: 0 auto; max-width: 100%; height: auto;
   padding: 0;
   font-size: 0.85rem;
   display: none;
+  /* 细滚动条：目录只是辅助导航，不抢正文注意力 */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
 }
 body.toc-open .toc { display: block; }
+.toc::-webkit-scrollbar { width: 4px; height: 4px; }
+.toc::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+.toc::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+.toc::-webkit-scrollbar-track { background: transparent; }
 
 /* 文章 + 目录整体：flex 让两者贴在一起，作为整体居中 */
 .post-wrap {
