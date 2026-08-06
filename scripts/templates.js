@@ -29,12 +29,15 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
     { key: 'about', href: url('about.html'), label: '关于' },
   ];
   // hero 背景图（与首页共用同一文件）：heroBg=true 的页面注入 .hero-bg，
-  // themeInit 的 setHeroSrc 与 main.js 的 applyHeroBg 会自动接管明暗图切换
+  // themeInit 的 setHeroSrc 与 main.js 的 applyHeroBg 会自动接管明暗图切换。
+  // img 后紧跟内联脚本立即设置 src：不等 DOMContentLoaded，图片下载与页面解析并行，
+  // 缩短导航跳转后"黑屏等背景图"的窗口（themeInit 的 setHeroSrc 兜底，幂等无害）
   const hero = config.hero || {};
   const bgLight = hero.bgLight ? url(hero.bgLight) : '';
   const bgDark = hero.bgDark ? url(hero.bgDark) : '';
   const heroImg = heroBg && bgLight
-    ? `<img class="hero-bg" data-bg-light="${bgLight}" data-bg-dark="${bgDark || bgLight}" alt="" fetchpriority="high">`
+    ? `<img class="hero-bg" data-bg-light="${bgLight}" data-bg-dark="${bgDark || bgLight}" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();<\/script>`
     : '';
   // 主题初始化必须放在 <link rel="stylesheet"> 之前：CSS 应用时就已是正确主题，
   // 避免"先按白天渲染、脚本执行后再切换"的闪烁（含 hero 背景图，见 hero 模板）
@@ -42,6 +45,13 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
   var t=localStorage.getItem('theme');
   if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
   document.documentElement.setAttribute('data-theme',t);
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
   // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
   // 图片加载与首次绘制并行，不显示白天版背景图
   function setHeroSrc(){
@@ -202,7 +212,6 @@ function indexPage({ config, url, posts }) {
 
   const body = `
     <section class="hero">
-      ${bgLight ? `<img class="hero-bg" data-bg-light="${bgLight}" data-bg-dark="${bgDark || bgLight}" alt="" fetchpriority="high">` : ''}
       <div class="hero-content">
         <p class="hero-typewriter" id="typewriter" data-phrases='${phrases}'></p>
       </div>
@@ -218,7 +227,7 @@ function indexPage({ config, url, posts }) {
         </section>
       </div>
     </div>`;
-  return layout({ config, url, title: config.siteName, description: config.description, body, isHome: true, current: 'home' });
+  return layout({ config, url, title: config.siteName, description: config.description, body, isHome: true, current: 'home', heroBg: true });
 }
 
 /** 文章页：标题、元信息、TOC、正文、上下篇、评论 */

@@ -20,6 +20,18 @@
     });
   }
 
+  // ---- 点击当前页同名导航链接时不触发整页重载 ----
+  // 归一化：忽略尾部 `/`，`/index.html` 等价于目录本身
+  const normPath = (p) => p.replace(/\/+$/, '').replace(/\/index\.html$/, '');
+  document.querySelectorAll('.nav-menu a[href], .nav-brand').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const target = new URL(link.getAttribute('href'), location.href);
+      if (normPath(target.pathname) === normPath(location.pathname) && target.search === location.search) {
+        e.preventDefault();
+      }
+    });
+  });
+
   // ---- 主题切换（明/暗，持久化到 localStorage）----
   const themeToggle = document.getElementById('theme-toggle');
   const hljsStyle = document.getElementById('hljs-style');

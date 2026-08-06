@@ -252,6 +252,8 @@ html[data-theme="dark"] .icon-moon { display: none; }
   from { opacity: 0; transform: scale(1.04); }
   to { opacity: 1; transform: scale(1); }
 }
+/* 非首次进入会话：禁用 hero 入场动画（导航/刷新整页重载不再重播） */
+.no-hero-anim .hero-bg { animation: none; }
 
 .hero-content {
   position: relative;
@@ -272,6 +274,7 @@ html[data-theme="dark"] .icon-moon { display: none; }
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
 }
+.no-hero-anim .hero-content { animation: none; }
 
 /* 打字机动画行（首页正中唯一文字） */
 .hero-typewriter {
