@@ -8,6 +8,7 @@
 const fs = require('fs');
 const fsp = require('fs/promises');
 const path = require('path');
+const { execFileSync } = require('child_process');
 const matter = require('gray-matter');
 const { createMd } = require('./md');
 const { PlantUMLBuilder, fallbackHtml } = require('./plantuml');
@@ -19,10 +20,54 @@ const SRC_POSTS = path.join(ROOT, 'source', '_posts');
 const SRC_PAGES = path.join(ROOT, 'source', '_pages');
 const ASSETS = path.join(ROOT, 'assets');
 
-/** 年月日 → 中文日期文案 */
-function dateText(iso) {
-  const [y, m, d] = iso.slice(0, 10).split('-');
-  return `${y} 年 ${Number(m)} 月 ${Number(d)} 日`;
+/** 时间文案：统一格式 YYYY-MM-DD HH:mm:ss；输入仅有日期时补 00:00:00 */
+function dateText(v) {
+  // 纯日期字符串按 UTC 解析会偏移时区（如东八区变 08:00:00），直接补 00:00:00
+  if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)) return `${v} 00:00:00`;
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return '';
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} `
+    + `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+
+/** 本地时区的 YYYY-MM-DD（仅日期，按年/月/日拼接避免 UTC 跨天） */
+function isoDateOf(v) {
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return '';
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/**
+ * 预计阅读时间（分钟）：依据词数估算。
+ * 阅读速度按中文约 300 字/分钟（countWords 为「中文字符数 + 英文单词数」的混合统计，
+ * 本博客以中文为主，统一按 300 计）；向上取整，最少 1 分钟。
+ */
+function estimateReadMinutes(words) {
+  return Math.max(1, Math.ceil(words / 300));
+}
+
+/** 取 git 最后修改该文件的提交时间（ISO 8601，含时分秒与时区）；非 git 仓库或文件未提交时返回 null */
+function gitLastModified(file) {
+  try {
+    const out = String(execFileSync('git', ['log', '-1', '--format=%cI', '--', file],
+      { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })).trim();
+    return out && !Number.isNaN(new Date(out).getTime()) ? out : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 取 git 首次提交该文件的提交时间（ISO 8601，含时分秒与时区）；非 git 仓库或文件未提交时返回 null */
+function gitFirstCommitted(file) {
+  try {
+    const out = String(execFileSync('git', ['log', '--reverse', '-1', '--format=%cI', '--', file],
+      { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })).trim();
+    return out && !Number.isNaN(new Date(out).getTime()) ? out : null;
+  } catch {
+    return null;
+  }
 }
 
 /** 统计字数：中文按字符计、英文/数字按单词计；剔除代码块、行内代码与链接语法 */
@@ -69,19 +114,34 @@ async function main() {
     const { data, content } = matter(raw);
     const baseName = file.replace(/\.md$/, '');
     const html = md.render(content, { puml, usedSlugs: new Set() });
-    const date = data.date ? new Date(data.date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    // 是否含时分秒：以 front matter 原文判断（gray-matter 会把裸日期解析成 UTC 午夜 Date，
+    // 不能靠值判断）。仅日期 → 天级 ISO（本地时区，避免 UTC 跨天）；含时分秒 → 完整 ISO
+    const dateHasTime = /T\d{2}:| \d{2}:\d{2}/.test((raw.match(/^date:\s*(.+)$/m) || [])[1] || '');
+    const updatedHasTime = /T\d{2}:| \d{2}:\d{2}/.test((raw.match(/^updated:\s*(.+)$/m) || [])[1] || '');
+    // 创建时间：front matter 显式 date 优先；否则自动取 git 首次提交该文件的提交时间（均含秒判定）
+    const date = data.date
+      ? (dateHasTime ? new Date(data.date).toISOString() : isoDateOf(data.date))
+      : (gitFirstCommitted(path.join(SRC_POSTS, file)) || isoDateOf(new Date()));
+    // 修改时间：front matter 显式 updated 优先（可精确到秒）；否则自动取 git 提交时间（含时分秒）
+    const updated = data.updated
+      ? (updatedHasTime ? new Date(data.updated).toISOString() : isoDateOf(data.updated))
+      : gitLastModified(path.join(SRC_POSTS, file));
+    const words = countWords(content);
     posts.push({
       slug: baseName,
       title: data.title || baseName,
       date,
-      updated: data.updated ? new Date(data.updated).toISOString().slice(0, 10) : null,
+      updated,
       dateText: dateText(date),
+      updatedText: updated ? dateText(updated) : null,
       tags: Array.isArray(data.tags) ? data.tags : [],
       categories: Array.isArray(data.categories) ? data.categories : [],
       description: data.description || '',
+      cover: data.cover || '', // 可选封面（front matter cover，根路径），用于首页卡片与文章页
       html,
       toc: buildToc(html),
-      words: countWords(content),
+      words,
+      readMinutes: estimateReadMinutes(words),
       path: `posts/${baseName}.html`
     });
   }
@@ -170,7 +230,7 @@ async function main() {
   await write('404.html', T.notFoundPage({ config, url }));
   await write('search.json', JSON.stringify(posts.map(p => ({
     title: p.title, url: url(`posts/${p.slug}.html`),
-    tags: p.tags, categories: p.categories, description: p.description, date: p.date
+    tags: p.tags, categories: p.categories, description: p.description, date: p.date.slice(0, 10)
   })), null, 2));
 
   console.log('✅ 构建完成 → dist/');

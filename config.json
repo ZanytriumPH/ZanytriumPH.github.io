@@ -9,7 +9,7 @@
   },
   "sidebar": {
     "avatar": "assets/img/avatar.jpg",
-    "announcement": "记录技术，分享生活，保持好奇。"
+    "announcement": "龟速更新中🚀"
   },
   "busuanzi": {
     "enabled": true,
@@ -36,5 +36,5 @@
     "mapping": "pathname",
     "lang": "zh-CN"
   },
-  "footer": "© 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine"
+  "footer": "© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced"
 }

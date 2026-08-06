@@ -121,12 +121,15 @@ ${isPost ? `
 function indexPage({ config, url, posts }) {
   const cards = posts.map(p => `
     <article class="post-card">
-      <div class="post-card-meta">
-        <time datetime="${p.date}">${p.dateText}</time>
-        ${p.tags.map(t => `<a class="tag-chip" href="${url('tags.html')}#${esc(t)}"># ${esc(t)}</a>`).join('')}
-      </div>
+      ${p.cover ? `<a class="post-card-cover" href="${url(p.path)}" tabindex="-1" aria-hidden="true"><img src="${url(p.cover)}" alt="${esc(p.title)}" loading="lazy"></a>` : ''}
       <h2 class="post-card-title"><a href="${url(p.path)}">${esc(p.title)}</a></h2>
       <p class="post-card-excerpt">${esc(p.description || '')}</p>
+      <div class="post-card-meta">
+        <time class="card-meta-item" datetime="${p.date}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${p.date.slice(0, 10)}</time>
+        ${p.categories.length ? `<span class="card-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>${p.categories.map(c => `<a class="card-cat" href="${url('categories.html')}#${esc(c)}">${esc(c)}</a>`).join(' ')}</span>` : ''}
+        ${p.tags.length ? `<span class="card-meta-item card-tags"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>${p.tags.map(t => `<a class="card-tag" href="${url('tags.html')}#${esc(t)}">${esc(t)}</a>`).join('')}</span>` : ''}
+        <a class="card-read-more" href="${url(p.path)}">进入阅读 →</a>
+      </div>
     </article>`).join('');
 
   const hero = config.hero || {};
@@ -229,8 +232,8 @@ function postPage({ config, url, post, prev, next }) {
     <blockquote class="post-copyright">
       <p><strong>标题</strong>：${esc(post.title)}</p>
       <p><strong>作者</strong>：${esc(config.author)}</p>
-      <p><strong>创建于</strong>：${esc(post.date)}</p>
-      <p><strong>更新于</strong>：${esc(post.updated || post.date)}</p>
+      <p><strong>创建于</strong>：${esc(post.dateText)}</p>
+      <p><strong>更新于</strong>：${esc(post.updatedText || post.dateText)}</p>
       <p><strong>链接</strong>：${postUrl}</p>
       <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
     </blockquote>`;
@@ -239,12 +242,18 @@ function postPage({ config, url, post, prev, next }) {
     <div class="post-wrap">
       <article class="post">
         <header class="post-header">
+          ${post.cover ? `<img class="post-cover" src="${url(post.cover)}" alt="${esc(post.title)}" loading="lazy">` : ''}
           <h1 class="post-title">${esc(post.title)}</h1>
           <div class="post-meta">
-            <time datetime="${post.date}">${post.dateText}</time>
-            ${post.categories.map(c => `<a class="meta-link" href="${url('categories.html')}#${esc(c)}">${esc(c)}</a>`).join(' ')}
-            ${post.tags.map(t => `<a class="tag-chip" href="${url('tags.html')}#${esc(t)}"># ${esc(t)}</a>`).join('')}
-            ${config.busuanzi && config.busuanzi.enabled ? `<span class="meta-views">本文访问量 <span id="busuanzi_value_page_pv">0</span></span>` : ''}
+            <time class="meta-item" datetime="${post.date}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${post.dateText}</time>
+            ${post.updated ? `<time class="meta-item" datetime="${post.updated}" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 ${post.updatedText}</time>` : ''}
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 ${post.words} 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 ${post.readMinutes} 分钟</span>
+            ${config.busuanzi && config.busuanzi.enabled ? `<span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>` : ''}
+            <span class="meta-group">
+              ${post.categories.map(c => `<a class="meta-link" href="${url('categories.html')}#${esc(c)}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>${esc(c)}</a>`).join(' ')}
+              ${post.tags.map(t => `<a class="tag-chip" href="${url('tags.html')}#${esc(t)}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>${esc(t)}</a>`).join(' ')}
+            </span>
           </div>
         </header>
         <div class="post-body markdown-body">${post.html}</div>

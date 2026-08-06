@@ -13,6 +13,8 @@
 用户先在别处写文章（图片以 PNG 为主），由 AI 搬运进本仓库部署。**必须遵守：**
 
 1. 文章 `.md` → `source/_posts/`，front matter 补全 `title / date / tags / categories / description`；
+   `cover` 可选（文章封面，根路径图片，如 `/assets/img/posts/<slug>/xx.webp`；有则显示在首页卡片顶部 150px 与文章页标题上方）；
+   `date` / `updated` 均可自动判定，无需手写：date 自动取 git 首次提交时间，updated 自动取 git 最后提交时间（含时分秒；显式写了则以 front matter 为准；`date: 2026-08-06 10:30:00` 可精确到秒）；
 2. 图片先压缩再进仓库：`node scripts/optimize-img.js <源图片目录> <文章slug> <文章md路径>`
    （传入文章路径后**只压缩文章引用的图片，未被引用的孤儿图片自动跳过**、不进仓库；
    auto 模式：图形/截图 → WebP 无损，照片 → 有损 q80；超 1600px 自动缩放；源文件不删除）；

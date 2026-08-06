@@ -25,8 +25,8 @@ html[data-theme="light"] {
   --border: #e4e7ec;
   --border-strong: #d0d7de;
   --nav-bg: rgba(255, 255, 255, 0.5);
-  --card-glass: rgba(255, 255, 255, 0.55);
-  --card-glass-hover: rgba(255, 255, 255, 0.72);
+  --card-glass: rgba(255, 255, 255, 0.67);
+  --card-glass-hover: rgba(255, 255, 255, 0.78);
   --border-glass: rgba(255, 255, 255, 0.55);
   --shadow: 0 1px 3px rgba(31, 35, 40, 0.06), 0 8px 24px rgba(31, 35, 40, 0.04);
   --shadow-hover: 0 2px 6px rgba(31, 35, 40, 0.08), 0 12px 32px rgba(31, 35, 40, 0.08);
@@ -52,8 +52,8 @@ html[data-theme="dark"] {
   --border: #30363d;
   --border-strong: #3d444d;
   --nav-bg: rgba(13, 17, 23, 0.5);
-  --card-glass: rgba(13, 17, 23, 0.55);
-  --card-glass-hover: rgba(13, 17, 23, 0.72);
+  --card-glass: rgba(13, 17, 23, 0.82);
+  --card-glass-hover: rgba(13, 17, 23, 0.92);
   --border-glass: rgba(255, 255, 255, 0.14);
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
   --shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.35);
@@ -323,18 +323,67 @@ html[data-theme="dark"] .icon-moon { display: none; }
   box-shadow: var(--shadow);
   transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
 }
+
+/* 文章卡片封面（front matter cover 可选）：全宽 × 150px，比例参照 Redefine 主题；
+   负 margin 抵消卡片 padding 顶到卡片边缘，仅顶部圆角与卡片一致 */
+.post-card-cover {
+  display: block;
+  margin: -24px -28px 18px;
+  width: calc(100% + 56px);
+  height: 150px;
+  overflow: hidden;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.post-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+.post-card:hover .post-card-cover img { transform: scale(1.03); }
 .post-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-hover);
   background: var(--card-glass-hover);
 }
 
+/* 卡片底部属性栏：创建时间 / 分类 / 标签（带图标，标签用 | 分隔，无胶囊样式） */
 .post-card-meta {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  margin-bottom: 10px;
+  margin-top: 16px;
+  display: flex; align-items: center; flex-wrap: wrap;
+  column-gap: 14px; row-gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
 }
+.post-card-meta .card-meta-item { display: inline-flex; align-items: center; gap: 5px; }
+.post-card-meta svg { width: 13px; height: 13px; flex-shrink: 0; color: var(--text-secondary); }
+.post-card-meta .card-cat { color: var(--text-secondary); }
+.post-card-meta .card-cat:hover { color: var(--accent); }
+/* 标签：不独立成胶囊，竖线分隔。竖线不用文本字符 |（受字体基线影响不居中），
+   改用 1px×1.1em 的块级竖线（background 绘制），在 flex 容器中绝对垂直居中；
+   间距全部用 margin 控制（gap 归零），竖线左右对称 7px */
+.post-card-meta .card-tags { gap: 0; }
+.post-card-meta .card-tags > svg { margin-right: 5px; }
+.post-card-meta .card-tag { display: inline-flex; align-items: center; color: var(--text-secondary); }
+.post-card-meta .card-tag:hover { color: var(--accent); }
+.post-card-meta .card-tag + .card-tag::before {
+  content: '';
+  width: 1px;
+  height: 1.1em;
+  margin: 0 7px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+/* 进入阅读：贴卡片右下角（flex 自动推到最右），hover 箭头微移 */
+.post-card-meta .card-read-more {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 4px;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  white-space: nowrap;
+  transition: color 0.15s, gap 0.15s;
+}
+.post-card-meta .card-read-more:hover { color: var(--accent); gap: 8px; }
 
 .post-card-title { font-size: 1.35rem; font-weight: 700; line-height: 1.4; }
 .post-card-title a { color: var(--text); }
@@ -342,7 +391,7 @@ html[data-theme="dark"] .icon-moon { display: none; }
 
 .post-card-excerpt {
   margin-top: 10px;
-  color: var(--text-secondary);
+  color: var(--text);
   font-size: 0.95rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -365,7 +414,7 @@ html[data-theme="dark"] .icon-moon { display: none; }
 /* ---------- 首页侧栏（Redefine 风格） ---------- */
 .home-layout {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr);
   gap: 24px;
   align-items: start;
   padding-bottom: 40px;
@@ -443,8 +492,9 @@ html[data-theme="dark"] .icon-moon { display: none; }
 }
 .side-stat:hover .side-stat-num { color: var(--accent); }
 .side-stat-label {
-  font-size: 0.78rem;
-  color: var(--text-muted);
+  font-size: 0.85rem;
+  /* 与背景反差加大（原 --text-muted 对比度不足），仍低于数字层级 */
+  color: var(--text);
 }
 
 /* 统计卡片：字数 / 访问人数 / 总访问量 / 运行时间 */
@@ -457,7 +507,7 @@ html[data-theme="dark"] .icon-moon { display: none; }
   font-size: 0.88rem;
 }
 .stat-row + .stat-row { border-top: 1px dashed var(--border); }
-.stat-label { color: var(--text-muted); white-space: nowrap; }
+.stat-label { color: var(--text); white-space: nowrap; }
 .stat-value {
   color: var(--text);
   font-weight: 600;
@@ -500,17 +550,59 @@ html[data-theme="dark"] .icon-moon { display: none; }
 
 .post-header { padding: 40px 0 24px; border-bottom: 1px solid var(--border); }
 
+/* 文章页封面（front matter cover 可选）：全宽，响应式高度（对应 Redefine h-60/sm:h-72/md:h-80） */
+.post-cover {
+  display: block;
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+}
+@media (min-width: 640px) { .post-cover { height: 288px; } }
+@media (min-width: 768px) { .post-cover { height: 320px; } }
+
 .post-title { font-size: clamp(1.8rem, 4.5vw, 2.6rem); font-weight: 800; line-height: 1.35; }
 
 .post-meta {
   margin-top: 14px;
-  display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+  display: flex; align-items: center; flex-wrap: wrap;
+  column-gap: 18px;
+  row-gap: 6px; /* 两行 meta 之间的行间距（比水平间距紧凑） */
   color: var(--text-muted);
   font-size: 0.88rem;
 }
 
+/* 分类 + 标签分组：单独占一行（flex-basis 100% 强制换行） */
+.post-meta .meta-group {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 18px;
+  row-gap: 6px;
+}
+
 .meta-link { color: var(--text-secondary); }
 .meta-link:hover { color: var(--accent); }
+
+/* meta 图标项（日期/修改时间/词数/阅读时间/分类/标签/访问量）：图标与文字基线对齐 */
+.post-meta .meta-item,
+.post-meta .meta-link,
+.post-meta .tag-chip,
+.post-meta .meta-views {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+/* 图标统一 14px；颜色比 meta 文字（--text-muted）加深一档，更易区分 */
+.post-meta svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
 
 /* ---------- 正文排版 ---------- */
 .markdown-body { padding-top: 28px; font-size: 1.02rem; }
