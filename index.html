@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zwing&#39;s blog</title>
+<meta name="description" content="Zwing 的个人博客，记录技术与生活。">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/hljs.css" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png">
+</head>
+<body>
+<img class="hero-bg" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/" class="active">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li><li><a href="/about.html">关于</a></li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="main-home">
+
+    <section class="hero">
+      <div class="hero-content">
+        <p class="hero-typewriter" id="typewriter" data-phrases='["记录技术，分享生活","热爱开源的开发者","用文字连接世界"]'></p>
+      </div>
+      <a class="hero-scroll" href="#posts" aria-label="向下滚动">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </a>
+    </section>
+    <div class="container">
+      <div class="home-layout">
+        
+    <aside class="sidebar">
+      <div class="side-card side-profile">
+        <img class="side-avatar" src="/assets/img/avatar.jpg" alt="Zwing">
+        <div class="side-name">Zwing</div>
+        <p class="side-announcement">龟速更新中🚀</p>
+        
+    <div class="side-stats">
+      <a class="side-stat" href="/tags.html" title="跳转标签页">
+        <span class="side-stat-num">4</span>
+        <span class="side-stat-label">标签</span>
+      </a>
+      <a class="side-stat" href="/categories.html" title="跳转分类页">
+        <span class="side-stat-num">2</span>
+        <span class="side-stat-label">分类</span>
+      </a>
+      <a class="side-stat" href="/archives.html" title="跳转归档页">
+        <span class="side-stat-num">3</span>
+        <span class="side-stat-label">文章</span>
+      </a>
+    </div>
+        <a class="side-link" href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+      
+    <div class="side-card side-stats-card">
+      <div class="stat-row"><span class="stat-label">文章总字数</span><span class="stat-value">13,898</span></div>
+      <div class="stat-row"><span class="stat-label">访问人数</span><span class="stat-value"><span id="busuanzi_value_site_uv" data-base="183">183</span></span></div>
+      <div class="stat-row"><span class="stat-label">总访问量</span><span class="stat-value"><span id="busuanzi_value_site_pv" data-base="1213">1213</span></span></div>
+      <div class="stat-row"><span class="stat-label">已运行天数</span><span class="stat-value uptime" id="uptime" data-start="2025-11-08T00:00:00+08:00">--</span></div>
+    </div>
+    </aside>
+        <section class="post-list" id="posts">
+          
+    <article class="post-card">
+      
+      <h2 class="post-card-title"><a href="/posts/人机交互.html">人机交互</a></h2>
+      <p class="post-card-excerpt">人机交互课程总复习:交互框架与形式、设计目标与原则、设计过程、需求与原型、评估方法与用户研究等核心知识。</p>
+      <div class="post-card-meta">
+        <time class="card-meta-item" datetime="2026-08-06"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-06</time>
+        <span class="card-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><a class="card-cat" href="/categories.html#学习笔记">学习笔记</a></span>
+        <span class="card-meta-item card-tags"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><a class="card-tag" href="/tags.html#课程笔记">课程笔记</a><a class="card-tag" href="/tags.html#人机交互">人机交互</a></span>
+        <a class="card-read-more" href="/posts/人机交互.html">进入阅读 →</a>
+      </div>
+    </article>
+    <article class="post-card">
+      
+      <h2 class="post-card-title"><a href="/posts/hello-world.html">欢迎来到我的博客</a></h2>
+      <p class="post-card-excerpt">第一篇博客，顺便演示这个博客支持的三种 Markdown 扩展语法。</p>
+      <div class="post-card-meta">
+        <time class="card-meta-item" datetime="2026-08-05"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-05</time>
+        <span class="card-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><a class="card-cat" href="/categories.html#随记">随记</a></span>
+        <span class="card-meta-item card-tags"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><a class="card-tag" href="/tags.html#博客">博客</a><a class="card-tag" href="/tags.html#教程">教程</a></span>
+        <a class="card-read-more" href="/posts/hello-world.html">进入阅读 →</a>
+      </div>
+    </article>
+    <article class="post-card">
+      
+      <h2 class="post-card-title"><a href="/posts/test.html">在博客里优雅地展示代码与图表</a></h2>
+      <p class="post-card-excerpt">一篇同时承载语法高亮、Mermaid 图表与 Markdown 提示块的示例文章 —— 用于对比 20 套博客风格。</p>
+      <div class="post-card-meta">
+        <time class="card-meta-item" datetime="2026-08-05"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-05</time>
+        <span class="card-meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><a class="card-cat" href="/categories.html#随记">随记</a></span>
+        <span class="card-meta-item card-tags"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><a class="card-tag" href="/tags.html#博客">博客</a><a class="card-tag" href="/tags.html#教程">教程</a></span>
+        <a class="card-read-more" href="/posts/test.html">进入阅读 →</a>
+      </div>
+    </article>
+        </section>
+      </div>
+    </div>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+
+<script src="/assets/js/main.js" defer></script>
+<script src="/assets/js/search.js" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+</body>
+</html>

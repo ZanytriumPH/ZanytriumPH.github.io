@@ -1,0 +1,2099 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人机交互 · Zwing&#39;s blog</title>
+<meta name="description" content="人机交互课程总复习:交互框架与形式、设计目标与原则、设计过程、需求与原型、评估方法与用户研究等核心知识。">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/hljs.css" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png">
+</head>
+<body>
+
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li><li><a href="/about.html">关于</a></li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container">
+
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">人机交互</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-06"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-06 00:00:00</time>
+            <time class="meta-item" datetime="2026-08-06T17:15:38+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-06 17:15:38</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 13245 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 45 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#学习笔记"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>学习笔记</a>
+              <a class="tag-chip" href="/tags.html#课程笔记"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>课程笔记</a> <a class="tag-chip" href="/tags.html#人机交互"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>人机交互</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><h2 id="1-人机交互概述">1 人机交互概述</h2>
+<h3 id="什么是人机交互">什么是人机交互</h3>
+<p>人机交互是一门关注面向人类使用的<mark>交互式计算系统的设计、评估与实现</mark>，并<mark>研究围绕这些系统的主要现象</mark>的学科</p>
+<h4 id="hci-的重要">HCI 的重要</h4>
+<ul>
+<li><strong>市场角度</strong>
+<ul>
+<li><mark>用户期望简单</mark>易用的系统</li>
+<li>对设计低劣系统的容忍度越来越差</li>
+</ul>
+</li>
+<li><strong>企业角度</strong>
+<ul>
+<li>提高员工的<mark>生产效率</mark></li>
+<li>降低产品的<mark>开发成本</mark></li>
+<li>降低产品的<mark>后续支持成本</mark></li>
+</ul>
+</li>
+<li><strong>用户角度</strong>
+<ul>
+<li>获得较高的<mark>主观满意度</mark></li>
+<li>减少时间、金钱、生命损失</li>
+</ul>
+</li>
+</ul>
+<h4 id="hci-相关领域">HCI 相关领域</h4>
+<p>HCI 是<strong>交叉学科</strong>，连接了“人”（心理学、人类学、生理学）、“机”（计算机科学、工程学）和“环境/设计”（社会学、艺术设计、传播学）</p>
+<h3 id="人机交互的发展历史">人机交互的发展历史</h3>
+<h4 id="旧的交互形式作为特例保存下来">旧的交互形式作为特例保存下来</h4>
+<ul>
+<li><strong>核心论点</strong>：新的界面变革会包含旧的界面作为特例，旧交互方式有其存在的必要性。</li>
+<li><strong>原因</strong>：
+<ol>
+<li>技术发展的包容性。</li>
+<li>旧用户习惯的延续性。</li>
+<li>特定场景下的有效性。</li>
+</ol>
+</li>
+<li><strong>典型例子</strong>：图形用户界面（GUI）普及后，命令行界面（CLI）依然作为高级功能或专业工具被保留和使用。</li>
+</ul>
+<blockquote>
+<ul>
+<li>批处理卡片
+<ul>
+<li>编写程序使用以 01 串表示的机器语⾔</li>
+</ul>
+</li>
+<li>联机终端（命令⾏）</li>
+<li>图形用户界面（GUI）
+<ul>
+<li>优点：依ᩢ识别而非记忆</li>
+</ul>
+</li>
+<li>未来的⼈机交互
+<ul>
+<li>多媒体界面</li>
+<li>虚拟现实、语音交互、脑机交互</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h3 id="人机交互与软件工程">人机交互与软件工程</h3>
+<h4 id="前者是对后者的促进和补充">前者是对后者的促进和补充</h4>
+<ul>
+<li><strong>方法学比较</strong>：软件工程师 ≈ 土木工程师；交互设计师 ≈ 建筑师</li>
+<li><strong>HCI 是软件工程人员需要掌握的核心知识领域之一</strong></li>
+</ul>
+<h4 id="二者结合存在许多困难">二者结合存在许多困难</h4>
+<ul>
+<li><strong>结合困难</strong>：二者在方法论、关注点上有本质差异</li>
+</ul>
+<h2 id="2-人机交互的基础知识">2 人机交互的基础知识</h2>
+<h3 id="交互框架">交互框架</h3>
+<h4 id="执行-评估活动周期-eec">执行/评估活动周期 EEC</h4>
+<blockquote>
+<p>最有影响力的交互框架</p>
+</blockquote>
+<p>活动的四个组成部分</p>
+<ul>
+<li><strong>目标 ≠ 意图</strong>（单个目标可对应多个意图，“删除” -&gt; “菜单删除”、“按钮删除”）</li>
+<li><strong>执行</strong></li>
+<li><strong>客观因素</strong></li>
+<li><strong>评估</strong></li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>EEC 七个阶段：1-4 执行阶段，5-7 评估阶段</li>
+</ul>
+<p>EEC 模型可解释为什么有些界面的使用存在问题</p>
+<ul>
+<li><strong>执行隔阂</strong>
+<ul>
+<li>用户为<mark>达目标而制定的动作</mark>与<mark>系统允许的动作</mark>之间的差别</li>
+<li><em>我想做这件事，但我不知道在这个界面上该怎么操作。</em></li>
+</ul>
+</li>
+<li><strong>评估隔阂</strong>
+<ul>
+<li>系统状态的<mark>实际表现</mark>与<mark>用户预期</mark>之间的差别</li>
+<li><em>我操作完了，但界面目前的反馈让我搞不清到底成功了没有，或者系统现在到底处于什么状态。</em></li>
+</ul>
+</li>
+</ul>
+<h3 id="交互形式">交互形式*</h3>
+<h4 id="1-直接操纵">1. 直接操纵</h4>
+<p>直接操纵是指用户通过在屏幕上直接与视觉对象进行物理上的互动（如点击、拖拽、滑动等），而不是通过输入复杂的代码或命令来完成任务。</p>
+<ul>
+<li><strong>核心特征</strong>：
+<ul>
+<li><strong>对象可见性</strong>：用户感兴趣的对象和动作始终以图形化的方式显示在界面上。</li>
+<li><strong>即时反馈</strong>：用户的每一个操作都会立即在界面上产生可见的响应（如拖动物体时，物体跟着鼠标移动）。</li>
+</ul>
+</li>
+<li><strong>操作可逆性</strong>：动作通常是渐进的、可逆的（如随时可以撤销或把拖出去的文件放回原处）。</li>
+</ul>
+<ul>
+<li><strong>典型例子</strong>：在桌面上将一个文件<strong>拖拽</strong>到另一个文件夹中；在手机地图上用双指<strong>捏合</strong>来缩放地图；在画图软件中<strong>拉伸</strong>图形的边缘来改变大小。</li>
+</ul>
+<ul>
+<li><strong>优点</strong>：学习成本极低，符合人类直觉，容易产生沉浸感和掌控感。</li>
+</ul>
+<h4 id="2-隐喻">2. 隐喻</h4>
+<p>界面隐喻是指将真实世界中人们已经熟悉的物理对象、动作或概念，借用到计算机软件界面中，以帮助用户快速理解系统的功能和操作逻辑。</p>
+<ul>
+<li><strong>核心特征</strong>：
+<ul>
+<li><strong>利用先验知识</strong>：通过唤起用户在现实生活中的记忆，降低学习新系统的认知门槛。</li>
+<li><strong>建立心智模型</strong>：让用户潜意识里知道“这个东西该怎么用”。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><strong>典型例子</strong>：
+<ul>
+<li><strong>“桌面”隐喻</strong>：操作系统的主界面被称为“桌面”，上面有“文件夹”、“文件”和“回收站”。</li>
+<li><strong>“购物车”隐喻</strong>：电商网站用手推车图标表示待结算的商品集合。</li>
+<li><strong>“书架”隐喻</strong>：电子书阅读器将电子书排列在木纹质感的虚拟书架上。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><strong>优点</strong>：能极大地消除用户对陌生软件的恐惧感，让复杂的技术概念变得易于理解。</li>
+</ul>
+<h4 id="3-问答">3. 问答</h4>
+<p>问答式交互（有时也称为对话式或向导式交互）是一种由系统主导的、一步一步进行的交互过程。系统提出问题或给出选项，用户输入答案或做出选择，然后系统根据输入进入下一步。</p>
+<ul>
+<li><strong>核心特征</strong>：
+<ul>
+<li><strong>系统主导</strong>：交互的节奏和路径由计算机控制。</li>
+<li><strong>单步线性</strong>：通常一次只关注一个特定的决策或信息输入。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><strong>典型例子</strong>：
+<ul>
+<li><strong>安装向导 (Wizards)</strong>：安装软件时经常遇到的“下一步、下一步”流程，系统会询问安装路径、是否创建桌面快捷方式等。</li>
+<li><strong>命令行提示</strong>：如终端中提示 <code>Do you want to continue? [Y/n]</code>。</li>
+<li><strong>调查问卷/表单</strong>：系统抛出特定问题，用户填空或单选。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><strong>优点</strong>：对新手极其友好，能够防止用户在复杂操作中迷失方向，非常适合那些偶尔执行且必须保证正确率的任务（如系统配置、网络重置）。</li>
+</ul>
+<h3 id="信息处理模型">信息处理模型</h3>
+<h4 id="人类处理机模型">人类处理机模型</h4>
+<ul>
+<li>包含三个交互式组件：
+<ul>
+<li><strong>感知处理器</strong>：信息将被输出到<mark>声音存储</mark>和<mark>视觉存储</mark>区域</li>
+<li><strong>认知处理器</strong>：输入将被输出到<mark>工作记忆</mark></li>
+<li><strong>动作处理器</strong>：执行动作</li>
+</ul>
+</li>
+<li>存在的问题：
+<ul>
+<li>把认知过程描述为一系列处理步骤</li>
+<li>仅关注单个人和单个任务的执行过程
+<ul>
+<li>忽视了复杂操作执行中人与人之间及任务与任务之间的互动</li>
+</ul>
+</li>
+<li><mark>忽视了环境和其他人可能带来的影响</mark></li>
+</ul>
+</li>
+</ul>
+<h4 id="格式塔心理学">格式塔心理学</h4>
+<ol>
+<li><strong>相近性原则</strong>：空间上比较靠近的物体容易被视为整体</li>
+</ol>
+<p><img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image-2.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>应用：让界面层次清晰有序（列表页设计，组间界限，组内靠拢）</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image-4.webp" alt="alt text" loading="lazy"></p>
+<ol start="2">
+<li><strong>相似性原则</strong>：习惯将看上去相似的物体看成一个整体</li>
+</ol>
+<p><img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image-3.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>应用：使用<mark>不同的大小、颜色、形状来创建对比</mark>或视觉权重，呈现出不一样的视觉效果，以达到弱化（降低视觉）或凸显（强化视觉）某些内容</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image-5.webp" alt="alt text" loading="lazy"></p>
+<ol start="3">
+<li><strong>连续性原则</strong>：共线或具有相同方向的物体会被组合在一起</li>
+</ol>
+<p><img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image-6.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>应用：将组件<strong>对齐</strong>，更有助于增强用户的主观感知效果</li>
+</ul>
+<ol start="4">
+<li>
+<p><strong>对称性原则</strong>：相互对称且能够组合为有意义单元的物体会被组合在一起</p>
+</li>
+<li>
+<p><strong>完整和闭合性原则</strong>：人们倾向于忽视轮廓的间隙而将其视作一个完整的整体</p>
+</li>
+</ol>
+<p><img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image-7.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>应用：页面上的<mark>空白可帮助实现分组</mark></li>
+</ul>
+<h4 id="记忆特性">记忆特性</h4>
+<table>
+<thead>
+<tr>
+<th>记忆类型</th>
+<th>持续时间</th>
+<th>容量</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>感觉记忆</strong></td>
+<td>≈1秒</td>
+<td>—</td>
+<td>瞬时记忆；帮助组合连续图像产生动态影像</td>
+</tr>
+<tr>
+<td><strong>短时记忆</strong></td>
+<td>≈30秒</td>
+<td><strong>7±2个信息单元</strong></td>
+<td>工作记忆；信息加工系统核心；类比为计算机内存</td>
+</tr>
+<tr>
+<td><strong>长时记忆</strong></td>
+<td>几乎永久</td>
+<td>几乎无限</td>
+<td>需要与已有信息建立联系才能进入</td>
+</tr>
+</tbody>
+</table>
+<h5 id="7-2法则与交互设计">7±2法则与交互设计</h5>
+<ul>
+<li>❌ 误解：菜单中最多只能有7个选项</li>
+<li>✅ 事实：浏览菜单基于<strong>识别</strong>功能，人们识别事物的能力远胜于回忆</li>
+<li><strong>设计启发</strong>：尽可能减小对用户的记忆需求；通过上下文减少信息单元数目</li>
+</ul>
+<h5 id="遗忘与错误">遗忘与错误</h5>
+<ul>
+<li>遗忘 = 长时记忆某些信息无法提取（不代表信息丢失）</li>
+<li>&quot;人为错误&quot;定义：人未发挥自身所具备的功能而产生的失误</li>
+<li><strong>大部分交互问题都源于系统设计本身！</strong></li>
+</ul>
+<h2 id="3-交互设计目标与原则">3 交互设计目标与原则</h2>
+<h3 id="可用性目标">可用性目标</h3>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>核心要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>易学性</strong></td>
+<td>使用系统的难易；“10 分钟法则”；对应学习曲线开头</td>
+</tr>
+<tr>
+<td><strong>易记性</strong></td>
+<td>5 个影响因素：意义、位置、分组、惯例、冗余</td>
+</tr>
+<tr>
+<td><strong>高效率</strong></td>
+<td>用户熟练后（曲线平坦）应具更高的生产力水平</td>
+</tr>
+<tr>
+<td><strong>效用性</strong></td>
+<td>产品是否提供了正确的功能让用户做需要/想做的事</td>
+</tr>
+<tr>
+<td><strong>安全性</strong></td>
+<td>避免危险和不好情形；提供出错恢复方法</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image-1.webp" alt="alt text" loading="lazy"></p>
+<blockquote>
+<p>安全菜单：保存 和 退出 不能放在一起</p>
+</blockquote>
+<h3 id="用户体验目标">用户体验目标</h3>
+<ul>
+<li>用户体验目标是多样性的，涵盖了一系列情绪和感受体验</li>
+</ul>
+<blockquote>
+<p>在特定的时间和地点使用或与一个产品交互时，选择传达用户的感受、目前状态、情绪、感觉等最佳词汇的过程，可以帮助设计者了解用户体验的多面性变化性的本质</p>
+</blockquote>
+<blockquote>
+<p>一张表格，表名为 “用户体验好和不好的方面”，表头为 “好的方面”，内容有 “满意的、有趣的、迷人的…”</p>
+</blockquote>
+<p><strong>体验和可用性的关系</strong></p>
+<ul>
+<li>体验：主观；可用性：客观</li>
+<li>矛盾性
+<ul>
+<li>许多玩家喜欢找最具挑战、非简单的游戏：违反可用性</li>
+</ul>
+</li>
+<li>有些可用性和用户体验目标是不兼容的
+<ul>
+<li>既安全又有趣的过程控制系统</li>
+</ul>
+</li>
+<li>认识和理解可用性和其他用户体验目标之间的关系是交互设计的核心</li>
+</ul>
+<h3 id="简易可用性工程">简易可用性工程</h3>
+<ul>
+<li>以<strong>提高产品的可用性为目标</strong>的先进的产品开发方法论</li>
+<li>强调<strong>以人为中心来</strong>进行交互式产品的设计研发</li>
+</ul>
+<h4 id="可用性度量">可用性度量*</h4>
+<table>
+<thead>
+<tr>
+<th>核心维度</th>
+<th>核心关注点</th>
+<th>常见度量指标</th>
+<th>数据收集方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>有效性</strong></td>
+<td>用户能否准确、完整地达成既定目标</td>
+<td>任务完成率、错误率、任务结果质量</td>
+<td>系统日志、可用性测试观察</td>
+</tr>
+<tr>
+<td><strong>效率</strong></td>
+<td>成功达成目标所消耗的资源与精力</td>
+<td>任务耗时、点击/交互次数、达到熟练的学习时间</td>
+<td>计时记录、点击流分析</td>
+</tr>
+<tr>
+<td><strong>满意度</strong></td>
+<td>用户在使用前、中、后的主观感受与态度</td>
+<td>SUS整体可用性得分、SEQ单题难度评分、NPS净推荐值</td>
+<td>标准化问卷、用户访谈</td>
+</tr>
+</tbody>
+</table>
+<h4 id="四种主要技术">四种主要技术</h4>
+<ul>
+<li><strong>用户和任务观察</strong>
+<ul>
+<li>直接与用户接触</li>
+</ul>
+</li>
+<li><strong>场景</strong>
+<ul>
+<li>使用简单的<mark>原型工具</mark></li>
+<li>水平原型：减少功能的深度并获得界面的表层</li>
+<li>垂直原型：减少功能的数量而对所选功能进行完整实现</li>
+</ul>
+</li>
+<li><strong>边做边说</strong> ⚠️
+<ul>
+<li>让真实用户在使用系统执行一组特定任务的时候，讲出他们的所思所想</li>
+<li><strong>最有价值的单个可用性工程方法</strong></li>
+<li><mark>可了解用户为什么这样做（原因）</mark>，并确定其可能对系统产生的误解</li>
+<li>实验人员需要不断地提示用户，或请他们事先观摩</li>
+</ul>
+</li>
+<li><strong>启发式评估</strong> ⚠️
+<ul>
+<li><em>涉及一些定量的问题（5 个专家发现 80% 的可用性问题）</em></li>
+<li>能够发现许多可用性问题</li>
+<li>为<mark>避免个人的偏见，应当让多个不同的人</mark>来进行经验性评估</li>
+</ul>
+</li>
+</ul>
+<h3 id="交互设计原则">交互设计原则</h3>
+<h4 id="十条启发式原则">十条启发式原则</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>规则</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>系统状态的可见度</strong></td>
+<td>长于3-5秒的操作需显式反馈（<mark>进度条</mark>等）</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>系统和现实世界的吻合</strong></td>
+<td>使用<mark>用户熟悉的词汇和概念</mark></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>用户享有控制权和自主权</strong></td>
+<td>提供<mark>撤销/重做/返回</mark>方法</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>一致性和标准化</strong></td>
+<td><mark>术语一致</mark>、无歧义图标、颜色/布局/字体一致</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>避免出错</strong></td>
+<td>从设计层面预防用户出错</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>依赖识别而非记忆</strong></td>
+<td>减少用户记忆负担</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>使用的灵活性和高效性</strong></td>
+<td>新手、专家、老年人</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>帮助用户识别、诊断和恢复错误</strong></td>
+<td><mark>错误信息用通俗语言</mark>，精确指出问题并建议解决方案</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>帮助和文档</strong></td>
+<td>提供帮助/手册，使用简单标准化术语</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>审美感和最小化设计</strong></td>
+<td>不过多不相关信息；标准控件；适合屏幕显示的字体</td>
+</tr>
+</tbody>
+</table>
+<h4 id="黄金规则">黄金规则</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>规则</th>
+<th>核心要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>尽可能保证一致</strong></td>
+<td>最容易被违背的原则；相似操作下一致的动作序列、术语、颜色、布局</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>符合普遍可用性</strong></td>
+<td>专家用户→快捷键；新手用户→引导性帮助</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>提供信息丰富的反馈</strong></td>
+<td>常用操作反馈简短，不常用操作反馈丰富</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>设计说明对话框以生成结束信息</strong></td>
+<td>让用户知道任务完成；产生满足感和轻松感</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>预防并处理错误</strong></td>
+<td>灰色屏蔽不适当选项；提供有建设性的恢复指导</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>让操作容易撤销</strong></td>
+<td>减轻焦虑，鼓励尝试新选项</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>支持内部控制点</strong></td>
+<td>用户是主动者而非响应者；避免模态对话框</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>减轻短时记忆负担</strong></td>
+<td>界面简单、风格统一、减少窗口移动</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-交互设计过程">4 交互设计过程</h2>
+<pre class="mermaid">graph LR
+    %% Define styles for the nodes
+    classDef whiteNode fill:#ffffff,stroke:#000000,stroke-width:1px,color:#000000;
+    classDef purpleNode fill:#955476,stroke:#000000,stroke-width:1px,color:#000000;
+    classDef textOnly fill:none,stroke:none,color:#000000,font-weight:bold,font-size:16px;
+
+    %% Define nodes with line breaks where appropriate
+    Start((" ")):::textOnly
+    N1(("明确需要/<br>建立需求")):::whiteNode
+    N2(("(重新) 设计")):::purpleNode
+    N3(("构建交互<br>式版本")):::purpleNode
+    N4(("评估")):::whiteNode
+    N5["最终产品"]:::textOnly
+
+    %% Define connections
+    Start --> N1
+    N1 --> N2
+    N2 --> N1
+    N2 --> N3
+    N3 --> N2
+    N3 --> N4
+    N4 --> N1
+    N4 --> N2
+    N4 --> N5
+</pre>
+<h2 id="5-交互式系统的需求">5 交互式系统的需求</h2>
+<h3 id="产品特性">产品特性</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>功能</strong></td>
+<td>智能冰箱提示牛奶用完；字处理器支持多种格式</td>
+</tr>
+<tr>
+<td><strong>物理条件</strong></td>
+<td>移动设备应尽可能小，屏幕显示限制</td>
+</tr>
+<tr>
+<td><strong>使用环境</strong></td>
+<td>物理环境（采光/噪音/尘土）、社会环境（共享/同步/异步）、组织环境（支持/培训）、技术环境（平台/兼容性）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="用户特性">用户特性</h3>
+<h5 id="1-体验水平差异">1. 体验水平差异</h5>
+<table>
+<thead>
+<tr>
+<th>用户类型</th>
+<th>特点</th>
+<th>设计要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>新手用户</strong></td>
+<td>敏感，容易在开始有挫折感</td>
+<td>不能让新手状态成为目标；学习过程快速有针对性；向导对话框；菜单项解释性</td>
+</tr>
+<tr>
+<td><strong>中间用户</strong></td>
+<td>数目最多、最稳定、最重要；需要工具；知道如何使用参考资料</td>
+<td><strong>工具提示</strong>是最适合的习惯用法；在线帮助是极佳工具；常用工具放在前端和中心</td>
+</tr>
+<tr>
+<td><strong>专家用户</strong></td>
+<td>对缺少经验的用户有异乎寻常的影响；欣赏更新更强大的功能</td>
+<td>快速访问经常使用的工具集</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心设计目标</strong>：让新手快速无痛苦成为中间用户；避免为想成为专家的用户设置障碍；让中间用户感到愉快</p>
+<h5 id="2-年龄差异">2. 年龄差异</h5>
+<ul>
+<li><strong>老年人</strong>：65岁以上多数有某种残疾；设计必须清楚、简单且容许出错；利用冗余</li>
+<li><strong>儿童</strong>：让他们参加设计很重要；允许多种输入模式（触觉/手写）；冗余显示增强体验</li>
+</ul>
+<h5 id="3-文化差异">3. 文化差异</h5>
+<ul>
+<li>符号：√ 和 X 在不同文化有不同意思</li>
+<li>姿势：点头 vs 摇头</li>
+<li>颜色：红色和绿色在不同国家意味不同</li>
+<li>解决方案：通过冗余阐明特定颜色的指定意义</li>
+</ul>
+<h5 id="4-健康差异">4. 健康差异</h5>
+<ul>
+<li>视觉损伤：辅以声音和触觉</li>
+<li>听觉损伤：给听觉内容加文字描述</li>
+<li>身体损伤：语音输入输出、姿势和眼球移动跟踪</li>
+<li>语音损伤：合成语音和基于文本的通信</li>
+<li>诵读困难：拼写更正、一致性导航结构和清晰标识</li>
+</ul>
+<h3 id="用户建模">用户建模 ⚠️</h3>
+<h4 id="人物角色">人物角色</h4>
+<h5 id="定义">定义</h5>
+<ul>
+<li>不是真实的人</li>
+<li>基于观察到的真实人的行为和动机，在整个设计过程中代表真实的人</li>
+<li>在人口统计学调查收集到的实际用户行为数据基础上形成的<strong>综合原型</strong></li>
+</ul>
+<h5 id="作用-解决3个设计问题">作用（解决3个设计问题）</h5>
+<ol>
+<li><strong>弹性用户</strong>：为弹性用户设计赋予开发者按自己意愿编码的许可</li>
+<li><strong>自参考设计</strong>：设计者将自己的目标、动机、技巧及心智模型投射到产品中</li>
+<li><strong>边缘情况设计</strong>：必须考虑边缘情况，但它们不应成为设计关注点</li>
+</ol>
+<h5 id="建模过程">建模过程</h5>
+<ul>
+<li><strong>拼凑</strong>：头脑风暴，产生一些零碎概念或模型的片段，先不考虑细节</li>
+<li><strong>组织</strong>：将这些片段进行分组和分类，归并或删除那些冗余</li>
+<li><strong>细节</strong>：建立和完善相应描述，补充遗漏的数据</li>
+<li><strong>求精</strong>：对模型进行推敲，以便改进和完善</li>
+<li>以上过程循环反复</li>
+</ul>
+<h3 id="需求获取-分析和验证">需求获取、分析和验证</h3>
+<h4 id="观察和场景-需求获取">观察和场景（<mark>需求获取</mark>）</h4>
+<h5 id="直接观察-vs-间接观察">直接观察 vs 间接观察</h5>
+<ul>
+<li>直接观察：陪同用户工作直接获得信息（可能影响日常活动）</li>
+<li>间接观察：用<mark>视频/录音</mark>获得信息（观察者更舒适）</li>
+</ul>
+<h5 id="场景">场景</h5>
+<ul>
+<li>定义：表示任务和工作结构的 “非正式的叙述性描述”</li>
+<li>形式：类似故事、小品或按时间顺序的情节</li>
+<li>“讲故事” 是人们解释自己做什么的最自然方式</li>
+<li>场景焦点：用户希望达到的目标</li>
+</ul>
+<div class="callout callout-info"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>人物角色 + 场景剧本 → 需求</div><table>
+<thead>
+<tr>
+<th>需求定义的 5 个 步骤</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. 创建问题和前景综述</strong></td>
+<td>问题综述反映需要改变的情况；前景综述是问题综述的倒置</td>
+</tr>
+<tr>
+<td><strong>2. 头脑风暴</strong></td>
+<td>“说反话”；去除成见；开放灵活；不受约束不评判</td>
+</tr>
+<tr>
+<td><strong>3. 确定人物角色期望</strong></td>
+<td>态度/经历/渴望；对产品体验的期待；数据基本单元认知</td>
+</tr>
+<tr>
+<td><strong>4. 构造情境场景剧本</strong></td>
+<td>关注人物角色活动及心理模型和动机；广而浅；高层次描述</td>
+</tr>
+<tr>
+<td><strong>5. 确立需求</strong></td>
+<td>数据需求（对象和信息）、功能需求（操作）、其他需求</td>
+</tr>
+</tbody>
+</table>
+<p>迭代的过程，直到需求变得稳定</p>
+</div><h4 id="层次化任务分析-hta-需求分析">层次化任务分析 HTA（需求分析）</h4>
+<blockquote>
+<p>把任务分解为若干子任务，再进一步分解为更细致的子任务，之后组织成 “执行次序”</p>
+</blockquote>
+<h5 id="文字和图形描述">文字和图形描述</h5>
+<p>终止规则</p>
+<ul>
+<li>任务包含复杂机械响应的地方
+<ul>
+<li>如鼠标移动 → 分解无价值，终止</li>
+</ul>
+</li>
+<li>涉及内部决断的地方：
+<ul>
+<li>若决断和外部动作相关 → 分解</li>
+<li>若为纯粹认知性 → 终止</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image-8.webp" alt="alt text" loading="lazy">
+<img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image-9.webp" alt="alt text" loading="lazy"></p>
+<h4 id="原型-需求验证">原型（<mark>需求验证</mark>）</h4>
+<h5 id="原型的重要性">原型的重要性</h5>
+<ul>
+<li><mark>评估和反馈</mark>是交互设计的核心</li>
+<li><mark>用户</mark>不能准确描述需要，但<mark>看到后就能立即知道不需要什么</mark></li>
+<li>与文档相比，涉众<mark>更容易与原型交互</mark></li>
+<li>团队成员能<mark>有效沟通</mark></li>
+</ul>
+<h5 id="低保真原型-vs-高保真原型">低保真原型 vs 高保真原型</h5>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>低保真原型</th>
+<th>高保真原型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>相似度</strong></td>
+<td>与最终产品不太相似</td>
+<td>与最终产品更为接近</td>
+</tr>
+<tr>
+<td><strong>材料</strong></td>
+<td>不同材料（纸张、纸板）</td>
+<td>相同材料</td>
+</tr>
+<tr>
+<td><strong>优点</strong></td>
+<td>简单、快速、便宜、易于制作修改</td>
+<td>更真实地体验交互</td>
+</tr>
+<tr>
+<td><strong>缺点</strong></td>
+<td>不能完全展示交互</td>
+<td>制作时间长、难以修改、风险</td>
+</tr>
+<tr>
+<td><strong>地位</strong></td>
+<td><strong>多数项目的首选</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h5 id="低保真原型形式">低保真原型形式</h5>
+<ul>
+<li><strong>草图</strong>：每张卡片代表一个屏幕或屏幕的一部分（常用于网站开发）</li>
+<li><strong>故事板</strong>：一系列草图展示用户如何使用设备完成任务（通常与场景一起使用）</li>
+<li><strong>绿野仙踪法(Wizard-of-Oz)</strong>：用户认为与计算系统交互，实际是开发人员响应</li>
+</ul>
+<h2 id="6-交互式系统的设计">6 交互式系统的设计</h2>
+<h3 id="设计框架">设计框架</h3>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>名称</th>
+<th>核心内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>定义<strong>外形因素和输入方法</strong></td>
+<td>设计什么样的产品？产品输入方法？取决于外形和人物角色的能力喜好</td>
+</tr>
+<tr>
+<td>2</td>
+<td>定义<strong>功能和数据</strong>元素</td>
+<td>数据元素（基本主体）+ 功能元素（操作工具）；用场景剧本检验</td>
+</tr>
+<tr>
+<td>3</td>
+<td>决定<strong>功能组合</strong>层次</td>
+<td>哪些元素需要大片区域、一起使用、相邻放置</td>
+</tr>
+<tr>
+<td>4</td>
+<td>勾画<strong>大致设计框架</strong></td>
+<td><strong>方块图阶段</strong>：粗略方块图表达每个视图，加标签和注解</td>
+</tr>
+<tr>
+<td>5</td>
+<td>构建<strong>关键情景场景剧本</strong></td>
+<td>描述人物角色最频繁使用界面的主要路径，重点在任务层（可用故事版）</td>
+</tr>
+<tr>
+<td>6</td>
+<td>通过<strong>验证性场景剧本</strong>检查设计</td>
+<td>“如果怎样，将怎样”；关键线路变种；必须使用场景；边缘情形场景</td>
+</tr>
+</tbody>
+</table>
+<h3 id="简化交互设计策略">简化交互设计策略</h3>
+<h4 id="策略一-删除">策略一：删除</h4>
+<blockquote>
+<p>最明显的简化设计方法</p>
+</blockquote>
+<p><strong>如何删除？</strong></p>
+<ul>
+<li><strong>关注核心</strong>：与新增功能相比，客户更关注基本功能的改进</li>
+<li><strong>砍掉残缺功能</strong>：警惕 “沉没成本误区”
+<ul>
+<li>反问 “为什么要留着它？” 而非 “为什么应该去掉它”</li>
+</ul>
+</li>
+<li><strong>不盲目假设用户需求与盲从用户要求</strong></li>
+</ul>
+<p><strong>删除视觉混乱</strong>：</p>
+<ul>
+<li>使用空白或轻微背景划分页面，不要使用线条</li>
+<li>尽可能少使用强调，别使用粗黑线</li>
+<li>控制信息层次：标题 → 子标题 → 正文</li>
+<li>减少元素大小和形状的变化</li>
+</ul>
+<p><strong>删减文字</strong>：</p>
+<ul>
+<li>删除引见性文字</li>
+<li>删除不必要的说明</li>
+<li>删除繁琐的解释</li>
+<li>使用描述性链接（非&quot;单击这里&quot;/“更多内容”）</li>
+</ul>
+<p><strong>精简句子</strong>：让文字变得更加简洁、清晰、有说服力</p>
+<p><strong>不要删减过多</strong>：人们希望自己能够掌控局面（启发式原则）</p>
+<h4 id="策略二-组织">策略二：组织</h4>
+<blockquote>
+<p>最快捷的简化设计方式</p>
+</blockquote>
+<ul>
+<li><strong>分块：“7 ± 2 法则”</strong>
+<ul>
+<li>名词：可按字母表、时间或空间顺序排列</li>
+<li>动词：围绕行为进行组织</li>
+</ul>
+</li>
+<li>确定清晰的<strong>分类</strong>标准（多找用户询问分类标准）</li>
+<li>利用不可见的网格对齐界面元素</li>
+<li>大小和位置：
+<ul>
+<li>重要元素要大一些</li>
+<li>相似元素放在一起</li>
+</ul>
+</li>
+<li>感知分层：眯起眼睛观察能否区分不同层</li>
+<li>期望路径：不要被自己规划图中清晰的线条和整洁的布局所迷惑</li>
+</ul>
+<h4 id="策略三-隐藏">策略三：隐藏</h4>
+<blockquote>
+<p>低成本简化方案</p>
+</blockquote>
+<ul>
+<li>隐藏什么：主流用户很少使用但需要更新的功能、细节、选项和偏好、特定地区信息</li>
+<li><strong>自定义</strong>：一般不应让用户自定义软件
+<ul>
+<li>费时，除非被自定义者简单</li>
+</ul>
+</li>
+<li><strong>渐进展示</strong>：核心功能 + 扩展功能模式；比自定义效果好
+<ul>
+<li>对于用户期望的功能，要在正确的环境下给出明确的提示</li>
+</ul>
+</li>
+<li><strong>适时出现</strong>：尽可能彻底隐藏；在合适时机、合适位置显示</li>
+<li><strong>让功能易于发现</strong>：为隐藏功能打上标签（更多/高级）；标签位置比大小重要</li>
+</ul>
+<h4 id="策略四-转移">策略四：转移</h4>
+<ul>
+<li><strong>在设备之间转移</strong>：利用两个平台优势各司其职（移动 vs 桌面）</li>
+<li><strong>把复杂的工作留给用户</strong>：让用户创建文件夹并自由命名，每个用户做适合自己的规划</li>
+<li><strong>用户擅长的事情</strong>：搞清楚什么交给计算机，什么留给用户</li>
+<li><strong>菜刀与钢琴</strong>：简单界面的最高境界 —— 专家和主流用户都感觉好用</li>
+</ul>
+<h3 id="设计中的折中">设计中的折中</h3>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>个性化 vs 配置</strong></td>
+<td>个性化：人们喜欢改变使之适合自己，必须简单易用、可预览、易撤销</td>
+</tr>
+<tr>
+<td><strong>本地化 vs 国际化</strong></td>
+<td>国际化=与特定语言及地区脱钩（做一次）；&lt;br&gt;本地化=加上与特定区域相关的信息（各做一次）</td>
+</tr>
+<tr>
+<td><strong>审美 vs 实用</strong></td>
+<td>漂亮界面不一定好；先实现良好基本布局，再改进美学效果</td>
+</tr>
+</tbody>
+</table>
+<h3 id="细节">细节</h3>
+<h4 id="让软件体贴">让软件体贴</h4>
+<ul>
+<li>有趣的用语</li>
+<li>直直白白（反例：安装容易卸载难）</li>
+</ul>
+<h4 id="加快响应时间">加快响应时间</h4>
+<ul>
+<li>利用程序空闲时间：对用户可能操作作出假设</li>
+</ul>
+<h4 id="减轻记忆负担">减轻记忆负担</h4>
+<ul>
+<li>两类记忆：和软件操作相关、和领域知识相关</li>
+<li>好的软件通过<mark>回忆用户上次行为预测用户可能的操作</mark></li>
+<li><mark>使用用户以前的设置作为默认值</mark></li>
+</ul>
+<h4 id="减少等待感">减少等待感</h4>
+<ul>
+<li>以反馈让用户了解操作进度和状态（如进度对话框）</li>
+<li>以渐进方式呈现处理结果</li>
+<li>给用户分配任务分散注意力</li>
+<li>减低用户期望值</li>
+</ul>
+<h4 id="交互设计模式">交互设计模式</h4>
+<ul>
+<li><strong>模式定义</strong>：“模式就是某个情形下某个问题的解决方案”</li>
+<li><mark>模式捕捉的是良好设计中不变的特性</mark>，具体实现取决于环境和设计者创造性</li>
+<li>模式<mark>不是拿来即用的</mark>商品，每次运用都有所不同</li>
+<li>主导航模式、二级导航模式</li>
+<li><strong>轮播模式</strong>：优点（充分使用屏幕空间、当前信息清晰可见）；缺点（用户几乎不使用、通常仅关注第一幅画面）</li>
+</ul>
+<h2 id="7-交互设计模型与理论">7 交互设计模型与理论</h2>
+<h3 id="预测模型">预测模型</h3>
+<ul>
+<li>不需要对用户做实际测试即可预测执行情况</li>
+<li>特别<mark>适合于无法进行用户测试的情形</mark></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>关注方面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GOMS</td>
+<td>认知-动作型任务如何执行，任务多层次细化</td>
+</tr>
+<tr>
+<td>KLM</td>
+<td>任务性能的时间方面（仅时间）</td>
+</tr>
+<tr>
+<td>Fitts 定律</td>
+<td>使用定位设备指向目标的时间</td>
+</tr>
+</tbody>
+</table>
+<h4 id="goms">GOMS</h4>
+<h5 id="全称与含义">全称与含义</h5>
+<table>
+<thead>
+<tr>
+<th>字母</th>
+<th>全称</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>G</strong></td>
+<td>Goal（目标）</td>
+<td>用户要达到什么目的</td>
+</tr>
+<tr>
+<td><strong>O</strong></td>
+<td>Operator（操作）</td>
+<td>任务执行的底层行为，不能分解（如点击鼠标）</td>
+</tr>
+<tr>
+<td><strong>M</strong></td>
+<td>Method（方法）</td>
+<td>如何完成目标的过程（子目标序列+所需操作）</td>
+</tr>
+<tr>
+<td><strong>S</strong></td>
+<td>Selection（选择规则）</td>
+<td>确定当有多种方法时如何选择（选择不是随机的）</td>
+</tr>
+</tbody>
+</table>
+<h5 id="方法步骤">方法步骤</h5>
+<ol>
+<li>选出最高层的用户目标</li>
+<li>写出具体的完成目标的方法（激活子目标）</li>
+<li>写出子目标的方法（递归分解到最底层操作）</li>
+<li>子目标关系：顺序关系、选择关系（以select引导）</li>
+</ol>
+<p><img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image-13.webp" alt="alt text" loading="lazy"></p>
+<h4 id="优缺点">优缺点</h4>
+<ul>
+<li><strong>优点</strong>：容易对不同界面或系统进行比较分析</li>
+<li><strong>局限性</strong>：
+<ul>
+<li>设用户完全按正确方式进行交互，没有错误处理</li>
+<li><mark>只针对不犯任何错误的专家用户</mark></li>
+<li>任务间关系描述过于简单</li>
+<li>忽略了用户间的个体差异</li>
+</ul>
+</li>
+</ul>
+<h4 id="klm-击键层次模型">KLM（击键层次模型） ⚠️</h4>
+<h5 id="定义-2">定义</h5>
+<p>对用户执行情况进行<strong>量化预测</strong>，仅涉及任务性能的一个方面：<strong>时间</strong></p>
+<h5 id="用途">用途</h5>
+<p>预测无错误情况下专家用户在给定输入前提下完成任务的时间</p>
+<h5 id="执行时间公式">执行时间公式</h5>
+<p>\(T_{execute} = T_K + T_P + T_H + T_D + T_M + T_R\)</p>
+<h5 id="操作符">操作符</h5>
+<p><img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image-10.webp" alt="alt text" loading="lazy"></p>
+<h5 id="编码举例">编码举例</h5>
+<ul>
+<li><strong>DOS下执行 ipconfig 命令</strong>：
+<ul>
+<li>M K[i] K[p] K[c] K[o] K[n] K[f] K[i] K[g] K[回车]</li>
+<li>M9K[ipconfig回车]（简略表达）</li>
+<li>\(T_{execute} = 1.35 + 9×0.28 = 3.87s\)</li>
+</ul>
+</li>
+<li><strong>菜单选择</strong>：
+<ul>
+<li>H[鼠标] M P[网络连接图标] P1[右键] P[修复] P1[左键]</li>
+<li>\(T_{execute}= 0.40 + 1.35 + 2P + 2K = 4.35s\)</li>
+</ul>
+</li>
+</ul>
+<p>举例：替换文字编辑器中长度为5个字符的单词</p>
+<ul>
+<li>任务准备 <code>M</code></li>
+<li>将手放在鼠标上 <code>H_{mouse}</code></li>
+<li>将鼠标移到单词 <code>P_{word}</code></li>
+<li>选择单词 <code>P_1 P</code></li>
+<li>回到键盘 <code>H_{keyboard}</code></li>
+<li>准备键入 <code>M</code></li>
+<li>键入新的5字符单词 <code>5K_{word}</code></li>
+</ul>
+<p>\(T_{execute} = 2M + 2H + P + P_1 + P + 4K\)<br>
+\(\quad = 2.70 + 0.80 + 1.10 + 0.20 + 1.10 + 0.88 = 6.78\text{s}\)</p>
+<h5 id="放置-m-操作符的启发规则">放置 M 操作符的启发规则</h5>
+<table>
+<thead>
+<tr>
+<th>规则</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>规则1</strong></td>
+<td>在每一步需要访问长时记忆区的操作前放置一个 M</td>
+</tr>
+<tr>
+<td><strong>规则2</strong></td>
+<td>在<mark>所有 K 和 P 之前放置 M</mark>：K→MK; P→MP（初始规则）</td>
+</tr>
+<tr>
+<td><strong>规则3</strong></td>
+<td><mark>删除键入单词或字符串之间的 M</mark>：MKMKMK → MKKK</td>
+</tr>
+<tr>
+<td><strong>规则4</strong></td>
+<td><mark>删除复合操作之间的M</mark>：MPMP₁ → MPP₁（如选中 P 和点击 P₁）</td>
+</tr>
+</tbody>
+</table>
+<h5 id="klm-分析的局限">KLM 分析的局限</h5>
+<p>没有考虑：错误、学习性、功能性、回忆、专注程度、疲劳、可接受性</p>
+<h4 id="fitts-定律">Fitts 定律 ⚠️</h4>
+<h5 id="定义-3">定义</h5>
+<ul>
+<li>预测使用某种定位设备指向某个目标的<strong>时间</strong></li>
+</ul>
+<h5 id="核心公式">核心公式</h5>
+<p><strong>困难指数</strong>：\(ID = log₂(A/W + 1)\)</p>
+<ul>
+<li>\(A\)：运动距离/振幅（Amplitude）</li>
+<li>\(W\)：目标宽度（Width）</li>
+<li>\(ID\) 单位：比特(bits)</li>
+</ul>
+<p><strong>运动时间</strong>：\(MT = a + b \cdot ID\)</p>
+<ul>
+<li>\(a\) 和 \(b\) 由经验数据确定，与设备相关</li>
+<li>一般计算：\(a=50ms, b=150ms\)</li>
+<li>\(MT\) 单位：秒</li>
+</ul>
+<h5 id="三个部分">三个部分</h5>
+<table>
+<thead>
+<tr>
+<th>部分</th>
+<th>公式</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID（困难指数）</td>
+<td>\(log₂(A/W+1)\)</td>
+<td>对任务困难程度的量化</td>
+</tr>
+<tr>
+<td>MT（运动时间）</td>
+<td>\(a + b \cdot ID\)</td>
+<td>在 ID 基础上将完成时间量化</td>
+</tr>
+<tr>
+<td>IP（性能指数）</td>
+<td>\(ID/MT\) (bits/sec)</td>
+<td>基于 MT 和 ID 的关系，也称吞吐量</td>
+</tr>
+</tbody>
+</table>
+<h5 id="fitts-定律的建议">Fitts 定律的建议</h5>
+<ol>
+<li>大目标、小距离具有优势</li>
+<li>屏幕元素应该尽可能多地占据屏幕空间</li>
+<li>最好的像素是光标所处的像素</li>
+<li>屏幕元素应尽可能利用<strong>屏幕边缘的优势</strong></li>
+<li>大菜单（如饼型菜单）比其他类型的菜单使用简单</li>
+</ol>
+<h5 id="应用策略">应用策略</h5>
+<ul>
+<li><strong>策略一：缩短当前位置到目标区域的距离</strong>（如右键菜单技术）</li>
+<li><strong>策略二：增大目标大小以缩短定位时间</strong></li>
+</ul>
+<h4 id="各自的适用场合">各自的适用场合</h4>
+<h5 id="1-goms模型">1. GOMS模型</h5>
+<p><strong>适用场合</strong>：</p>
+<ul>
+<li><strong>系统或界面的比较与评估</strong>：能够非常容易地对不同的界面或系统设计进行比较分析</li>
+<li><strong>认知与动作任务分解</strong>：适用于采用“分而治之”的思想，将任务进行多层次细化并计算完成时间</li>
+<li><strong>专家用户预测</strong>：仅适用于针对<strong>不犯任何错误的专家用户</strong>进行预测，它假设用户完全按照一种正确的方式进行交互</li>
+</ul>
+<p><strong>不适用场合</strong>：</p>
+<ul>
+<li>不适合用于需要考虑错误处理过程、任务之间关系过于复杂，或需要考虑用户间个体差异的场景 。</li>
+</ul>
+<h5 id="2-击键层次模型-klm">2. 击键层次模型 (KLM)</h5>
+<p><strong>适用场合</strong>：</p>
+<ul>
+<li><strong>纯时间的量化预测</strong>：专门用于预测<strong>无错误情况下，专家用户</strong>在给定的输入前提下完成特定任务所需的时间 。</li>
+<li><strong>方案选优与系统比较</strong>：非常便于比较不同的系统设计，能够帮助设计者确定何种方案能最有效地支持特定任务 。</li>
+<li><strong>底层物理和心理操作计算</strong>：适用于能够将任务拆解为具体的击键（K）、指向（P）、心理准备（M）等底层操作符，并累加时间的场景 。</li>
+</ul>
+<p><strong>局限性</strong>：</p>
+<ul>
+<li>错误、学习性、功能性、回忆、专注程度、疲劳、可接受性</li>
+</ul>
+<h4 id="3-fitts-定律">3. Fitts 定律</h4>
+<p><strong>适用场合</strong>：</p>
+<ul>
+<li><strong>指向性运动任务的<mark>时间预测</mark></strong>：适用于量化和预测用户完成“目标指向”运动（如移动鼠标到屏幕某处）所需的时间（MT）。</li>
+<li><strong>量化任务<mark>困难程度</mark></strong>：适用于评估由于目标大小（宽度 W）和移动距离（振幅 A）带来的任务困难指数（ID）。</li>
+<li><strong>界面布局与元素<mark>大小设计</mark></strong>：指导设计者如何合理安排界面元素（例如解释了汽车刹车踏板为何比油门大且距离近的原因），即用于探讨距离和目标宽度对操作效率的具体影响 。</li>
+</ul>
+<h2 id="8-评估的基础知识">8 评估的基础知识</h2>
+<blockquote>
+<p>评估是设计过程的组成部分</p>
+</blockquote>
+<h3 id="评估范型和方法">评估范型和方法</h3>
+<h4 id="评估范型">评估范型</h4>
+<h5 id="快速评估">快速评估</h5>
+<ul>
+<li><strong>可以在任何阶段进行</strong></li>
+<li>强调 “快速了解”，而非仔细记录研究发现，得到的数据通常是非正式的、叙述性的</li>
+<li>是设计网站时常用的方法</li>
+<li>基本特性：快速</li>
+</ul>
+<h5 id="可用性评估">可用性评估</h5>
+<blockquote>
+<p>可用性测试（用户测试，DECIDE 评估框架）</p>
+</blockquote>
+<ul>
+<li>评估典型用户执行典型任务时的情况，包括<strong>出错次数、完成任务的时间</strong>等</li>
+<li>基本特征：是在评估人员的密切控制下实行的</li>
+<li>主要任务：量化表示用户的执行情况</li>
+<li>缺点：
+<ul>
+<li>测试用户的数量通常较少</li>
+<li>不适合进行细致的数据分析</li>
+</ul>
+</li>
+</ul>
+<h5 id="实地研究">实地研究</h5>
+<ul>
+<li>基本特征：在自然工作环境中进行</li>
+<li>目的：理解用户的实际工作情形以及技术对他们的影响</li>
+<li>重难点：如何不对受试者造成影响；控制权在用户，很难预测即将发生和出现的情况</li>
+</ul>
+<h5 id="预测性评估">预测性评估</h5>
+<ul>
+<li>研究人员通过想象或对界面的使用过程进行建模，逐步通过场景或基于问题回答的走查法</li>
+<li>基本特征：<mark>用户可以不在场，整个过程快速、成本较低</mark></li>
+<li>启发式评估属于预测性评估</li>
+</ul>
+<h3 id="实证研究方法">🔬 实证研究方法</h3>
+<h4 id="研究假设">研究假设</h4>
+<ul>
+<li><strong>零假设(H₀)</strong>：不同实验条件不会产生差异</li>
+<li><strong>备择假设(H₁)</strong>：与零假设相反的陈述</li>
+<li>实验目标：找到统计学证据反驳零假设，支持备择假设</li>
+<li>好的假设特点：精确清晰、专注于单次可检验问题、明确实验条件</li>
+</ul>
+<blockquote>
+<p>H0：下拉菜单和弹出菜单在用户满意度评价上没有差异
+H1：下拉菜单和弹出菜单在用户满意度评价上存在差异</p>
+</blockquote>
+<h4 id="自变量-vs-因变量">自变量 vs 因变量</h4>
+<table>
+<thead>
+<tr>
+<th>变量类型</th>
+<th>定义</th>
+<th>典型例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>自变量</strong></td>
+<td>研究者感兴趣的因素，变化的可能 “原因”</td>
+<td>技术类型、设计类型、设备类型</td>
+</tr>
+<tr>
+<td><strong>因变量</strong></td>
+<td>研究者感兴趣的结果/效果</td>
+<td>效率、准确性、主观满意度、易学性、易记性</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>自变量至少需要 2 个不同取值（取值称为实验条件）</li>
+<li>“自”：自变量与受试者的行为无关，参与者无法对自变量施加任何影响</li>
+<li>“因”：因变量依赖于受试者的行为或自变量的变化</li>
+</ul>
+<h4 id="实验构成三要素">实验构成三要素</h4>
+<ul>
+<li>实验条件：需要比较的不同技术/设备/程序</li>
+<li>实验单位：应用实验条件的对象（通常是具有特定特征的人类受试者）</li>
+<li>分配方式：将实验单位分配到不同实验条件的方式（强调<strong>完全随机化</strong>）</li>
+</ul>
+<h3 id="实验设计">📐 实验设计</h3>
+<pre class="mermaid">graph TD
+    A[研究设计] --> B{随机分配？}
+    B -- 是 --> C[真实验]
+    B -- 否 --> D{多个组或多次测量？}
+    D -- 是 --> E[准实验]
+    D -- 否 --> F[非实验]
+</pre>
+<blockquote>
+<p>控制条件 vs 对照条件</p>
+</blockquote>
+<h4 id="组间设计-vs-组内设计-重点">组间设计 vs 组内设计（重点）</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>组间设计</th>
+<th>组内设计</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>参与者</strong></td>
+<td>每个参与者只暴露在一种条件下</td>
+<td>相同参与者执行所有实验情形</td>
+</tr>
+<tr>
+<td><strong>优点</strong></td>
+<td>设计简洁，<mark>避免学习效应</mark></td>
+<td><mark>样本量小，隔离个体差异</mark></td>
+</tr>
+<tr>
+<td><strong>缺点</strong></td>
+<td><mark>个体差异影响大，样本量大</mark></td>
+<td><mark>学习效果影响，疲劳问题</mark></td>
+</tr>
+<tr>
+<td><strong>适用</strong></td>
+<td>任务简单/个体差异有限/受学习效果影响大的任务</td>
+<td>个体差异大/学习效果不易受影响/目标群体小</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/assets/img/posts/%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92/image-12.webp" alt="alt text" loading="lazy"></p>
+<h4 id="选择合适设计的场景">选择合适设计的场景</h4>
+<ul>
+<li><strong>必须用组间设计</strong>：不可能同时是新手和专家
+<ul>
+<li>参与者应尽可能随机分配到不同的条件下</li>
+<li>需要在不同条件下尽量平衡潜在的混杂因素（确保群体相似）</li>
+</ul>
+</li>
+<li><strong>适合组内设计</strong>：打字、阅读、写作等需要测试<strong>复杂学习技能的任务</strong>
+<ul>
+<li><strong>控制学习效应</strong>：
+<ul>
+<li>实验条件的顺序随机化</li>
+<li>当研究的目标不是与应用的初始交互时，减少学习效果影响的有效方法是提供充足的培训</li>
+</ul>
+</li>
+<li><strong>疲劳控制</strong>：实验长度 60-90 分钟或更短，提供休息</li>
+<li><strong>平衡拉丁方设计</strong>：平衡学习和疲劳</li>
+</ul>
+</li>
+</ul>
+<h4 id="析因设计">析因设计</h4>
+<ul>
+<li>调查<strong>一个以上自变量时采用</strong></li>
+<li>允许在一个实验中研究两个或两个以上自变量之间的相互作用的影响
+<ul>
+<li>一个自变量对因变量的不同影响，取决于另一个自变量的特定取值</li>
+</ul>
+</li>
+<li>条件数 = 各自变量取值数的乘积</li>
+<li>组内/组间均可，重要的是平衡顺序和条件</li>
+</ul>
+<blockquote>
+<p>比较使用三种类型键盘时的打字速度，且调查不同的任务(写作和抄写)对打字速度的影响</p>
+<p>自变量及取值？
+• 变量 “键盘类型” 有三个值：QWERTY 键盘、DVORAK 键盘和字母键盘
+• 变量 “任务类型” 有两个值：抄写和写
+• 条件数：6</p>
+</blockquote>
+<h4 id="裂区设计">裂区设计</h4>
+<blockquote>
+<p>析因研究中的一种设计，既有组间成分，也有组内成分</p>
+</blockquote>
+<ul>
+<li>年龄和 GPS 的使用情况</li>
+<li>自变量 “年龄” 有三个值：20 到 40 岁的人，41 到 60 岁的人，以及 60 岁以上（“裂区”）</li>
+<li>第二个变量有两个值：无 GPS 驾驶和有 GPS 辅助驾驶</li>
+</ul>
+<h3 id="评估方法的选择">评估方法的选择</h3>
+<h4 id="不同方法的适用阶段">不同方法的适用阶段</h4>
+<p><strong>观察用户</strong></p>
+<ul>
+<li><strong>现场观察</strong>：主要适用于<strong>项目早期（需求发现阶段）</strong>，因为重点在于了解“应用的上下文环境”和自然真实的工作流，难以控制干扰因素，适合找方向。</li>
+<li><strong>实验室观察</strong>：适用于<strong>项目后期（原型可用性测试阶段）</strong>，重点在“用户执行任务的细节”，因为环境可控，易于分析比较。</li>
+</ul>
+<p><strong>询问用户（访谈、问卷、焦点小组）</strong></p>
+<ul>
+<li>主要贯穿于<strong>一头一尾（设计前和使用后）</strong>。</li>
+<li>设计前：用于探索用户主观满意度、忧虑和隐藏需求。</li>
+<li>使用后：结合焦点小组或问卷，验证产品是否解决了用户问题，或通过互联网分发问卷以较低成本获取大规模反馈。</li>
+</ul>
+<p><strong>认知走查（专家评估）</strong></p>
+<ul>
+<li>适用于<strong>设计中期的原型阶段</strong>。</li>
+<li>此时不需要完成开发，只要“制作出界面原型”，专家就能根据用户执行任务的具体步骤，评估系统的“易学性”（新用户第一次使用的表现）。</li>
+</ul>
+<p><strong>启发式评估（专家评估）</strong></p>
+<ul>
+<li>适用于<strong>设计阶段（低保真/高保真原型均可）或系统开发的早期</strong>。</li>
+<li>在此阶段，让专家用 10 条法则“彻底检查界面”，可以在投入昂贵的“用户测试”之前，廉价、快速地排除掉绝大多数基础的可用性问题。</li>
+</ul>
+<p><strong>用户测试（基于 DECIDE 框架）</strong></p>
+<ul>
+<li>适用于<strong>开发中后期或拥有高保真互动原型时</strong>。</li>
+<li>因为需要定义具体任务，搜集时间、错误率等“定量数据”，并对“软件”进行测试，所以必须等到产品具有一定可操作性时才能进行。通常作为上线前的最后一道防线。</li>
+</ul>
+<h3 id="decide-评估框架">DECIDE 评估框架</h3>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>名称</th>
+<th>要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>D</strong></td>
+<td>Determine <strong>确定目标</strong></td>
+<td>评估目标决定评估过程，影响范型选择</td>
+</tr>
+<tr>
+<td><strong>E</strong></td>
+<td>Explore <strong>发掘问题</strong></td>
+<td>根据目标确定具体问题，可逐层分解</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>Choose <strong>选择范型和技术</strong></td>
+<td>范型决定技术类型；需权衡实际和道德问题；可结合多种技术</td>
+</tr>
+<tr>
+<td><strong>I</strong></td>
+<td>Identify <strong>明确实际问题</strong></td>
+<td>用户、设施设备、期限预算、专门技能</td>
+</tr>
+<tr>
+<td><strong>D</strong></td>
+<td>Decide <strong>处理道德问题</strong></td>
+<td>保护隐私；签署协议书(IRB)；测试对象是软件而非个人</td>
+</tr>
+<tr>
+<td><strong>E</strong></td>
+<td>Evaluate <strong>评估解释并表示数据</strong></td>
+<td>可靠性、有效性、偏见、范围、环境影响（霍桑效应）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="小规模试验的重要性">小规模试验的重要性</h3>
+<ul>
+<li>确保评估计划的<mark>可行性</mark></li>
+<li>检查设备及使用说明</li>
+<li>练习<mark>访谈技巧</mark></li>
+<li>检查问卷中的问题是否明确</li>
+<li><mark>快速、成本低</mark></li>
+</ul>
+<blockquote>
+<p>考试实验设计时写上 “进行多次⼩规模实验” 一定有分</p>
+</blockquote>
+<h2 id="9-观察用户">9 观察用户</h2>
+<h3 id="观察方式">观察方式</h3>
+<h4 id="实验室-vs-实地">实验室 vs 实地</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>实验室观察</th>
+<th>现场观察</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>环境</strong></td>
+<td>专门可用性测试实验室（测试区 + 观察区）</td>
+<td>用户的实际工作环境</td>
+</tr>
+<tr>
+<td><strong>控制</strong></td>
+<td>可控且一致</td>
+<td>相对不可控</td>
+</tr>
+<tr>
+<td><strong>观察者角色</strong></td>
+<td>旁观者（不能作为参与者）</td>
+<td>旁观者或参与者</td>
+</tr>
+<tr>
+<td><strong>重点</strong></td>
+<td>用户执行任务的细节</td>
+<td>应用的上下文环境</td>
+</tr>
+<tr>
+<td><strong>优点</strong></td>
+<td>可控一致、易于分析比较</td>
+<td>自然真实、发现环境相关问题</td>
+</tr>
+<tr>
+<td><strong>缺点</strong></td>
+<td>人为环境、降低普遍性、不利于观察协作</td>
+<td>难以控制干扰因素</td>
+</tr>
+</tbody>
+</table>
+<h3 id="观察框架">观察框架</h3>
+<h4 id="减少干扰-完成目标">减少干扰、完成目标</h4>
+<blockquote>
+<p>观察框架用于<strong>组织观察活动</strong>和<strong>明确观察重点</strong></p>
+</blockquote>
+<p><strong>Goetz &amp; Lecompte 框架</strong></p>
+<ul>
+<li>6 个维度：<strong>人员、行为、时间、地点、原因、方式</strong></li>
+<li><strong>关注事件的上下文、涉及的人员和技术</strong></li>
+</ul>
+<p><strong>Robson 框架</strong></p>
+<ul>
+<li>8 个维度：<strong>空间、行为者、活动、物体、举止、事件、目标、感觉</strong></li>
+<li><strong>有助于组织观察和数据搜集活动</strong></li>
+</ul>
+<h3 id="核心方法">💡 核心方法</h3>
+<h4 id="边做边说">边做边说</h4>
+<ul>
+<li><strong>目的</strong>：解决 “不知道用户在想什么” 的问题</li>
+<li><strong>做法</strong>：让真实用户使用系统执行任务时说出所思所想</li>
+<li><strong>优点</strong>：简单、只需要很少专业技术；最有价值的单个可用性工程方法</li>
+<li><strong>缺点</strong>：不自然，可能改变人们执行任务的方式</li>
+<li>沉默时观察人员可提醒用户</li>
+</ul>
+<h4 id="合作评估">合作评估</h4>
+<ul>
+<li>两位用户共同合作，互相讨论、相互帮助</li>
+<li>限制少、评估者容易学会</li>
+<li>鼓励用户对系统提出批评</li>
+<li><strong>尤其适合评估面向儿童的系统</strong></li>
+</ul>
+<h4 id="生理反应监控">生理反应监控</h4>
+<ul>
+<li>心脏活动 → 压力或愤怒</li>
+<li>汗腺活动 → 激励和精神努力程度</li>
+<li>大脑活动 → 决策制定、关注和动机</li>
+<li>难点：不清楚事件与测量之间的关系</li>
+</ul>
+<h3 id="数据记录方式">数据记录方式</h3>
+<h4 id="纸笔-音视频-日志">纸笔、音视频、日志</h4>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>优点</th>
+<th>缺点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>纸笔记录</strong></td>
+<td>最原始、最廉价；事后分析工作量小</td>
+<td>容易疲劳、记录速度有限</td>
+<td>对观察对象有一定了解，有明确侧重</td>
+</tr>
+<tr>
+<td><strong>音频记录</strong></td>
+<td>信息全面无遗漏</td>
+<td>转录烦琐、无可见记录</td>
+<td>边做边说；作为辅助材料</td>
+</tr>
+<tr>
+<td><strong>视频记录</strong></td>
+<td>能看到参与者行为</td>
+<td>信息量大，分析耗时</td>
+<td>需要全面了解行为的场景</td>
+</tr>
+<tr>
+<td><strong>日志/交互记录</strong></td>
+<td>自动收集、体现真实任务</td>
+<td>属于间接观察</td>
+<td>用户分散、互联网应用、无法当面研究</td>
+</tr>
+</tbody>
+</table>
+<h2 id="10-询问用户和专家">10 询问用户和专家</h2>
+<div class="callout callout-info"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>了解用户的需要和对产品的意见和建议</div><ul>
+<li>观察用户</li>
+<li>询问用户
+<ul>
+<li>适用于客观上较难度量的、与用户主观满意度和可能的忧虑心情相关的问题</li>
+<li>访谈和问卷调查</li>
+</ul>
+</li>
+<li>请专家帮忙
+<ul>
+<li>不能帮助大家成为可用性专家</li>
+<li>但有助于更好地去评估自己和他人的工作</li>
+</ul>
+</li>
+</ul>
+</div><h3 id="访谈">访谈</h3>
+<h4 id="分类和技巧">分类和技巧</h4>
+<ul>
+<li>
+<p><strong>非结构化访谈</strong></p>
+<ul>
+<li>问题是开放式的，不限定内容和格式</li>
+<li>受访人自行选择详细回答还是简要回答</li>
+<li>访问人应确保能够搜集到重要问题的回答</li>
+</ul>
+</li>
+<li>
+<p><strong>结构化访谈</strong></p>
+<ul>
+<li>根据预先确定的一组问题进行访谈</li>
+<li>问题通常是 “封闭式” 的，它要求准确的回答</li>
+</ul>
+</li>
+<li>
+<p><strong>半结构化访谈</strong></p>
+<ul>
+<li>开放式问题 + 封闭式问题</li>
+<li>注意不要暗示答案</li>
+</ul>
+</li>
+<li>
+<p><strong>集体访谈</strong></p>
+<ul>
+<li>基本思想：个别成员的看法是在应用的上下文中通过与其他用户的交流而形成的</li>
+<li>“焦点小组” 是集体访谈的一种形式</li>
+</ul>
+</li>
+</ul>
+<h4 id="焦点小组">焦点小组</h4>
+<ul>
+<li>非正式的评估方法
+<ul>
+<li>在界面设计之前和经过一段使用之后评估用户的需要和感受</li>
+<li>是市场、政治和社会科学研究经常使用的方法</li>
+<li>人数限制：由大约 6 到 9 个典型用户组成</li>
+<li>如在评估大学的网站时，可考虑由行政人员、教师和学生们组成 3 个分别的焦点小组</li>
+</ul>
+</li>
+<li>主持人工作
+<ul>
+<li>事先列出一张讨论问题和数据收集目标的清单</li>
+<li>保持所谈论的内容不离题</li>
+<li>保证小组的每个成员都积极参与谈论</li>
+<li>讨论结果的分析报告</li>
+</ul>
+</li>
+<li>焦点小组存在风险</li>
+</ul>
+<h3 id="问卷调查">问卷调查</h3>
+<h4 id="问卷设计与组织">问卷设计与组织</h4>
+<p><strong>问卷设计原则</strong>：</p>
+<ol>
+<li>确保问题明确、具体</li>
+<li>尽可能采用封闭式问题，提供充分答案选项</li>
+<li>对于征求用户意见的问题，应提供&quot;无看法&quot;答案选项</li>
+<li>注意提问次序：先一般化→再具体</li>
+<li>避免复杂的多重问题</li>
+<li>等级标度应设定适当范围，确保不重叠</li>
+<li>避免使用术语</li>
+<li>明确说明如何完成问卷</li>
+<li>既要紧凑，也应适当留空</li>
+</ol>
+<p><strong>问卷组织（提供回复率）</strong></p>
+<ol>
+<li>精心设计问卷，避免厌烦</li>
+<li>提供简要描述和简短版本选项</li>
+<li>提供回邮信封（粘好邮票）</li>
+<li>解释调查目的并保密承诺</li>
+<li>后续邮件/电话跟进</li>
+<li>激励措施</li>
+<li>进行小规模测验</li>
+</ol>
+<h3 id="认知走查">认知走查</h3>
+<blockquote>
+<p>询问专家</p>
+</blockquote>
+<h5 id="基本特征">基本特征</h5>
+<ul>
+<li>逐步检查使用系统执行任务的过程，找出可用性问题</li>
+<li><strong>无需用户参与</strong></li>
+<li>主要目标：确定系统如何 <mark><strong>易于学习</strong></mark></li>
+<li>试图想象人们第一次使用产品时的想法和动作</li>
+</ul>
+<h5 id="走查步骤">走查步骤</h5>
+<ol>
+<li>标识并记录典型用户特性</li>
+<li>基于评估重点设计样本任务（大多数用户要做的典型任务）</li>
+<li>制作界面原型，明确用户执行任务的具体步骤</li>
+<li>由设计人员和专家级评估人员共同分析</li>
+<li>逐步检查每项任务的操作步骤</li>
+<li>汇总关键信息</li>
+<li>修改设计，更正问题</li>
+</ol>
+<h5 id="逐步检查的三个核心问题">逐步检查的三个核心问题</h5>
+<ol>
+<li><strong>可预见</strong>：正确的操作对于用户是否足够明显？（用户能否知道如何完成任务）</li>
+<li><strong>可理解</strong>：用户能否注意到正确的操作？（功能名称或图标是否容易理解）</li>
+<li><strong>可解释</strong>：能否正确解释操作的响应？（执行—评估交互周期的完成）</li>
+</ol>
+<h5 id="优缺点-2">优缺点</h5>
+<ul>
+<li>优点：不需要用户参与、不需要可运行原型、能找出非常具体的用户问题</li>
+<li>缺点：工作量大、非常费时、关注面有限、<mark>只适合评估<strong>易学性</strong></mark></li>
+</ul>
+<h3 id="启发式评估">启发式评估</h3>
+<blockquote>
+<p>询问专家</p>
+</blockquote>
+<ul>
+<li>由<strong>可用性专家</strong>完成（非用户）</li>
+<li>灵活而又相当廉价的评估方式</li>
+<li>又称 “经济评估法”</li>
+</ul>
+<h4 id="评估原则">评估原则</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>规则</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>系统状态的可见度</strong></td>
+<td>长于3-5秒的操作需显式反馈（进度条等）</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>系统和现实世界的吻合</strong></td>
+<td>使用用户熟悉的词汇和概念</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>用户享有控制权和自主权</strong></td>
+<td>提供撤销/重做/返回方法</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>一致性和标准化</strong></td>
+<td>术语一致、无歧义图标、颜色/布局/字体一致</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>避免出错</strong></td>
+<td>从设计层面预防用户出错</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>依赖识别而非记忆</strong></td>
+<td>减少用户记忆负担</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>使用的灵活性和高效性</strong></td>
+<td>新手、专家、老年人</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>帮助用户识别、诊断和恢复错误</strong></td>
+<td>错误信息用通俗语言，精确指出问题并建议解决方案</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>帮助和文档</strong></td>
+<td>提供帮助/手册，使用简单标准化术语</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>审美感和最小化设计</strong></td>
+<td>不过多不相关信息；标准控件；适合屏幕显示的字体</td>
+</tr>
+</tbody>
+</table>
+<h4 id="评估步骤">评估步骤</h4>
+<blockquote>
+<p>由可用性专家完成</p>
+</blockquote>
+<ol>
+<li>彻底检查界面</li>
+<li>将界面与启发式规则进行对比</li>
+<li>列举可用性问题</li>
+<li>应用启发式规则对每一个问题进行解释与确认</li>
+</ol>
+<h2 id="11-用户测试">11 用户测试</h2>
+<blockquote>
+<ul>
+<li>在受控环境中（类似于实验室环境）测量典型用户执行典型任务的情况</li>
+<li>以 DECIDE 框架为基础</li>
+</ul>
+</blockquote>
+<h4 id="decide-评估框架-2">DECIDE 评估框架</h4>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>名称</th>
+<th>要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>D</strong></td>
+<td>Determine 确定目标</td>
+<td>评估目标决定评估过程，影响范型选择</td>
+</tr>
+<tr>
+<td><strong>E</strong></td>
+<td>Explore 发掘问题</td>
+<td>根据目标确定具体问题，可逐层分解</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>Choose 选择范型和技术</td>
+<td>范型决定技术类型；需权衡实际和道德问题；可结合多种技术</td>
+</tr>
+<tr>
+<td><strong>I</strong></td>
+<td>Identify 明确实际问题</td>
+<td>用户、设施设备、期限预算、专门技能</td>
+</tr>
+<tr>
+<td><strong>D</strong></td>
+<td>Decide 处理道德问题</td>
+<td>保护隐私；签署协议书(IRB)；测试对象是软件而非个人</td>
+</tr>
+<tr>
+<td><strong>E</strong></td>
+<td>Evaluate 评估解释并表示数据</td>
+<td>可靠性、有效性、偏见、范围、环境影响（霍桑效应）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="1-定义目标和问题">1. 定义目标和问题</h4>
+<ul>
+<li>目标描述测试原因，定义测试在整个项目中的价值</li>
+<li>举例：用户第一次尝试使用时能选择正确的菜单；用户在少于 5 秒内导航到正确 3 级菜单</li>
+</ul>
+<h4 id="2-选择参与者">2. 选择参与者</h4>
+<ul>
+<li>至关重要！要尽可能<mark>接近实际用户</mark></li>
+<li>通常需要<mark>平衡性别比例</mark></li>
+<li><strong>至少 4-5 位，5-12 位用户足够</strong>（视情况）</li>
+<li>三种参与者安排方式：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>安排方式</th>
+<th>做法</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>参与者不同</strong></td>
+<td>随机指派不同组执行不同实验情形</td>
+<td>不存在顺序效应</td>
+<td>要求足够多参与者，受个别差异影响</td>
+</tr>
+<tr>
+<td><strong>参与者相同</strong></td>
+<td>相同参与者执行所有情形</td>
+<td>消除各种实验情形下的个体差异</td>
+<td>需要均衡处理以避免顺序效应</td>
+</tr>
+<tr>
+<td><strong>参与者配对</strong></td>
+<td>根据用户特性配对后随机安排</td>
+<td>无顺序效应；能消除个别差异的影响</td>
+<td>可能忽略一些重要变量，造成配对不当</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>顺序效应的解决：均衡处理
+<ul>
+<li>若有任务 A 和 B，一半参与者先 A 后 B，另一半先 B 后 A</li>
+</ul>
+</li>
+</ul>
+<h4 id="3-设计测试任务">3. 设计测试任务</h4>
+<ul>
+<li>任务应与定义的目标相关</li>
+<li>通常是简单任务（如查找信息），有时采用复杂</li>
+<li>任务不能仅限于测试功能，应全面使用设计各区域</li>
+<li>每项任务时间：<strong>5-20分钟</strong></li>
+<li>开始时先提出简单问题增强自信心</li>
+</ul>
+<h4 id="4-明确测试步骤">4. 明确测试步骤</h4>
+<ul>
+<li>测试前准备好进度表和说明，设置好设备</li>
+<li><strong>正式测试前应进行小规模测试</strong></li>
+<li>必要时询问参与者遇到什么问题</li>
+<li>若用户确实无法完成，让他们继续下一项</li>
+<li>测试过程应控制在 <strong>1 小时之内</strong></li>
+</ul>
+<h4 id="5-数据搜集与分析">5. 数据搜集与分析</h4>
+<p>常用的定量度量指标：</p>
+<ul>
+<li>完成任务的时间</li>
+<li>停止使用一段时间后完成任务的时间</li>
+<li>执行每项任务时的出错次数和错误类型</li>
+<li>单位时间内的出错次数</li>
+<li>求助在线帮助或手册的次数</li>
+<li>用户犯某个特定错误的次数</li>
+<li>成功完成任务的用户数</li>
+</ul>
+<p>数据分析方法：</p>
+<ul>
+<li>定量数据
+<ul>
+<li>最常用的描述性统计方法是次数统计</li>
+<li>定量数据的次数统计、平均数统计</li>
+</ul>
+</li>
+<li>定性数据
+<ul>
+<li>通常按主题分类</li>
+<li>eg. 找出获得某信息的最快途径</li>
+</ul>
+</li>
+</ul>
+<h2 id="12-以用户为中心-ucd">12 以用户为中心（UCD）</h2>
+<h3 id="用户参与设计">用户参与设计</h3>
+<h4 id="重要性">重要性</h4>
+<ul>
+<li><strong>期望管理</strong>
+<ul>
+<li>保证产品不会出乎用户的意料，避免失望</li>
+<li>对用户进行培训也有助于改进期望管理</li>
+</ul>
+</li>
+<li><strong>拥有权</strong>
+<ul>
+<li>人们总渴望自己的意见得到重视</li>
+<li>更容易接受有 “拥有权” 的最终产品</li>
+</ul>
+</li>
+</ul>
+<h4 id="形式">形式</h4>
+<table>
+<thead>
+<tr>
+<th>形式</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>作为设计组成员</strong>（全职/兼职）</td>
+<td>用户能透彻理解系统及其原理</td>
+<td>用户逐渐变得不具有代表性；大型项目应注意用户更新</td>
+</tr>
+<tr>
+<td><strong>邮件/专题讨论/类似会议</strong></td>
+<td>定期接收项目进展信息</td>
+<td>参与深度不够</td>
+</tr>
+<tr>
+<td><strong>折衷方案</strong></td>
+<td>各组派代表全职加入 + 其他人员通过专题讨论参与</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h4 id="上下文询问法-情景调查">上下文询问法（情景调查）</h4>
+<h5 id="定义-4">定义</h5>
+<ul>
+<li>观察并与用户交流会比仅仅观察的效果要好</li>
+<li>强调到用户工作的地方，在用户工作时观察，并和用户讨论他的工作</li>
+<li>基于 <strong>“学徒模型”</strong>：<mark>用户是师傅，研究人员是学徒</mark></li>
+</ul>
+<blockquote>
+<p>与观察法的区别</p>
+<ul>
+<li>用户知道研究人员的存在</li>
+<li>也知道他们是研究的一部分</li>
+</ul>
+</blockquote>
+<h5 id="4-个原则">4 个原则</h5>
+<table>
+<thead>
+<tr>
+<th>原则</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>上下文环境</strong></td>
+<td>深入工作空间了解其中发生的事情；可要求用户边做边说</td>
+</tr>
+<tr>
+<td><strong>伙伴关系</strong></td>
+<td>开发人员和用户应相互合作；提醒用户是专家，将研究人员作为新手</td>
+</tr>
+<tr>
+<td><strong>解释</strong></td>
+<td>解释过程必须由用户和开发人员合作完成；杜绝设计人员片面解释或假设</td>
+</tr>
+<tr>
+<td><strong>焦点</strong></td>
+<td>把问题集中在所定的研究题目上；准备观察方向的列表</td>
+</tr>
+</tbody>
+</table>
+<h3 id="正确看待-以用户为中心">正确看待 “以用户为中心”</h3>
+<h5 id="以用户为中心方法的缺陷">以用户为中心方法的缺陷</h5>
+<ul>
+<li>影响产品的<strong>创新性</strong>（<em>更快的马</em>）</li>
+<li>可操作性<strong>受到时间、预算和任务规模的限制</strong></li>
+<li>忽视了人的<strong>主观能动性和对技术的适应能力</strong></li>
+</ul>
+<h5 id="以活动为中心-acd">以活动为中心（ACD）</h5>
+<ul>
+<li>ACD 思想是对 UCD 思想的一种反思</li>
+<li>ACD 把人与技术综合起来进行考虑，<mark>不单纯考虑人或者技术，而是关注事情本身的活动目标</mark></li>
+<li><mark>倾听用户永远是明智的，但屈从于用户的要求是不明智的</mark></li>
+</ul>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：人机交互</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-06 00:00:00</p>
+      <p><strong>更新于</strong>：2026-08-06 17:15:38</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/人机交互.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">人机交互</div>
+      <ul><li class="toc-l2"><a href="#1-人机交互概述">1 人机交互概述</a></li><li class="toc-l3"><a href="#什么是人机交互">什么是人机交互</a></li><li class="toc-l3"><a href="#人机交互的发展历史">人机交互的发展历史</a></li><li class="toc-l3"><a href="#人机交互与软件工程">人机交互与软件工程</a></li><li class="toc-l2"><a href="#2-人机交互的基础知识">2 人机交互的基础知识</a></li><li class="toc-l3"><a href="#交互框架">交互框架</a></li><li class="toc-l3"><a href="#交互形式">交互形式*</a></li><li class="toc-l3"><a href="#信息处理模型">信息处理模型</a></li><li class="toc-l2"><a href="#3-交互设计目标与原则">3 交互设计目标与原则</a></li><li class="toc-l3"><a href="#可用性目标">可用性目标</a></li><li class="toc-l3"><a href="#用户体验目标">用户体验目标</a></li><li class="toc-l3"><a href="#简易可用性工程">简易可用性工程</a></li><li class="toc-l3"><a href="#交互设计原则">交互设计原则</a></li><li class="toc-l2"><a href="#4-交互设计过程">4 交互设计过程</a></li><li class="toc-l2"><a href="#5-交互式系统的需求">5 交互式系统的需求</a></li><li class="toc-l3"><a href="#产品特性">产品特性</a></li><li class="toc-l3"><a href="#用户特性">用户特性</a></li><li class="toc-l3"><a href="#用户建模">用户建模 ⚠️</a></li><li class="toc-l3"><a href="#需求获取-分析和验证">需求获取、分析和验证</a></li><li class="toc-l2"><a href="#6-交互式系统的设计">6 交互式系统的设计</a></li><li class="toc-l3"><a href="#设计框架">设计框架</a></li><li class="toc-l3"><a href="#简化交互设计策略">简化交互设计策略</a></li><li class="toc-l3"><a href="#设计中的折中">设计中的折中</a></li><li class="toc-l3"><a href="#细节">细节</a></li><li class="toc-l2"><a href="#7-交互设计模型与理论">7 交互设计模型与理论</a></li><li class="toc-l3"><a href="#预测模型">预测模型</a></li><li class="toc-l2"><a href="#8-评估的基础知识">8 评估的基础知识</a></li><li class="toc-l3"><a href="#评估范型和方法">评估范型和方法</a></li><li class="toc-l3"><a href="#实证研究方法">🔬 实证研究方法</a></li><li class="toc-l3"><a href="#实验设计">📐 实验设计</a></li><li class="toc-l3"><a href="#评估方法的选择">评估方法的选择</a></li><li class="toc-l3"><a href="#decide-评估框架">DECIDE 评估框架</a></li><li class="toc-l3"><a href="#小规模试验的重要性">小规模试验的重要性</a></li><li class="toc-l2"><a href="#9-观察用户">9 观察用户</a></li><li class="toc-l3"><a href="#观察方式">观察方式</a></li><li class="toc-l3"><a href="#观察框架">观察框架</a></li><li class="toc-l3"><a href="#核心方法">💡 核心方法</a></li><li class="toc-l3"><a href="#数据记录方式">数据记录方式</a></li><li class="toc-l2"><a href="#10-询问用户和专家">10 询问用户和专家</a></li><li class="toc-l3"><a href="#访谈">访谈</a></li><li class="toc-l3"><a href="#问卷调查">问卷调查</a></li><li class="toc-l3"><a href="#认知走查">认知走查</a></li><li class="toc-l3"><a href="#启发式评估">启发式评估</a></li><li class="toc-l2"><a href="#11-用户测试">11 用户测试</a></li><li class="toc-l2"><a href="#12-以用户为中心-ucd">12 以用户为中心（UCD）</a></li><li class="toc-l3"><a href="#用户参与设计">用户参与设计</a></li><li class="toc-l3"><a href="#正确看待-以用户为中心">正确看待 “以用户为中心”</a></li></ul>
+    </nav>
+    </div>
+    
+    <nav class="post-pager">
+      <span></span>
+      <a class="pager-next" href="/posts/hello-world.html">欢迎来到我的博客 →</a>
+    </nav>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js"></script>
+<script src="/assets/js/main.js" defer></script>
+<script src="/assets/js/search.js" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js"></script>
+</body>
+</html>
