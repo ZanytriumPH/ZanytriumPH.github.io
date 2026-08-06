@@ -20,7 +20,21 @@ function esc(s) {
 
 /** 布局骨架：导航 + 内容 + 页脚 + 暗色模式初始化（防闪烁） */
 function layout({ config, url, title, description, body, isPost = false, isHome = false }) {
-  const themeInit = `<script>(function(){var t=localStorage.getItem('theme');if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);})();</script>`;
+  // 主题初始化必须放在 <link rel="stylesheet"> 之前：CSS 应用时就已是正确主题，
+  // 避免"先按白天渲染、脚本执行后再切换"的闪烁（含 hero 背景图，见 hero 模板）
+  const themeInit = `<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>`;
   const nav = `
     <nav class="navbar">
       <div class="nav-inner">
@@ -79,10 +93,10 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${esc(title)}${title === config.siteName ? '' : ' · ' + esc(config.siteName)}</title>
 <meta name="description" content="${esc(description || config.description)}">
+${themeInit}
 <link rel="stylesheet" href="${url('assets/css/style.css')}">
 <link rel="stylesheet" href="${url('assets/css/hljs.css')}" id="hljs-style">
 <link rel="icon" type="image/png" href="${url('assets/img/logo.png')}">
-${themeInit}
 </head>
 <body>
 ${nav}
@@ -172,7 +186,7 @@ function indexPage({ config, url, posts }) {
 
   const body = `
     <section class="hero">
-      ${bgLight ? `<img class="hero-bg" src="${bgLight}" data-bg-light="${bgLight}" data-bg-dark="${bgDark || bgLight}" alt="" fetchpriority="high">` : ''}
+      ${bgLight ? `<img class="hero-bg" data-bg-light="${bgLight}" data-bg-dark="${bgDark || bgLight}" alt="" fetchpriority="high">` : ''}
       <div class="hero-content">
         <p class="hero-typewriter" id="typewriter" data-phrases='${phrases}'></p>
       </div>
