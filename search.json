@@ -12,32 +12,6 @@
     "date": "2026-08-06"
   },
   {
-    "title": "在博客里优雅地展示代码与图表",
-    "url": "/posts/test.html",
-    "tags": [
-      "博客",
-      "教程"
-    ],
-    "categories": [
-      "随记"
-    ],
-    "description": "一篇同时承载语法高亮、Mermaid 图表与 Markdown 提示块的示例文章 —— 用于对比 20 套博客风格。",
-    "date": "2026-08-05"
-  },
-  {
-    "title": "欢迎来到我的博客",
-    "url": "/posts/hello-world.html",
-    "tags": [
-      "博客",
-      "教程"
-    ],
-    "categories": [
-      "随记"
-    ],
-    "description": "第一篇博客，顺便演示这个博客支持的三种 Markdown 扩展语法。",
-    "date": "2026-08-05"
-  },
-  {
     "title": "为了偷懒，我给自己开发了一款 VS Code 插件并上线了？",
     "url": "/posts/为了偷懒，我给自己开发了一款-VS-Code-插件并上线了.html",
     "tags": [
