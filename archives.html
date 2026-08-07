@@ -11,6 +11,8 @@
   document.documentElement.setAttribute('data-theme',t);
   // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
   document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
   // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
   // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
   if(sessionStorage.getItem('hero-anim-shown')){
@@ -27,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786075670891">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786075670891" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786075670891">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786077524663">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786077524663" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786077524663">
 </head>
 <body>
 <img class="hero-bg" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -87,8 +89,8 @@
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
 
-<script src="/assets/js/main.js?v=1786075670891" defer></script>
-<script src="/assets/js/search.js?v=1786075670891" defer></script>
+<script src="/assets/js/main.js?v=1786077524663" defer></script>
+<script src="/assets/js/search.js?v=1786077524663" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 </body>
