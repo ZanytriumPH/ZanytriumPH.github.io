@@ -83,12 +83,13 @@
         document.body.classList.add('page-loaded');
       });
     });
-    // 主页卡片列表也参与离场淡出（分页器换页时卡片先淡出再跳转）
-    const panels = document.querySelectorAll('.glass-panel, .home-layout .post-list');
+    // 仅毛玻璃容器（标签 / 分类 / 归档页）参与离场淡出；主页卡片不参与——
+    // 换页 / 离开首页时直接跳转，只保留入场淡入
+    const panels = document.querySelectorAll('.glass-panel');
     if (panels.length) {
       let leaving = false;
       // bfcache 恢复：浏览器「后退」从往返缓存恢复时，JS 堆与 DOM 保持离开时状态——
-      // 离场淡出留下的 .leaving 会让卡片保持透明，且 leaving=true 会拦截所有点击。
+      // 离场淡出留下的 .leaving 会让容器保持透明，且 leaving=true 会拦截所有点击。
       // 恢复时清除 leaving 类、复位标志，并重新触发入场淡入。
       window.addEventListener('pageshow', (e) => {
         if (!e.persisted) return;
