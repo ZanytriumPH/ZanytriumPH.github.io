@@ -42,6 +42,23 @@
     });
   }
 
+  // ---- 文章页背景图模式切换（目录按钮正下方的圆形开关）----
+  // 状态记忆在 localStorage 'post-glass'，首帧恢复由模板内联脚本完成
+  //（CSS 应用前设 html.post-glass，无闪烁），这里同步 aria-pressed 并处理点击。
+  // 开 = 复用关于页毛玻璃容器 + hero 背景图样式（CSS 规则见 style.css）
+  const bgToggle = document.getElementById('bg-toggle');
+  if (bgToggle) {
+    const setPostGlass = (on) => {
+      document.documentElement.classList.toggle('post-glass', on);
+      localStorage.setItem('post-glass', on ? '1' : '');
+      bgToggle.setAttribute('aria-pressed', String(on));
+    };
+    bgToggle.addEventListener('click', () => {
+      setPostGlass(!document.documentElement.classList.contains('post-glass'));
+    });
+    setPostGlass(document.documentElement.classList.contains('post-glass'));
+  }
+
   // ---- 点击当前页同名导航链接时不触发整页重载 ----
   // 归一化：忽略尾部 `/`，`/index.html` 等价于目录本身
   const normPath = (p) => p.replace(/\/+$/, '').replace(/\/index\.html$/, '');

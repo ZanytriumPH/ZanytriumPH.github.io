@@ -344,6 +344,17 @@ html[data-theme="dark"] .icon-moon { display: none; }
 /* 非首次进入会话：禁用 hero 入场动画（导航/刷新整页重载不再重播） */
 .no-hero-anim .hero-bg { animation: none; }
 
+/* 文章页背景图模式（html.post-glass，模板内联脚本首帧恢复）：
+   默认隐藏背景图（无背景模式 = 当前文章页样式），切换后显示；
+   opacity 过渡让切换平滑淡入淡出 */
+.hero-bg-hidden { opacity: 0; }
+html.post-glass .hero-bg-hidden { opacity: 1; }
+/* 背景图模式下正文整体（含 pager/评论）绘制在 fixed 背景图（z-index:0）之上 */
+html.post-glass .container { position: relative; z-index: 1; }
+/* 背景图模式：文章容器与关于页同宽（924px，container-wide 同款）；
+   仅限文章页（.container-post），标签/分类等页面不受影响 */
+html.post-glass .container-post { max-width: 924px; }
+
 .hero-content {
   position: relative;
   z-index: 2;
@@ -965,7 +976,8 @@ pre.mermaid svg { display: block; margin: 0 auto; max-width: 100%; height: auto;
 }
 
 /* ---------- 目录 TOC：右侧浮动按钮 + 贴文章右侧的折叠抽屉 ---------- */
-.toc-toggle {
+/* 背景图开关按钮与目录按钮同款圆钮，固定在其正下方 */
+.toc-toggle, .toc-bg-toggle {
   position: fixed;
   top: 180px;
   right: 40px;
@@ -980,10 +992,11 @@ pre.mermaid svg { display: block; margin: 0 auto; max-width: 100%; height: auto;
   color: var(--text-secondary);
   cursor: pointer;
   box-shadow: var(--shadow);
-  transition: color 0.15s;
+  transition: color 0.15s, border-color 0.15s;
 }
-.toc-toggle:hover { color: var(--accent); }
-.toc-toggle svg { width: 20px; height: 20px; }
+.toc-bg-toggle { top: 234px; } /* 180 + 44 高度 + 10 间距 */
+.toc-toggle:hover, .toc-bg-toggle:hover { color: var(--accent); }
+.toc-toggle svg, .toc-bg-toggle svg { width: 20px; height: 20px; }
 
 /* 抽屉贴在文章右侧、靠上（sticky 随滚动保持在视口内）；无边框无背景的纯文本目录 */
 .toc {
@@ -1006,9 +1019,15 @@ body.toc-open .toc { display: block; }
 .toc::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 .toc::-webkit-scrollbar-track { background: transparent; }
 
-/* 文章 + 目录整体：flex 让两者贴在一起，作为整体居中 */
+/* 文章 + 目录整体：flex 让两者贴在一起，作为整体居中；
+   wrap 使内部的上下篇 pager（flex-basis:100%）换行占满整行。
+   relative + z-index:1：文章页恒有全屏 hero 背景图（fixed z-index:0），
+   static 内容会被它盖住拦截点击（翻页按钮点不动）——始终抬升到背景图之上 */
 .post-wrap {
+  position: relative;
+  z-index: 1;
   display: flex;
+  flex-wrap: wrap;
   gap: 24px;
   align-items: flex-start;
 }
@@ -1052,22 +1071,25 @@ body.toc-open .toc { display: block; }
 
 /* 目录展开时：容器加宽以容纳「文章 + 目录」整体居中（244 = 24 间距 + 220 目录宽） */
 body.toc-open main.container { max-width: calc(var(--content-width) + 244px); }
-/* 目录展开时：上下篇 pager 是容器的直接子元素，会被一起加宽而伸到目录栏下方，
-   限制其宽度与文章列（post-wrap 的 article 列）对齐 */
-body.toc-open .post-pager { max-width: calc(100% - 244px); }
+/* 目录展开时：上下篇胶囊（post-wrap 内第二行）限制为文章列宽
+   （容器宽 - 244 目录列 + 间距），不延伸到目录下方 */
+body.toc-open .post-pager { flex-basis: calc(100% - 244px); }
 
 /* 窄屏隐藏目录抽屉（避免挤压文章） */
 @media (max-width: 900px) {
-  .toc-toggle { display: none; }
+  .toc-toggle, .toc-bg-toggle { display: none; }
   body.toc-open .toc { display: none; }
-  /* 窄屏目录已隐藏，pager 恢复全宽，避免缩进失效 */
-  body.toc-open .post-pager { max-width: none; }
+  /* 窄屏目录已隐藏且无法展开，pager 恢复整行宽 */
+  body.toc-open .post-pager { flex-basis: 100%; }
 }
 
 /* ---------- 上下篇 ---------- */
+/* 位于 post-wrap 内（背景图模式下随毛玻璃容器一起）：flex 换行占满整行，
+   与文章正文的间距由 post-wrap 的 row-gap 提供 */
 .post-pager {
   display: flex; justify-content: space-between; gap: 16px;
-  padding: 20px 0 40px;
+  flex-basis: 100%;
+  padding: 0 0 40px;
 }
 .post-pager a {
   color: var(--text-secondary);
@@ -1089,7 +1111,8 @@ body.toc-open .post-pager { max-width: calc(100% - 244px); }
 /* 毛玻璃面板（归档 / 标签 / 标签详情共用容器）：
    与主页卡片同款，透过固定的 hero 背景图；
    z-index:1 使其绘制在 fixed 背景图（z-index:0）之上 */
-.glass-panel {
+.glass-panel,
+html.post-glass .post-wrap {
   position: relative;
   z-index: 1;
   margin: 28px 0 40px;
@@ -1349,12 +1372,21 @@ html[data-theme="dark"] .friend-avatar-empty { background: #4d5763; }
 .about-panel .post-header { padding: 8px 0 20px; }
 /* 关于页加宽：924 - 40(container) - 64(panel 内边距) = 820，文字区与文章页一致 */
 .container-wide { max-width: 924px; }
-/* 关于页玻璃不透明度稍高（其余面板保持默认） */
+/* 关于页玻璃不透明度稍高（其余面板保持默认）。
+   背景图模式下的文章容器：容器高度数屏、透出面积远大于「我」页，同等透明度
+   下观感明显更透（headless 渲染实证 CSS 值相同）——不透明度提高至 0.94
+   做视觉补偿，保证任何滚动位置都不比「我」页透 */
 .about-panel {
   background: rgba(255, 255, 255, 0.88);
 }
+html.post-glass .post-wrap {
+  background: rgba(255, 255, 255, 0.94);
+}
 html[data-theme="dark"] .about-panel {
   background: rgba(13, 17, 23, 0.88);
+}
+html[data-theme="dark"].post-glass .post-wrap {
+  background: rgba(13, 17, 23, 0.94);
 }
 /* 窄屏：友链胶囊单列 */
 @media (max-width: 768px) {

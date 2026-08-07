@@ -12,6 +12,15 @@ function makeUrl(base) {
   };
 }
 
+// 静态资源版本号：构建时注入（build.js 传构建时间戳）。
+// GitHub Pages 对同名文件默认 Cache-Control: max-age=600，HTML 更新后浏览器
+// 仍可能命中旧 CSS/JS（曾致「导航下拉菜单样式缺失、条目不隐藏」的线上 bug）——
+// 每次构建 URL 都带新 ?v=，强制缓存失效。
+let assetVer = '';
+function setAssetVer(v) { assetVer = v; }
+/** 给静态资源 URL 追加版本号：有版本号时 → path?v=<ver> */
+const versioned = (u) => (assetVer ? `${u}?v=${assetVer}` : u);
+
 function esc(s) {
   return String(s ?? '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -19,7 +28,7 @@ function esc(s) {
 }
 
 /** 布局骨架：导航 + 内容 + 页脚 + 暗色模式初始化（防闪烁） */
-function layout({ config, url, title, description, body, isPost = false, isHome = false, current = '', heroBg = false, wide = false }) {
+function layout({ config, url, title, description, body, isPost = false, isHome = false, current = '', heroBg = false, wide = false, heroBgHidden = false }) {
   // 导航项：current 命中时加 active 类，样式为标签下方横线；
   // 带 dropdown 的项点击展开子菜单（关于 → 我 / GitHub / 友链）
   const navItems = [
@@ -44,7 +53,7 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
   const bgLight = hero.bgLight ? url(hero.bgLight) : '';
   const bgDark = hero.bgDark ? url(hero.bgDark) : '';
   const heroImg = heroBg && bgLight
-    ? `<img class="hero-bg" data-bg-light="${bgLight}" data-bg-dark="${bgDark || bgLight}" alt="" fetchpriority="high">
+    ? `<img class="hero-bg${heroBgHidden ? ' hero-bg-hidden' : ''}" data-bg-light="${bgLight}" data-bg-dark="${bgDark || bgLight}" alt="" fetchpriority="high">
 <script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();<\/script>`
     : '';
   // 主题初始化必须放在 <link rel="stylesheet"> 之前：CSS 应用时就已是正确主题，
@@ -55,6 +64,8 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
   document.documentElement.setAttribute('data-theme',t);
   // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
   document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
   // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
   // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
   if(sessionStorage.getItem('hero-anim-shown')){
@@ -135,26 +146,26 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
 <title>${esc(title)}${title === config.siteName ? '' : ' · ' + esc(config.siteName)}</title>
 <meta name="description" content="${esc(description || config.description)}">
 ${themeInit}
-<link rel="stylesheet" href="${url('assets/css/style.css')}">
-<link rel="stylesheet" href="${url('assets/css/hljs.css')}" id="hljs-style">
-<link rel="icon" type="image/png" href="${url('assets/img/logo.png')}">
+<link rel="stylesheet" href="${versioned(url('assets/css/style.css'))}">
+<link rel="stylesheet" href="${versioned(url('assets/css/hljs.css'))}" id="hljs-style">
+<link rel="icon" type="image/png" href="${versioned(url('assets/img/logo.png'))}">
 </head>
 <body>
 ${heroImg}
 ${nav}
-<main class="${isHome ? 'main-home' : wide ? 'container container-wide' : 'container'}">
+<main class="${isHome ? 'main-home' : (wide ? 'container container-wide' : 'container') + (isPost ? ' container-post' : '')}">
 ${body}
 </main>
 <footer class="site-footer">
   <div class="footer-inner">${esc(config.footer)}</div>
 </footer>
-${isPost ? `<script defer src="${url('assets/vendor/mermaid/mermaid.min.js')}"></script>` : ''}
-<script src="${url('assets/js/main.js')}" defer></script>
-<script src="${url('assets/js/search.js')}" defer></script>
+${isPost ? `<script defer src="${versioned(url('assets/vendor/mermaid/mermaid.min.js'))}"></script>` : ''}
+<script src="${versioned(url('assets/js/main.js'))}" defer></script>
+<script src="${versioned(url('assets/js/search.js'))}" defer></script>
 ${config.busuanzi && config.busuanzi.enabled ? `<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>` : ''}
 ${isPost ? `
 <script>window.MathJax = { tex: { inlineMath: [['\\\\(', '\\\\)']], displayMath: [['\\\\[', '\\\\]']] } };</script>
-<script defer src="${url('assets/vendor/mathjax/tex-svg.js')}"></script>` : ''}
+<script defer src="${versioned(url('assets/vendor/mathjax/tex-svg.js'))}"></script>` : ''}
 </body>
 </html>`;
 }
@@ -251,10 +262,18 @@ function indexPage({ config, url, posts }) {
 
 /** 文章页：标题、元信息、TOC、正文、上下篇、评论 */
 function postPage({ config, url, post, prev, next }) {
-  const toc = post.toc ? `
+  // 两个右侧浮动按钮必须放在 .post-wrap 之外：背景图模式下 post-wrap 带
+  // backdrop-filter（毛玻璃），会使内部 fixed 元素的包含块从视口变成该容器，
+  // 按钮会「掉进」容器内并随滚动移动——放到 main 层则始终相对视口 fixed
+  const tocButtons = post.toc ? `
     <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
     </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>` : '';
+
+  const toc = post.toc ? `
     <nav class="toc">
       <div class="toc-title">目录</div>
       <div class="page-title">${esc(post.title)}</div>
@@ -263,8 +282,8 @@ function postPage({ config, url, post, prev, next }) {
 
   const pager = (prev || next) ? `
     <nav class="post-pager">
-      ${prev ? `<a class="pager-prev" href="${url(prev.path)}">← ${esc(prev.title)}</a>` : '<span></span>'}
-      ${next ? `<a class="pager-next" href="${url(next.path)}">${esc(next.title)} →</a>` : ''}
+      ${prev ? `<a class="pager-prev" href="${url(prev.path)}">&lt; ${esc(prev.title)}</a>` : '<span></span>'}
+      ${next ? `<a class="pager-next" href="${url(next.path)}">${esc(next.title)} &gt;</a>` : ''}
     </nav>` : '';
 
   // 文章末尾版权声明（blockquote 格式，更新于缺失时回退为创建日期）
@@ -282,6 +301,7 @@ function postPage({ config, url, post, prev, next }) {
     </blockquote>`;
 
   const body = `
+    ${tocButtons}
     <div class="post-wrap">
       <article class="post">
         <header class="post-header">
@@ -303,10 +323,12 @@ function postPage({ config, url, post, prev, next }) {
         ${copyright}
       </article>
       ${toc}
+      ${pager}
     </div>
-    ${pager}
     ${config.giscus && config.giscus.enabled ? `<section class="post-comments" id="comments"><div id="giscus"></div></section>` : ''}`;
-  return layout({ config, url, title: post.title, description: post.description, body, isPost: true });
+  // heroBgHidden: 注入 hero 背景图但默认隐藏（CSS .hero-bg-hidden），
+  // 用户经 TOC 底部按钮切换（html.post-glass）后显示，样式复用关于页毛玻璃
+  return layout({ config, url, title: post.title, description: post.description, body, isPost: true, heroBg: true, heroBgHidden: true });
 }
 
 /**
@@ -490,4 +512,4 @@ function notFoundPage({ config, url }) {
   return layout({ config, url, title: '404', body });
 }
 
-module.exports = { layout, indexPage, postPage, archivesPage, tagsPage, tagPage, categoriesPage, categoryPage, friendsPage, pagePage, notFoundPage, makeUrl, esc, tagSlug };
+module.exports = { layout, indexPage, postPage, archivesPage, tagsPage, tagPage, categoriesPage, categoryPage, friendsPage, pagePage, notFoundPage, makeUrl, setAssetVer, esc, tagSlug };

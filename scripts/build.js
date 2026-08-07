@@ -98,6 +98,8 @@ function buildToc(html) {
 async function main() {
   const config = JSON.parse(await fsp.readFile(path.join(ROOT, 'config.json'), 'utf8'));
   const url = T.makeUrl(config.base);
+  // 静态资源版本号：每次构建换新时间戳 → 部署后浏览器必取新 CSS/JS，不再命中旧缓存
+  T.setAssetVer(Date.now());
 
   console.log('🗑  清理 dist/…');
   await fsp.rm(DIST, { recursive: true, force: true });
