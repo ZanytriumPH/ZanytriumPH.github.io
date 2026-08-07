@@ -219,8 +219,13 @@ async function main() {
     await write(`posts/${post.slug}.html`, page);
   }
 
-  // 首页 / 归档 / 标签 / 分类
-  await write('index.html', T.indexPage({ config, url, posts }));
+  // 首页分页：每页 PAGE_SIZE 篇，第 1 页 index.html，其余 page/2.html、page/3.html…
+  const PAGE_SIZE = 10;
+  const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+  for (let p = 1; p <= totalPages; p++) {
+    const file = p === 1 ? 'index.html' : `page/${p}.html`;
+    await write(file, T.indexPage({ config, url, posts, page: p, pageSize: PAGE_SIZE, totalPages }));
+  }
   await write('archives.html', T.archivesPage({ config, url, posts }));
 
   // 标签独立页：tags/<slug>.html，slug 冲突时加 -2/-3 去重

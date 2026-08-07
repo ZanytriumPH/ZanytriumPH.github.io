@@ -20,12 +20,30 @@ npm run build      # 构建 dist/ 静态站点
 ```yaml
 ---
 title: 文章标题
-date: 2026-08-05
 tags: [标签1, 标签2]
 categories: [分类]
 description: 文章摘要（显示在首页卡片和搜索索引）
+priority: 1                       # 可选，置顶权重（int，默认 0，越大越靠前）
+cover: /assets/img/posts/<slug>/cover.webp   # 可选，文章封面（根路径图片）
 ---
 ```
+
+### 时间字段自动判定
+
+`date` / `updated` 都可以不写，自动从 git 历史取：
+
+- `date`（创建时间）→ git **首次**提交该文件的提交时间；
+- `updated`（修改时间）→ git **最后**提交该文件的提交时间；
+- 两者均含时分秒；显式写了则以 front matter 为准（如 `date: 2026-08-05 10:30:00`）；
+- 只写日期不带时分秒 → 时分秒补 `00:00:00`；
+- 文件尚未提交过（新建未 commit）时，创建时间回落当天。
+
+### 置顶与封面
+
+- `priority`：可选，int 型，默认 0。主页文章按 priority 降序排列，相同则按创建时间；
+  priority > 0 时卡片右上角显示「置顶」标识（带 pin 图标）；
+- `cover`：可选，根路径图片。显示在首页卡片顶部（150px）与文章页标题上方，
+  文章页的图片引用规则（根路径 + `.webp`）同样适用于 cover。
 
 ### 支持的 Markdown 扩展
 
@@ -39,6 +57,13 @@ description: 文章摘要（显示在首页卡片和搜索索引）
 
 > [!note] 提示
 > 数学公式与 Mermaid 脚本仅加载在文章页，体积较大（约 5MB），不影响首页速度。
+
+## 文章阅读页
+
+- **目录抽屉**：正文右上角圆形按钮展开 / 收起，滚动时高亮当前章节并自动跟随；
+- **背景图切换**：目录按钮正下方的圆形按钮，切换「无背景 / 毛玻璃容器 + hero 背景图」两种样式
+  （后者复用关于页的样式），选择记忆在 `localStorage`，下次访问自动恢复；
+- **上下篇跳转**：正文底部「上一篇 / 下一篇」链接，箭头形如 `< 标题` / `标题 >`。
 
 ## 部署
 
@@ -63,7 +88,10 @@ npm run deploy:pages    # 一条命令：构建 dist/ → 同步到 gh-pages 分
 ### 注意事项
 
 - PlantUML 图由本地渲染：根目录需有 `plantuml.jar`（见「快速开始」），没有则图降级为源码块；
-- 部署不依赖任何 CI，GitHub 后端故障不影响发文章。
+- 部署不依赖任何 CI，GitHub 后端故障不影响发文章；
+- **资源版本号**：每次构建会给本地资源 URL 追加 `?v=<构建时间戳>`。GitHub Pages 返回
+  `Cache-Control: max-age=600`，浏览器会缓存旧 CSS/JS 最多 10 分钟；版本号保证每次部署后
+  立即取到新资源（同时避免部署后样式错乱的缓存问题）。
 
 ## 评论系统（Giscus）
 
@@ -116,7 +144,8 @@ node scripts/optimize-img.js <源图片目录> <文章slug>
 
 ### 搬运流程（AI 执行）
 
-1. 文章 `.md` → `source/_posts/`，front matter 补全 `title / date / tags / categories / description`；
+1. 文章 `.md` → `source/_posts/`，front matter 补全 `title / tags / categories / description`
+   （`date` / `updated` 可省略，自动从 git 历史取）；
 2. 运行压缩脚本：`node scripts/optimize-img.js <源图片目录> <文章slug>`；
 3. 按脚本输出的对照表，把文章内图片引用全部改写为 `/assets/img/posts/<slug>/<原名>.webp`；
 4. **不要**把原 PNG 复制进仓库（原图留在源目录备份）；
@@ -132,6 +161,7 @@ node scripts/optimize-img.js <源图片目录> <文章slug>
 source/_posts/  文章（.md）
 source/_pages/  独立页面（.md）
 assets/         静态资源（CSS/JS/图片）
-scripts/        构建脚本（build.js / md.js / plantuml.js / templates.js）
+scripts/        构建与工具脚本（build.js / md.js / plantuml.js / templates.js /
+                optimize-img.js / deploy-pages.js）
 config.json     站点配置
 ```

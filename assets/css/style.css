@@ -442,6 +442,66 @@ html.post-glass .container-post { max-width: 924px; }
 /* ---------- 文章卡片 ---------- */
 .post-list { display: flex; flex-direction: column; gap: 20px; padding-bottom: 60px; }
 
+/* 主页分页器：无整体方框，每个按钮独立小圆角毛玻璃；
+   上一页/下一页紧贴页码按钮两侧，整体居中 */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.page-prev,
+.page-next {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: 8px;
+  background: var(--card-glass);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--border-glass);
+  transition: color 0.2s, border-color 0.2s;
+}
+.page-prev:hover,
+.page-next:hover { color: var(--accent); border-color: var(--border); }
+.page-prev.disabled,
+.page-next.disabled { visibility: hidden; }
+.page-nums { display: flex; align-items: center; gap: 6px; }
+.page-num {
+  min-width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  background: var(--card-glass);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--border-glass);
+  transition: color 0.2s, border-color 0.2s;
+}
+.page-num:hover { color: var(--accent); border-color: var(--border); }
+/* 当前页：蓝色反向填充（accent 底 + 白字） */
+.page-num.active {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+.page-ellipsis { color: var(--text-muted); padding: 0 2px; }
+
 .post-card {
   position: relative; /* 置顶标识的定位基准 */
   padding: 24px 28px;
@@ -571,6 +631,10 @@ html.post-glass .container-post { max-width: 924px; }
   align-items: start;
   padding-bottom: 40px;
 }
+
+/* 翻页页（无 hero）：post-list 与 sticky 侧栏（top: 80px）上边缘齐平。
+   容器顶在导航栏下 61px（60px 高 + 1px 边框），差 19px 由 margin-top 补齐 */
+.home-layout.paged .post-list { margin-top: 19px; }
 
 .sidebar {
   position: sticky;
@@ -1166,6 +1230,27 @@ html.post-glass .post-wrap {
 }
 @media (prefers-reduced-motion: reduce) {
   .glass-anim .glass-panel { opacity: 1; transform: none; transition: none; }
+}
+/* 主页卡片（分页换页）淡入淡出：与 .glass-panel 同步。
+   入场逐张错开（transition-delay 由模板内联设置，每张 60ms）；
+   离场（.post-list.leaving）统一同时淡出，延迟清零避免逐张消失 */
+.glass-anim .home-layout .post-card {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.glass-anim.page-loaded .home-layout .post-card {
+  opacity: 1;
+  transform: none;
+}
+.glass-anim .home-layout .post-list.leaving .post-card {
+  opacity: 0;
+  transform: translateY(10px);
+  transition-duration: 0.18s, 0.18s;
+  transition-delay: 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-anim .home-layout .post-card { opacity: 1; transform: none; transition: none; }
 }
 /* 篇数徽标（年份胶囊 / 标签胶囊内共用）：小字圆角徽标 */
 .count-badge {

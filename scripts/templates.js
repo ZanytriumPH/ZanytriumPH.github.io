@@ -171,13 +171,38 @@ ${isPost ? `
 }
 
 /** 首页：全屏 hero（背景图 + 打字机动画）+ 文章卡片列表 */
-function indexPage({ config, url, posts }) {
+/** 分页器：上一页 / 下一页 + 页码（页数多时首尾 + 省略号） */
+function pagination({ current, total, url }) {
+  if (total <= 1) return '';
+  const pageHref = (n) => (n === 1 ? url('index.html') : url(`page/${n}.html`));
+  const nums = [];
+  const push = (n) => nums.push(`<a class="page-num${n === current ? ' active' : ''}" href="${pageHref(n)}">${n}</a>`);
+  const ellipsis = () => nums.push('<span class="page-ellipsis">…</span>');
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) push(i);
+  } else {
+    push(1);
+    if (current > 3) ellipsis();
+    for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) push(i);
+    if (current < total - 2) ellipsis();
+    push(total);
+  }
+  return `
+    <nav class="pagination" aria-label="分页导航">
+      ${current > 1 ? `<a class="page-prev" href="${pageHref(current - 1)}" aria-label="上一页">&lt;</a>` : '<span class="page-prev disabled"></span>'}
+      <span class="page-nums">${nums.join('')}</span>
+      ${current < total ? `<a class="page-next" href="${pageHref(current + 1)}" aria-label="下一页">&gt;</a>` : '<span class="page-next disabled"></span>'}
+    </nav>`;
+}
+
+function indexPage({ config, url, posts, page = 1, pageSize = 10, totalPages = 1 }) {
   // 置顶排序：priority 降序（未设置默认 0），相同再按创建时间降序；
   // 复制数组排序，不影响归档/标签/分类/上下篇等页面的时间线顺序
   const ordered = [...posts].sort((a, b) =>
     (b.priority || 0) - (a.priority || 0) || b.date.localeCompare(a.date));
-  const cards = ordered.map(p => `
-    <article class="post-card">
+  const pagePosts = ordered.slice((page - 1) * pageSize, page * pageSize);
+  const cards = pagePosts.map((p, i) => `
+    <article class="post-card" style="transition-delay:${i * 60}ms">
       ${p.priority > 0 ? `<span class="post-card-pin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>置顶</span>` : ''}
       ${p.cover ? `<a class="post-card-cover" href="${url(p.path)}" tabindex="-1" aria-hidden="true"><img src="${url(p.cover)}" alt="${esc(p.title)}" loading="lazy"></a>` : ''}
       <h2 class="post-card-title"><a href="${url(p.path)}">${esc(p.title)}</a></h2>
@@ -245,7 +270,9 @@ function indexPage({ config, url, posts }) {
       ${statCard}
     </aside>`;
 
-  const body = `
+  // 仅第 1 页展示 hero（打字机 + 向下引导箭头）；翻页页直接展示卡片列表，
+  // 等同第一页点击箭头后的内容（背景图与毛玻璃卡片保留）
+  const heroSection = page === 1 ? `
     <section class="hero">
       <div class="hero-content">
         <p class="hero-typewriter" id="typewriter" data-phrases='${phrases}'></p>
@@ -253,16 +280,20 @@ function indexPage({ config, url, posts }) {
       <a class="hero-scroll" href="#posts" aria-label="向下滚动">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </a>
-    </section>
+    </section>` : '';
+  const body = `
+    ${heroSection}
     <div class="container">
-      <div class="home-layout">
+      <div class="home-layout${page > 1 ? ' paged' : ''}">
         ${sidebar}
         <section class="post-list" id="posts">
           ${cards || '<p class="empty">还没有文章，去 <code>source/_posts/</code> 里写一篇吧。</p>'}
+          ${pagination({ current: page, total: totalPages, url })}
         </section>
       </div>
     </div>`;
-  return layout({ config, url, title: config.siteName, description: config.description, body, isHome: true, current: 'home', heroBg: true });
+  const title = page === 1 ? config.siteName : `第 ${page} 页 · ${config.siteName}`;
+  return layout({ config, url, title, description: config.description, body, isHome: true, current: 'home', heroBg: true });
 }
 
 /** 文章页：标题、元信息、TOC、正文、上下篇、评论 */

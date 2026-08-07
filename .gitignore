@@ -8,3 +8,6 @@ dist/
 
 # 本地 PlantUML（部署时由 GitHub Actions 自动下载）
 plantuml.jar
+
+# 调试临时目录（Edge headless 截图验证等）
+.tmp-*/
