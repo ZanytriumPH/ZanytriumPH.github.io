@@ -38,6 +38,11 @@ cover: /assets/img/posts/<slug>/cover.webp   # 可选，文章封面（根路径
 - 只写日期不带时分秒 → 时分秒补 `00:00:00`；
 - 文件尚未提交过（新建未 commit）时，创建时间回落当天。
 
+> **例外（同分类编号系列文章）**：当同一分类下有一系列带章节编号的文章（如「软件工程 II 复习笔记(一)/(二)/(三)」）
+> 同批搬运时，它们的 git 首次提交时间相同，主页排序不定，需按搬运时刻**逆序显式写 `date`**：
+> 编号最小的拿最新时间（≈搬运时刻）、编号最大的拿最早时间（逐篇递减，建议 1 分钟/篇），
+> 保证主页从上往下按编号从小到大排列。
+
 ### 置顶与封面
 
 - `priority`：可选，int 型，默认 0。主页文章按 priority 降序排列，相同则按创建时间；
@@ -145,7 +150,7 @@ node scripts/optimize-img.js <源图片目录> <文章slug>
 ### 搬运流程（AI 执行）
 
 1. 文章 `.md` → `source/_posts/`，front matter 补全 `title / tags / categories / description`
-   （`date` / `updated` 可省略，自动从 git 历史取）；
+   （`date` / `updated` 可省略，自动从 git 历史取；同分类编号系列文章例外，见「时间字段自动判定」）；
 2. 运行压缩脚本：`node scripts/optimize-img.js <源图片目录> <文章slug>`；
 3. 按脚本输出的对照表，把文章内图片引用全部改写为 `/assets/img/posts/<slug>/<原名>.webp`；
 4. **不要**把原 PNG 复制进仓库（原图留在源目录备份）；
