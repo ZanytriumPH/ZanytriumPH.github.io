@@ -62,9 +62,12 @@ function gitLastModified(file) {
 /** 取 git 首次提交该文件的提交时间（ISO 8601，含时分秒与时区）；非 git 仓库或文件未提交时返回 null */
 function gitFirstCommitted(file) {
   try {
-    const out = String(execFileSync('git', ['log', '--reverse', '-1', '--format=%cI', '--', file],
+    // 注意不能写 --reverse -1：git 的 -1（max-count）在反转前就截取了最新一条，
+    // --reverse -1 返回的其实是最后提交。改为全量反向输出（旧→新）后取首行。
+    const out = String(execFileSync('git', ['log', '--format=%cI', '--reverse', '--', file],
       { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })).trim();
-    return out && !Number.isNaN(new Date(out).getTime()) ? out : null;
+    const first = out.split('\n')[0] || '';
+    return first && !Number.isNaN(new Date(first).getTime()) ? first : null;
   } catch {
     return null;
   }

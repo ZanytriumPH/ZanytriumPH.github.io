@@ -1,6 +1,5 @@
 ---
 title: 欢迎来到我的博客
-date: 2026-08-05
 tags: [博客, 教程]
 categories: [随记]
 description: 第一篇博客，顺便演示这个博客支持的三种 Markdown 扩展语法。

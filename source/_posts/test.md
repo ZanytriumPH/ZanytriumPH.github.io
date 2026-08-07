@@ -1,6 +1,5 @@
 ---
 title: 在博客里优雅地展示代码与图表
-date: 2026-08-05
 tags: [博客, 教程]
 categories: [随记]
 description: 一篇同时承载语法高亮、Mermaid 图表与 Markdown 提示块的示例文章 —— 用于对比 20 套博客风格。
