@@ -443,6 +443,7 @@ html.post-glass .container-post { max-width: 924px; }
 .post-list { display: flex; flex-direction: column; gap: 20px; padding-bottom: 60px; }
 
 .post-card {
+  position: relative; /* 置顶标识的定位基准 */
   padding: 24px 28px;
   /* 半透明毛玻璃卡片，透过模糊后的背景图 */
   background: var(--card-glass);
@@ -453,6 +454,27 @@ html.post-glass .container-post { max-width: 924px; }
   box-shadow: var(--shadow);
   transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
 }
+
+/* 置顶标识（front matter priority > 0）：卡片右上角小徽标
+   无颜色填充：仅细边框 + 浅色文字，不抢眼 */
+.post-card-pin {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.post-card-pin svg { width: 12px; height: 12px; }
 
 /* 文章卡片封面（front matter cover 可选）：全宽 × 150px，比例参照 Redefine 主题；
    负 margin 抵消卡片 padding 顶到卡片边缘，仅顶部圆角与卡片一致 */

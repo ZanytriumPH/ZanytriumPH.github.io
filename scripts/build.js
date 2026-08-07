@@ -138,6 +138,7 @@ async function main() {
       updatedText: updated ? dateText(updated) : null,
       tags: Array.isArray(data.tags) ? data.tags : [],
       categories: Array.isArray(data.categories) ? data.categories : [],
+      priority: Number.isInteger(data.priority) ? data.priority : 0, // 可选置顶权重，默认 0，越大越靠前
       description: data.description || '',
       cover: data.cover || '', // 可选封面（front matter cover，根路径），用于首页卡片与文章页
       html,

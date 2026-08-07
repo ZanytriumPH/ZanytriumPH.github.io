@@ -172,8 +172,13 @@ ${isPost ? `
 
 /** 首页：全屏 hero（背景图 + 打字机动画）+ 文章卡片列表 */
 function indexPage({ config, url, posts }) {
-  const cards = posts.map(p => `
+  // 置顶排序：priority 降序（未设置默认 0），相同再按创建时间降序；
+  // 复制数组排序，不影响归档/标签/分类/上下篇等页面的时间线顺序
+  const ordered = [...posts].sort((a, b) =>
+    (b.priority || 0) - (a.priority || 0) || b.date.localeCompare(a.date));
+  const cards = ordered.map(p => `
     <article class="post-card">
+      ${p.priority > 0 ? `<span class="post-card-pin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>置顶</span>` : ''}
       ${p.cover ? `<a class="post-card-cover" href="${url(p.path)}" tabindex="-1" aria-hidden="true"><img src="${url(p.cover)}" alt="${esc(p.title)}" loading="lazy"></a>` : ''}
       <h2 class="post-card-title"><a href="${url(p.path)}">${esc(p.title)}</a></h2>
       <p class="post-card-excerpt">${esc(p.description || '')}</p>
