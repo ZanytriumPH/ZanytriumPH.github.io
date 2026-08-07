@@ -1,11 +1,13 @@
 ---
 title: 友链
 description: 我的朋友们的博客
+friends:
+  - name: Ferne
+    url: https://github.com/aliferne
+    avatar: https://avatars.githubusercontent.com/u/172346214?v=4
+    desc: 我 “亦友亦师” 的兄弟
+  - name: 广告位招租
+    url: https://zanytriumph.github.io/friends.html
+    avatar: 
+    desc: 欢迎加入
 ---
-
-> [!info] 说明
-> 想交换友链的话，欢迎在评论区留言或在 GitHub 上提交 Issue。
-
-## 我的朋友们
-
-（暂无，期待你的加入）

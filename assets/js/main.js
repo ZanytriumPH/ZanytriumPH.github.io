@@ -20,6 +20,28 @@
     });
   }
 
+  // ---- 关于下拉菜单：点击展开，点外部或 ESC 关闭 ----
+  const navDropdown = document.querySelector('.nav-dropdown');
+  const dropdownToggle = navDropdown && navDropdown.querySelector('.nav-dropdown-toggle');
+  if (navDropdown && dropdownToggle) {
+    dropdownToggle.addEventListener('click', () => {
+      const open = navDropdown.classList.toggle('open');
+      dropdownToggle.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', (e) => {
+      if (!navDropdown.contains(e.target)) {
+        navDropdown.classList.remove('open');
+        dropdownToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        navDropdown.classList.remove('open');
+        dropdownToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
   // ---- 点击当前页同名导航链接时不触发整页重载 ----
   // 归一化：忽略尾部 `/`，`/index.html` 等价于目录本身
   const normPath = (p) => p.replace(/\/+$/, '').replace(/\/index\.html$/, '');
@@ -118,9 +140,10 @@
   }
 
   // ---- busuanzi 计数基数：显示值 = 实时值 + 旧博客累计基数（data-base）----
-  // busuanzi 脚本写入实时值时带从 0 递增的计数动画，动画期间每次都重写
-  // 会看到数字持续「相加跳动」。因此动画期间隐藏数字（.busuanzi-hide），
-  // 等写入稳定（400ms 无变化）后一次性写入最终值并显示；10s 兜底防脚本挂掉
+  // span 初始输出基数并带 .busuanzi-hide（模板生成，首帧即隐藏，不显示基数）；
+  // busuanzi 脚本写入实时值带从 0 递增的计数动画，动画期间每次都重写会看到
+  // 数字持续「相加跳动」——改为等写入稳定（400ms 无变化）后一次性写入最终值并显示。
+  // 观察器挂载后立即评估一次：busuanzi 是 async 脚本，可能已先于本脚本写入
   document.querySelectorAll('#busuanzi_value_site_uv, #busuanzi_value_site_pv').forEach((el) => {
     const base = parseInt(el.dataset.base || '0', 10);
     if (!base) return;
@@ -129,7 +152,8 @@
     let obs;
     const settle = () => {
       const n = parseInt(el.textContent, 10);
-      if (isNaN(n) || n <= 0) { obs.observe(el, cfg); return; } // 值无效，继续等待
+      // 文本仍是基数或无效（busuanzi 未写入）→ 继续等待
+      if (isNaN(n) || n <= 0 || String(n) === String(base)) { obs.observe(el, cfg); return; }
       el.textContent = String(n + base); // 最终值一次写入
       el.classList.remove('busuanzi-hide'); // 一次性显示
     };
@@ -140,12 +164,12 @@
     };
     obs = new MutationObserver(onChange);
     obs.observe(el, cfg);
-    el.classList.add('busuanzi-hide');
+    onChange(); // 立即评估：处理 busuanzi 已先写入的情况
     // 兜底：busuanzi 加载失败时显示当前内容，避免永久空白
     setTimeout(() => {
       clearTimeout(timer);
       const n = parseInt(el.textContent, 10);
-      if (!isNaN(n) && n > 0) el.textContent = String(n + base);
+      if (!isNaN(n) && n > 0 && String(n) !== String(base)) el.textContent = String(n + base);
       el.classList.remove('busuanzi-hide');
     }, 10000);
   });

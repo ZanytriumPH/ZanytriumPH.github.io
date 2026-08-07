@@ -19,14 +19,22 @@ function esc(s) {
 }
 
 /** 布局骨架：导航 + 内容 + 页脚 + 暗色模式初始化（防闪烁） */
-function layout({ config, url, title, description, body, isPost = false, isHome = false, current = '', heroBg = false }) {
-  // 导航项：current 命中时加 active 类，样式为标签下方横线
+function layout({ config, url, title, description, body, isPost = false, isHome = false, current = '', heroBg = false, wide = false }) {
+  // 导航项：current 命中时加 active 类，样式为标签下方横线；
+  // 带 dropdown 的项点击展开子菜单（关于 → 我 / GitHub / 友链）
   const navItems = [
     { key: 'home', href: url(''), label: '首页' },
     { key: 'archives', href: url('archives.html'), label: '归档' },
     { key: 'tags', href: url('tags.html'), label: '标签' },
     { key: 'categories', href: url('categories.html'), label: '分类' },
-    { key: 'about', href: url('about.html'), label: '关于' },
+    {
+      key: 'about', label: '关于',
+      dropdown: [
+        { key: 'about', href: url('about.html'), label: '我' },
+        { key: 'github', href: 'https://github.com/ZanytriumPH', label: 'GitHub', external: true },
+        { key: 'friends', href: url('friends.html'), label: '友链' },
+      ],
+    },
   ];
   // hero 背景图（与首页共用同一文件）：heroBg=true 的页面注入 .hero-bg，
   // themeInit 的 setHeroSrc 与 main.js 的 applyHeroBg 会自动接管明暗图切换。
@@ -45,6 +53,8 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
   var t=localStorage.getItem('theme');
   if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
   document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
   // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
   // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
   if(sessionStorage.getItem('hero-anim-shown')){
@@ -69,7 +79,16 @@ function layout({ config, url, title, description, body, isPost = false, isHome 
           <span></span><span></span><span></span>
         </button>
         <ul class="nav-menu" id="nav-menu">
-          ${navItems.map(i => `<li><a href="${i.href}"${i.key === current ? ' class="active"' : ''}>${i.label}</a></li>`).join('')}
+          ${navItems.map(i => i.dropdown ? `
+          <li class="nav-dropdown${i.key === current || i.dropdown.some(d => d.key === current) ? ' active' : ''}">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              ${i.label}
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              ${i.dropdown.map(d => `<li><a href="${d.href}"${d.external ? ' target="_blank" rel="noopener"' : ''}${d.key === current ? ' class="active"' : ''}>${d.label}</a></li>`).join('')}
+            </ul>
+          </li>` : `<li><a href="${i.href}"${i.key === current ? ' class="active"' : ''}>${i.label}</a></li>`).join('')}
           <li class="nav-actions">
             <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
               <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -123,7 +142,7 @@ ${themeInit}
 <body>
 ${heroImg}
 ${nav}
-<main class="${isHome ? 'main-home' : 'container'}">
+<main class="${isHome ? 'main-home' : wide ? 'container container-wide' : 'container'}">
 ${body}
 </main>
 <footer class="site-footer">
@@ -179,8 +198,8 @@ function indexPage({ config, url, posts }) {
   const statCard = `
     <div class="side-card side-stats-card">
       <div class="stat-row"><span class="stat-label">文章总字数</span><span class="stat-value">${totalWords.toLocaleString('zh-CN')}</span></div>
-      <div class="stat-row"><span class="stat-label">访问人数</span><span class="stat-value">${bsz ? `<span id="busuanzi_value_site_uv" data-base="${uvBase}">${uvBase}</span>` : '0'}</span></div>
-      <div class="stat-row"><span class="stat-label">总访问量</span><span class="stat-value">${bsz ? `<span id="busuanzi_value_site_pv" data-base="${pvBase}">${pvBase}</span>` : '0'}</span></div>
+      <div class="stat-row"><span class="stat-label">访问人数</span><span class="stat-value">${bsz ? `<span id="busuanzi_value_site_uv" data-base="${uvBase}"${uvBase ? ' class="busuanzi-hide"' : ''}>${uvBase}</span>` : '0'}</span></div>
+      <div class="stat-row"><span class="stat-label">总访问量</span><span class="stat-value">${bsz ? `<span id="busuanzi_value_site_pv" data-base="${pvBase}"${pvBase ? ' class="busuanzi-hide"' : ''}>${pvBase}</span>` : '0'}</span></div>
       <div class="stat-row"><span class="stat-label">已运行天数</span><span class="stat-value uptime" id="uptime" data-start="${esc(config.siteStart || '')}">--</span></div>
     </div>`;
   const stats = `
@@ -424,16 +443,40 @@ function categoryPage({ config, url, category, posts }) {
   return layout({ config, url, title: `分类：${category}`, description: `分类「${category}」下的全部文章`, body, current: 'categories', heroBg: true });
 }
 
-/** 普通页面（关于、友链等） */
-function pagePage({ config, url, page }) {
+/** 友链页：玻璃容器 + 双列胶囊（左头像 + 昵称/签名），与分类页同构 */
+function friendsPage({ config, url, friends }) {
   const body = `
-    <article class="post">
+    <div class="glass-panel friend-panel">
+      <div class="friend-cloud">
+        ${friends.map(f => `
+          <a class="friend-pill" href="${esc(f.url)}"${/^https?:/i.test(f.url) ? ' target="_blank" rel="noopener"' : ''}>
+            ${f.avatar
+              ? `<img class="friend-avatar" src="${esc(f.avatar)}" alt="${esc(f.name)}" loading="lazy">`
+              : `<span class="friend-avatar friend-avatar-empty" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>`}
+            <span class="friend-info">
+              <span class="friend-name">${esc(f.name)}</span>
+              <span class="friend-desc">${esc(f.desc || '')}</span>
+            </span>
+          </a>`).join('')}
+      </div>
+    </div>`;
+  return layout({ config, url, title: '友链', description: '我的朋友们的博客', body, current: 'friends', heroBg: true });
+}
+
+/** 普通页面：关于页与其他导航页一致（毛玻璃容器 + 背景图），其余页面保持普通排版 */
+function pagePage({ config, url, page }) {
+  const isAbout = page.slug === 'about';
+  const inner = `
       <header class="post-header">
         <h1 class="post-title">${esc(page.title)}</h1>
       </header>
-      <div class="post-body markdown-body">${page.html}</div>
-    </article>`;
-  return layout({ config, url, title: page.title, description: page.description, body, current: page.slug === 'about' ? 'about' : '' });
+      <div class="post-body markdown-body">${page.html}</div>`;
+  const body = isAbout
+    ? `<div class="glass-panel about-panel">${inner}</div>`
+    : `<article class="post">${inner}</article>`;
+  // 导航高亮：关于页对应下拉的「我」，友链页对应「友链」（友链由 friendsPage 渲染，不走这里）
+  const current = { about: 'about' }[page.slug] || '';
+  return layout({ config, url, title: page.title, description: page.description, body, current, heroBg: isAbout, wide: isAbout });
 }
 
 /** 404 页面 */
@@ -447,4 +490,4 @@ function notFoundPage({ config, url }) {
   return layout({ config, url, title: '404', body });
 }
 
-module.exports = { layout, indexPage, postPage, archivesPage, tagsPage, tagPage, categoriesPage, categoryPage, pagePage, notFoundPage, makeUrl, esc, tagSlug };
+module.exports = { layout, indexPage, postPage, archivesPage, tagsPage, tagPage, categoriesPage, categoryPage, friendsPage, pagePage, notFoundPage, makeUrl, esc, tagSlug };

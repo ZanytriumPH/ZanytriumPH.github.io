@@ -209,7 +209,96 @@ html[data-theme="dark"] .icon-moon { display: none; }
   .nav-menu li a { padding: 12px; }
   .nav-menu li a.active::after { bottom: 8px; }
   .nav-actions { margin-left: 0; padding: 8px 0 0; border-top: 1px solid var(--border); }
+  /* 移动端：下拉菜单改为面板内展开，不做浮层 */
+  .nav-dropdown { width: 100%; }
+  .nav-dropdown-toggle { width: 100%; justify-content: space-between; padding: 12px; }
+  .nav-dropdown-menu {
+    position: static;
+    transform: none;
+    min-width: 0;
+    width: 100%;
+    padding: 4px 0 4px 16px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .nav-dropdown.open .nav-dropdown-menu { transform: none; }
+  .nav-dropdown-menu li a { padding: 10px 12px; }
 }
+
+/* 关于下拉菜单（毛玻璃浮层）：点击展开，点外部 / ESC 关闭（交互见 main.js） */
+.nav-dropdown { position: relative; }
+.nav-dropdown-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+.nav-dropdown-toggle:hover { color: var(--text); background: var(--bg-soft); }
+/* 当前页标记：位于「关于」下的横线（与普通导航项一致） */
+.nav-dropdown.active > .nav-dropdown-toggle { color: var(--accent); font-weight: 600; }
+.nav-dropdown.active > .nav-dropdown-toggle::after {
+  content: '';
+  position: absolute;
+  left: 12px; right: 12px;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.nav-dropdown-caret {
+  width: 14px; height: 14px;
+  transition: transform 0.2s ease;
+}
+.nav-dropdown.open .nav-dropdown-caret { transform: rotate(180deg); }
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  min-width: 124px;
+  padding: 8px;
+  list-style: none; /* 取消条目左侧分点 */
+  background: var(--card-glass);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  z-index: 60;
+}
+.nav-dropdown.open .nav-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+/* 覆盖 .nav-menu li a 基础样式（下拉项独立外观） */
+.nav-dropdown-menu li a {
+  display: block;
+  padding: 9px 14px;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.95rem;
+  white-space: nowrap;
+  text-align: center; /* 条目文字居中 */
+}
+.nav-dropdown-menu li a:hover { background: var(--bg-soft); color: var(--accent); }
+.nav-dropdown-menu li a.active { color: var(--accent); font-weight: 600; }
+/* 子项 active 不显示横线（横线只属于「关于」本身） */
+.nav-dropdown-menu li a.active::after { display: none; }
 
 /* ---------- 首页 hero：全屏背景 + 打字机 ---------- */
 .main-home { min-height: 100vh; }
@@ -547,11 +636,13 @@ html[data-theme="dark"] .icon-moon { display: none; }
 .stat-value.uptime { font-size: 0.82rem; }
 
 /* busuanzi 站点计数：隐藏「实时值计数动画 + 基数叠加」的跳动过程，
-   由 main.js 在数值稳定后一次性写入最终值并移除隐藏类（0.3s 淡入） */
+   由 main.js 在数值稳定后一次性写入最终值并移除隐藏类（0.3s 淡入）。
+   .js 前缀：隐藏类由模板直接输出（首帧即隐藏，不等 JS 时机），
+   无 JS 时（html 无 js 类）正常显示基数 */
 #busuanzi_value_site_uv, #busuanzi_value_site_pv {
   transition: opacity 0.3s ease;
 }
-.busuanzi-hide { opacity: 0; }
+.js .busuanzi-hide { opacity: 0; }
 
 /* 文章页：单篇访问量 */
 .meta-views { color: var(--text-muted); }
@@ -1191,6 +1282,84 @@ body.toc-open .post-pager { max-width: calc(100% - 244px); }
 }
 .category-pill:nth-child(odd):last-child { flex-basis: 100%; }
 .category-pill-name { font-size: 1.15rem; }
+
+/* 友链胶囊：双列布局（尺寸同分类页），头像占满胶囊最左侧 + 右侧昵称/签名 */
+.friend-panel { padding: 48px 32px 32px; }
+.friend-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 0 16px;
+}
+.friend-pill {
+  display: flex;
+  align-items: center;
+  flex-basis: calc(50% - 8px); /* 与分类胶囊一致：每行两个 */
+  height: 64px; /* 固定胶囊高度：头像正方形的基准，内容垂直居中 */
+  padding: 0; /* 头像贴满左缘，不另留内边距 */
+  border-radius: 12px;
+  overflow: hidden; /* 直角头像裁进胶囊圆角内 */
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s, transform 0.2s;
+}
+.friend-pill:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+/* 头像：高度撑满胶囊（64px），aspect-ratio 让宽度=高度 → 正方形适配胶囊高度 */
+.friend-avatar {
+  height: 100%;
+  width: auto;
+  aspect-ratio: 1 / 1;
+  border-radius: 0; /* 直角，贴住胶囊最左侧 */
+  object-fit: cover;
+  flex-shrink: 0;
+}
+/* 无头像：浅灰竖条占位（同样占满最左侧）+ 居中用户图标 */
+.friend-avatar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eceef2;
+}
+.friend-avatar-empty svg {
+  width: 55%;
+  height: 55%;
+  color: var(--text-muted); /* 图标用 muted 灰，随明暗主题自适应 */
+}
+html[data-theme="dark"] .friend-avatar-empty { background: #4d5763; }
+.friend-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 昵称/签名垂直居中于剩余空间 */
+  padding: 10px 16px;
+  min-width: 0;
+}
+.friend-name { font-weight: 600; font-size: 1rem; color: var(--text); }
+.friend-desc {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 关于页：毛玻璃容器内的标题紧凑一点（glass-panel 已有内边距） */
+.about-panel .post-header { padding: 8px 0 20px; }
+/* 关于页加宽：924 - 40(container) - 64(panel 内边距) = 820，文字区与文章页一致 */
+.container-wide { max-width: 924px; }
+/* 关于页玻璃不透明度稍高（其余面板保持默认） */
+.about-panel {
+  background: rgba(255, 255, 255, 0.88);
+}
+html[data-theme="dark"] .about-panel {
+  background: rgba(13, 17, 23, 0.88);
+}
+/* 窄屏：友链胶囊单列 */
+@media (max-width: 768px) {
+  .friend-pill { flex-basis: 100%; }
+}
 
 /* ---------- 搜索 ---------- */
 .search-panel {

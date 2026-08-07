@@ -159,6 +159,7 @@ async function main() {
       slug: baseName,
       title: data.title || baseName,
       description: data.description || '',
+      data,
       html: md.render(content, { puml, usedSlugs: new Set() })
     });
   }
@@ -248,11 +249,13 @@ async function main() {
   }
   await write('categories.html', T.categoriesPage({ config, url, posts, slugMap: catSlugMap }));
 
-  // 独立页面（关于 / 友链）
+  // 独立页面（关于走富文本；友链走胶囊列表，front matter 的 friends 数组为数据源）
   const aboutPage = pages.find(p => p.slug === 'about');
   if (aboutPage) await write('about.html', T.pagePage({ config, url, page: aboutPage }));
+  const friendsPage = pages.find(p => p.slug === 'friends');
+  if (friendsPage) await write('friends.html', T.friendsPage({ config, url, friends: friendsPage.data.friends || [] }));
   for (const p of pages) {
-    if (p.slug === 'about') continue;
+    if (p.slug === 'about' || p.slug === 'friends') continue;
     await write(`${p.slug}.html`, T.pagePage({ config, url, page: p }));
   }
 
