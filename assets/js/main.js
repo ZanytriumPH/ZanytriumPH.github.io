@@ -32,6 +32,38 @@
     });
   });
 
+  // ---- 毛玻璃容器入场淡入 / 离场淡出（标签 / 分类 / 归档页）----
+  // 入场：JS 可用时容器先透明（body.glass-anim），双 rAF 后加 .page-loaded
+  // 触发 CSS 过渡淡入；无 JS / 减弱动效时容器直接可见（CSS 默认不透明）。
+  // 离场：点击站内链接先给容器加 .leaving 快速淡出（180ms），再跳转，
+  // 避免生硬整页切换；排除锚点 / 外链 / 新窗口 / 下载 / 当前页链接
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.body.classList.add('glass-anim');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.body.classList.add('page-loaded');
+      });
+    });
+    const panels = document.querySelectorAll('.glass-panel');
+    if (panels.length) {
+      let leaving = false;
+      document.addEventListener('click', (e) => {
+        if (leaving) { e.preventDefault(); return; } // 淡出过程中再点：阻止二次跳转
+        const a = e.target.closest('a[href]');
+        if (!a) return;
+        const href = a.getAttribute('href');
+        if (!href || href.startsWith('#') || a.target === '_blank' || a.hasAttribute('download')) return;
+        const target = new URL(href, location.href);
+        if (target.origin !== location.origin || target.hash) return;
+        if (normPath(target.pathname) === normPath(location.pathname) && target.search === location.search) return;
+        e.preventDefault();
+        leaving = true;
+        panels.forEach(p => p.classList.add('leaving'));
+        setTimeout(() => { location.href = href; }, 200);
+      }, true); // 捕获阶段：先于链接自身的处理
+    }
+  }
+
   // ---- 主题切换（明/暗，持久化到 localStorage）----
   const themeToggle = document.getElementById('theme-toggle');
   const hljsStyle = document.getElementById('hljs-style');
@@ -86,20 +118,36 @@
   }
 
   // ---- busuanzi 计数基数：显示值 = 实时值 + 旧博客累计基数（data-base）----
-  // busuanzi 脚本填充 span 后，把 data-base 加上去；重写期间断开观察避免自触发
+  // busuanzi 脚本写入实时值时带从 0 递增的计数动画，动画期间每次都重写
+  // 会看到数字持续「相加跳动」。因此动画期间隐藏数字（.busuanzi-hide），
+  // 等写入稳定（400ms 无变化）后一次性写入最终值并显示；10s 兜底防脚本挂掉
   document.querySelectorAll('#busuanzi_value_site_uv, #busuanzi_value_site_pv').forEach((el) => {
     const base = parseInt(el.dataset.base || '0', 10);
     if (!base) return;
     const cfg = { childList: true, characterData: true, subtree: true };
+    let timer = null;
     let obs;
-    const rewrite = () => {
+    const settle = () => {
+      const n = parseInt(el.textContent, 10);
+      if (isNaN(n) || n <= 0) { obs.observe(el, cfg); return; } // 值无效，继续等待
+      el.textContent = String(n + base); // 最终值一次写入
+      el.classList.remove('busuanzi-hide'); // 一次性显示
+    };
+    const onChange = () => {
       obs.disconnect();
+      clearTimeout(timer);
+      timer = setTimeout(settle, 400); // 计数动画结束后 400ms 无变化视为稳定
+    };
+    obs = new MutationObserver(onChange);
+    obs.observe(el, cfg);
+    el.classList.add('busuanzi-hide');
+    // 兜底：busuanzi 加载失败时显示当前内容，避免永久空白
+    setTimeout(() => {
+      clearTimeout(timer);
       const n = parseInt(el.textContent, 10);
       if (!isNaN(n) && n > 0) el.textContent = String(n + base);
-      obs.observe(el, cfg);
-    };
-    obs = new MutationObserver(rewrite);
-    obs.observe(el, cfg);
+      el.classList.remove('busuanzi-hide');
+    }, 10000);
   });
 
   // ---- 已运行天数：基准时间取 config.siteStart，整日计数 ----
