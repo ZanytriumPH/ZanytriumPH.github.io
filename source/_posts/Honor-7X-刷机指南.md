@@ -4,7 +4,7 @@ date: 2026-01-21 19:14:01
 tags: [服务器, Linux, Android]
 categories: [刷机]
 description: "在我 2025 秋季学期的选修课 “自动化测试” 的代码大作业中，有将自行实现的模糊测试工具在目标程序上运行 24h 的…"
-priority: 998
+priority: 999
 cover: /assets/img/posts/Honor-7X-刷机指南/flash1.webp
 ---
 

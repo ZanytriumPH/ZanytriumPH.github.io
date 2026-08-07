@@ -1231,9 +1231,9 @@ html.post-glass .post-wrap {
 @media (prefers-reduced-motion: reduce) {
   .glass-anim .glass-panel { opacity: 1; transform: none; transition: none; }
 }
-/* 主页卡片（分页换页）淡入淡出：与 .glass-panel 同步。
+/* 主页卡片（分页换页）淡入：与 .glass-panel 的 page-loaded 同步。
    入场逐张错开（transition-delay 由模板内联设置，每张 60ms）；
-   离场（.post-list.leaving）统一同时淡出，延迟清零避免逐张消失 */
+   不做离场淡出——换页 / 离开首页时直接跳转，只保留淡入 */
 .glass-anim .home-layout .post-card {
   opacity: 0;
   transform: translateY(14px);
@@ -1242,12 +1242,6 @@ html.post-glass .post-wrap {
 .glass-anim.page-loaded .home-layout .post-card {
   opacity: 1;
   transform: none;
-}
-.glass-anim .home-layout .post-list.leaving .post-card {
-  opacity: 0;
-  transform: translateY(10px);
-  transition-duration: 0.18s, 0.18s;
-  transition-delay: 0s;
 }
 @media (prefers-reduced-motion: reduce) {
   .glass-anim .home-layout .post-card { opacity: 1; transform: none; transition: none; }

@@ -4,7 +4,7 @@ date: 2026-03-27 21:26:26
 tags: [碎碎念, VS Code]
 categories: [其他]
 description: "Obsidian 在笔记圈可谓是小有名气，但我依然选择在万能的 VS Code 中以 Markdown 格式来做笔记、写…"
-priority: 999
+priority: 99
 cover: /assets/img/posts/为了偷懒，我给自己开发了一款-VS-Code-插件并上线了/VScodeExtentions6.webp
 ---
 
