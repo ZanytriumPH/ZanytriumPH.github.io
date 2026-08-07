@@ -11,7 +11,7 @@ npm run build      # 构建 dist/ 静态站点
 ```
 
 可选：本机装有 Java 时，把 `plantuml.jar` 放到项目根目录即可在本地渲染 PlantUML 图
-（否则图会降级显示为源码块，部署时由 GitHub Actions 自动渲染）。
+（否则图会降级显示为源码块）。
 
 ## 写作
 
@@ -33,7 +33,7 @@ description: 文章摘要（显示在首页卡片和搜索索引）
 |---|---|
 | `==文本==` | 荧光笔高亮 |
 | `> [!note] 标题` | MPE 风格提示框（支持 note/info/tip/success/question/warning/example/quote/important 9 种） |
-| ` ```plantuml ` 代码块 | 构建时渲染为 SVG 图片（本地无 Java 时降级显示源码，部署时自动渲染） |
+| ` ```plantuml ` 代码块 | 构建时渲染为 SVG 图片（本地无 Java 时降级显示源码块） |
 | `$公式$` / `$$公式$$` | MathJax 数学公式（行内 / 块级，本地渲染无 CDN 依赖） |
 | ` ```mermaid ` 代码块 | Mermaid 图（客户端渲染，跟随明暗主题） |
 
@@ -42,12 +42,28 @@ description: 文章摘要（显示在首页卡片和搜索索引）
 
 ## 部署
 
-GitHub Actions 已配置自动部署（见 `.github/workflows/deploy.yml`）：
+**本地构建 + 推送 `gh-pages` 分支**，绕过 GitHub Actions（其部署步骤曾因 GitHub
+后端问题卡在 deployment_in_progress）。Pages 直接从分支发布，部署环节零依赖。
 
-1. push 到 `main` 分支
-2. Actions 自动执行：Node 构建 → Java + PlantUML 渲染图片 → 发布到 GitHub Pages
+### 日常部署（改完文章 / 样式后）
 
-首次部署需在仓库 **Settings → Pages** 中把 Source 设为 **GitHub Actions**。
+```bash
+npm run deploy:pages    # 一条命令：构建 dist/ → 同步到 gh-pages 分支 → 推送
+```
+
+- 产物自动提交并推送，GitHub Pages 约 1-2 分钟生效；
+- 构建产物同步到仓库外同级目录 `../myBlog-gh-pages`（git worktree，增量提交，不会全量重传）；
+- 源码备份照旧：`git add -A && git commit && git push`（推 `main` 分支，不影响部署）。
+
+### 首次设置（一次性，网页操作）
+
+仓库 **Settings → Pages** → Build and deployment → Source 改为
+**Deploy from a branch** → Branch 选 **`gh-pages`** / **`(root)`** → Save。
+
+### 注意事项
+
+- PlantUML 图由本地渲染：根目录需有 `plantuml.jar`（见「快速开始」），没有则图降级为源码块；
+- 部署不依赖任何 CI，GitHub 后端故障不影响发文章。
 
 ## 评论系统（Giscus）
 

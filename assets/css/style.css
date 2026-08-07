@@ -546,6 +546,13 @@ html[data-theme="dark"] .icon-moon { display: none; }
 }
 .stat-value.uptime { font-size: 0.82rem; }
 
+/* busuanzi 站点计数：隐藏「实时值计数动画 + 基数叠加」的跳动过程，
+   由 main.js 在数值稳定后一次性写入最终值并移除隐藏类（0.3s 淡入） */
+#busuanzi_value_site_uv, #busuanzi_value_site_pv {
+  transition: opacity 0.3s ease;
+}
+.busuanzi-hide { opacity: 0; }
+
 /* 文章页：单篇访问量 */
 .meta-views { color: var(--text-muted); }
 
@@ -1002,6 +1009,27 @@ body.toc-open .post-pager { max-width: calc(100% - 244px); }
   border: 1px solid var(--border-glass);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+}
+/* 毛玻璃容器入场淡入 / 离场淡出（标签 / 分类 / 归档页共用）：
+   JS 可用时（body.glass-anim）容器先透明微下移，双 rAF 后加 .page-loaded
+   触发过渡淡入；点击站内链接时 main.js 加 .leaving 快速淡出再跳转。
+   默认状态可见：无 JS 或 prefers-reduced-motion 时跳过动画直接显示 */
+.glass-anim .glass-panel {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.glass-anim.page-loaded .glass-panel {
+  opacity: 1;
+  transform: none;
+}
+.glass-anim .glass-panel.leaving {
+  opacity: 0;
+  transform: translateY(10px);
+  transition-duration: 0.18s, 0.18s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-anim .glass-panel { opacity: 1; transform: none; transition: none; }
 }
 /* 篇数徽标（年份胶囊 / 标签胶囊内共用）：小字圆角徽标 */
 .count-badge {
