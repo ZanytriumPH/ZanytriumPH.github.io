@@ -4,7 +4,7 @@
    ============================================================ */
 
 :root {
-  --accent: #4f7cff;
+  --accent: #016A8E;
   --accent-2: #7b5cff;
   --radius: 12px;
   --radius-sm: 8px;
@@ -35,8 +35,8 @@ html[data-theme="light"] {
   --mark-text: inherit;
   --callout-bg: #f6f8fa;
   --callout-border: #d0d7de;
-  --link-hover: #3157d6;
-  --toc-active: #4f7cff;
+  --link-hover: #014c65;
+  --toc-active: #016A8E;
   /* 表格隔行变色：半透明叠层（见 .markdown-body tbody），叠在页面或提示框底色上自动协调 */
   --table-stripe: rgba(31, 35, 40, 0.035);
 }
@@ -62,8 +62,8 @@ html[data-theme="dark"] {
   --mark-text: #ffe97d;
   --callout-bg: #161b22;
   --callout-border: #30363d;
-  --link-hover: #8bb3ff;
-  --toc-active: #7ba6ff;
+  --link-hover: #7bdefe;
+  --toc-active: #6ed5f7;
   /* 暗色下对微弱亮度变化不敏感，叠层略强于浅色主题 */
   --table-stripe: rgba(230, 237, 243, 0.05);
 }
@@ -442,6 +442,66 @@ html.post-glass .container-post { max-width: 924px; }
 /* ---------- 文章卡片 ---------- */
 .post-list { display: flex; flex-direction: column; gap: 20px; padding-bottom: 60px; }
 
+/* 主页分页器：无整体方框，每个按钮独立小圆角毛玻璃；
+   上一页/下一页紧贴页码按钮两侧，整体居中 */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.page-prev,
+.page-next {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: 8px;
+  background: var(--card-glass);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--border-glass);
+  transition: color 0.2s, border-color 0.2s;
+}
+.page-prev:hover,
+.page-next:hover { color: var(--accent); border-color: var(--border); }
+.page-prev.disabled,
+.page-next.disabled { visibility: hidden; }
+.page-nums { display: flex; align-items: center; gap: 6px; }
+.page-num {
+  min-width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  background: var(--card-glass);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--border-glass);
+  transition: color 0.2s, border-color 0.2s;
+}
+.page-num:hover { color: var(--accent); border-color: var(--border); }
+/* 当前页：蓝色反向填充（accent 底 + 白字） */
+.page-num.active {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+.page-ellipsis { color: var(--text-muted); padding: 0 2px; }
+
 .post-card {
   position: relative; /* 置顶标识的定位基准 */
   padding: 24px 28px;
@@ -571,6 +631,10 @@ html.post-glass .container-post { max-width: 924px; }
   align-items: start;
   padding-bottom: 40px;
 }
+
+/* 翻页页（无 hero）：post-list 与 sticky 侧栏（top: 80px）上边缘齐平。
+   容器顶在导航栏下 61px（60px 高 + 1px 边框），差 19px 由 margin-top 补齐 */
+.home-layout.paged .post-list { margin-top: 19px; }
 
 .sidebar {
   position: sticky;
@@ -1167,6 +1231,27 @@ html.post-glass .post-wrap {
 @media (prefers-reduced-motion: reduce) {
   .glass-anim .glass-panel { opacity: 1; transform: none; transition: none; }
 }
+/* 主页卡片（分页换页）淡入淡出：与 .glass-panel 同步。
+   入场逐张错开（transition-delay 由模板内联设置，每张 60ms）；
+   离场（.post-list.leaving）统一同时淡出，延迟清零避免逐张消失 */
+.glass-anim .home-layout .post-card {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.glass-anim.page-loaded .home-layout .post-card {
+  opacity: 1;
+  transform: none;
+}
+.glass-anim .home-layout .post-list.leaving .post-card {
+  opacity: 0;
+  transform: translateY(10px);
+  transition-duration: 0.18s, 0.18s;
+  transition-delay: 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-anim .home-layout .post-card { opacity: 1; transform: none; transition: none; }
+}
 /* 篇数徽标（年份胶囊 / 标签胶囊内共用）：小字圆角徽标 */
 .count-badge {
   font-size: 0.78rem;
@@ -1398,13 +1483,17 @@ html[data-theme="dark"] .friend-avatar-empty { background: #4d5763; }
    背景图模式下的文章容器：容器高度数屏、透出面积远大于「我」页，同等透明度
    下观感明显更透（headless 渲染实证 CSS 值相同）——不透明度提高至 0.94
    做视觉补偿，保证任何滚动位置都不比「我」页透 */
-.about-panel {
+/* 关于页 / 归档标签分类页容器：统一 0.88 透明度（视觉一致）；
+   文章页背景图模式（post-wrap）因面积更大做 0.94 视觉补偿 */
+.about-panel,
+.glass-panel {
   background: rgba(255, 255, 255, 0.88);
 }
 html.post-glass .post-wrap {
   background: rgba(255, 255, 255, 0.94);
 }
-html[data-theme="dark"] .about-panel {
+html[data-theme="dark"] .about-panel,
+html[data-theme="dark"] .glass-panel {
   background: rgba(13, 17, 23, 0.88);
 }
 html[data-theme="dark"].post-glass .post-wrap {

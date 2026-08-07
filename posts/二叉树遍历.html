@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二叉树遍历 · Zwing&#39;s blog</title>
+<meta name="description" content="层序遍历从顶部到底部逐层遍历二叉树，并在每一层按照从左到右的顺序访问节点。">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786091881542">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786091881542" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786091881542">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">二叉树遍历</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-01-16T11:08:20.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-01-16 19:08:20</time>
+            <time class="meta-item" datetime="2026-08-07T16:17:52+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-07 16:17:52</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 496 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 2 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#数据结构与算法"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>数据结构与算法</a>
+              <a class="tag-chip" href="/tags.html#二叉树"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>二叉树</a> <a class="tag-chip" href="/tags.html#遍历"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>遍历</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><h2 id="层序遍历">层序遍历</h2>
+<p>层序遍历从顶部到底部逐层遍历二叉树，并在每一层按照从左到右的顺序访问节点。</p>
+<p>层序遍历本质上属于广度优先遍历，也称广度优先搜索，它体现了一种 “一圈一圈向外扩展” 的逐层遍历方式。</p>
+<p>层序遍历在实现上符合队列先进先出的特点，因此可以使用队列来实现层序遍历。</p>
+<h3 id="数组存储">数组存储</h3>
+<pre><code class="language-cpp"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">TreeNode</span>
+{
+    <span class="hljs-type">int</span> val;
+    <span class="hljs-type">int</span> l;
+    <span class="hljs-type">int</span> r;
+    <span class="hljs-built_in">TreeNode</span>():<span class="hljs-built_in">val</span>(<span class="hljs-number">0</span>),<span class="hljs-built_in">l</span>(<span class="hljs-number">0</span>),<span class="hljs-built_in">r</span>(<span class="hljs-number">0</span>),<span class="hljs-built_in">p</span>(<span class="hljs-number">0</span>){}
+};
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">levelOrder</span><span class="hljs-params">(vector&lt;TreeNode&gt; &amp;v,<span class="hljs-type">int</span> root)</span>
+</span>{
+    queue&lt;<span class="hljs-type">int</span>&gt; q;
+    q.<span class="hljs-built_in">push</span>(root);
+    <span class="hljs-keyword">while</span>(!q.<span class="hljs-built_in">empty</span>())
+    {
+        <span class="hljs-type">int</span> cur = q.<span class="hljs-built_in">front</span>();
+        q.<span class="hljs-built_in">pop</span>();
+        cout &lt;&lt; v[cur].val &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+        <span class="hljs-keyword">if</span>(v[cur].l)
+        {
+            q.<span class="hljs-built_in">push</span>(v[cur].l);
+        }
+        <span class="hljs-keyword">if</span>(v[cur].r)
+        {
+            q.<span class="hljs-built_in">push</span>(v[cur].r);
+        }
+    }
+}
+</code></pre>
+<h3 id="指针">指针</h3>
+<pre><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;queue&gt;</span></span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">TreeNode</span>
+{
+    <span class="hljs-type">int</span> val;
+    TreeNode *l;
+    TreeNode *r;
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">TreeNode</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span>:val(x),l(nullptr),r(nullptr){</span>}
+    <span class="hljs-comment">// 析构略</span>
+};
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">levelOrder</span><span class="hljs-params">(TreeNode *root)</span>
+</span>{
+    queue&lt;TreeNode*&gt; q;
+    q.<span class="hljs-built_in">push</span>(root);
+    <span class="hljs-keyword">while</span>(!q.<span class="hljs-built_in">empty</span>())
+    {
+        TreeNode *cur = q.<span class="hljs-built_in">front</span>();
+        q.<span class="hljs-built_in">pop</span>();
+        cout &lt;&lt; cur-&gt;val &lt;&lt;  <span class="hljs-string">&quot; &quot;</span>;
+        <span class="hljs-keyword">if</span>(cur-&gt;l)
+        {
+            q.<span class="hljs-built_in">push</span>(cur-&gt;l);
+        }
+        <span class="hljs-keyword">if</span>(cur-&gt;r)
+        {
+            q.<span class="hljs-built_in">push</span>(cur-&gt;r);
+        }
+    }
+}
+</code></pre>
+<h3 id="逐层操作">逐层操作</h3>
+<p>如果对每一层的操作有区别，那么要真正实现 “按层遍历”</p>
+<pre><code class="language-cpp">vector&lt;vector&lt;<span class="hljs-type">int</span>&gt;&gt; <span class="hljs-built_in">levelOrder</span>(TreeNode* root) {
+    vector&lt;vector&lt;<span class="hljs-type">int</span>&gt;&gt; v;
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> v;
+        
+    queue&lt;TreeNode*&gt; q;
+    q.<span class="hljs-built_in">push</span>(root);
+    <span class="hljs-keyword">while</span>(!q.<span class="hljs-built_in">empty</span>()){
+        <span class="hljs-type">int</span> curLevelSize = q.<span class="hljs-built_in">size</span>(); <span class="hljs-comment">//创新点</span>
+        vector&lt;<span class="hljs-type">int</span>&gt; tmp;
+        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; curLevelSize; i++){ <span class="hljs-comment">// 这个循环内为一层</span>
+            root = q.<span class="hljs-built_in">front</span>();
+            q.<span class="hljs-built_in">pop</span>();
+            tmp.<span class="hljs-built_in">push_back</span>(root-&gt;val);
+            <span class="hljs-keyword">if</span>(root-&gt;left){
+                q.<span class="hljs-built_in">push</span>(root-&gt;left);
+            }
+            <span class="hljs-keyword">if</span>(root-&gt;right){
+                q.<span class="hljs-built_in">push</span>(root-&gt;right);
+            }
+        }
+        v.<span class="hljs-built_in">push_back</span>(tmp);
+    }
+    <span class="hljs-keyword">return</span> v;
+}
+</code></pre>
+<h2 id="先序遍历">先序遍历</h2>
+<h3 id="先序递归">先序递归</h3>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">preOrder</span><span class="hljs-params">(TreeNode *root)</span>
+</span>{
+    <span class="hljs-keyword">if</span>(root == <span class="hljs-literal">nullptr</span>)
+    {
+        <span class="hljs-keyword">return</span>;
+    }
+    cout &lt;&lt; root-&gt;val &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+    <span class="hljs-built_in">preOrder</span>(root-&gt;l);
+    <span class="hljs-built_in">preOrder</span>(root-&gt;r);
+}
+</code></pre>
+<h3 id="先序迭代">先序迭代</h3>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">preOrder</span><span class="hljs-params">(TreeNode *root)</span>
+</span>{
+    stack&lt;TreeNode*&gt; s;
+    TreeNode *cur = root;
+    <span class="hljs-keyword">while</span>(cur || !s.<span class="hljs-built_in">empty</span>())
+    {
+        <span class="hljs-keyword">while</span>(cur)
+        {
+            cout &lt;&lt; cur-&gt;val &lt;&lt; <span class="hljs-string">&quot; &quot;</span>; <span class="hljs-comment">// 根</span>
+            s.<span class="hljs-built_in">push</span>(cur);
+            cur = cur-&gt;l; <span class="hljs-comment">// 往左走</span>
+        }
+        cur = s.<span class="hljs-built_in">top</span>(); <span class="hljs-comment">// 循环结束，左走到底</span>
+        s.<span class="hljs-built_in">pop</span>();
+        cur = cur-&gt;r; <span class="hljs-comment">// 往右走</span>
+    }
+}
+</code></pre>
+<h2 id="中序遍历">中序遍历</h2>
+<h3 id="中序递归">中序递归</h3>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">inOrder</span><span class="hljs-params">(TreeNode *root)</span>
+</span>{
+    <span class="hljs-keyword">if</span>(root == <span class="hljs-literal">nullptr</span>)
+    {
+        <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-built_in">inOrder</span>(root-&gt;l);
+    cout &lt;&lt; root-&gt;val &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+    <span class="hljs-built_in">inOrder</span>(root-&gt;r);
+}
+</code></pre>
+<h3 id="中序迭代">中序迭代</h3>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">inOrder</span><span class="hljs-params">(TreeNode *root)</span>
+</span>{
+    stack&lt;TreeNode*&gt; s;
+    TreeNode *cur = root;
+    <span class="hljs-keyword">while</span>(cur || !s.<span class="hljs-built_in">empty</span>())
+    {
+        <span class="hljs-keyword">while</span>(cur)
+        {
+            s.<span class="hljs-built_in">push</span>(cur);
+            cur = cur-&gt;l;
+        }
+        cur = s.<span class="hljs-built_in">top</span>(); <span class="hljs-comment">// 左走到底</span>
+        s.<span class="hljs-built_in">pop</span>();
+        cout &lt;&lt; cur-&gt;val &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+        cur = cur-&gt;r;
+    }
+}
+</code></pre>
+<h2 id="后序遍历">后序遍历</h2>
+<h3 id="后序递归">后序递归</h3>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">postOrder</span><span class="hljs-params">(TreeNode *root)</span>
+</span>{
+    <span class="hljs-keyword">if</span>(root == <span class="hljs-literal">nullptr</span>)
+    {
+        <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-built_in">postOrder</span>(root-&gt;l);
+    <span class="hljs-built_in">postOrder</span>(root-&gt;r);
+    cout &lt;&lt; root-&gt;val &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+}
+</code></pre>
+<h3 id="后序双栈迭代">后序双栈迭代</h3>
+<p>按根-右-左的顺序，再翻转</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">postOrder</span><span class="hljs-params">(TreeNode *root)</span>
+</span>{
+    stack&lt;TreeNode*&gt; s1;
+    stack&lt;TreeNode*&gt; s2;
+    s<span class="hljs-number">1.</span><span class="hljs-built_in">push</span>(root);
+    <span class="hljs-keyword">while</span>(!s<span class="hljs-number">1.</span><span class="hljs-built_in">empty</span>())
+    {
+        TreeNode *cur = s<span class="hljs-number">1.</span><span class="hljs-built_in">top</span>();
+        s<span class="hljs-number">1.</span><span class="hljs-built_in">pop</span>();
+        s<span class="hljs-number">2.</span><span class="hljs-built_in">push</span>(cur);
+        <span class="hljs-keyword">if</span>(cur-&gt;l)
+        {
+            s<span class="hljs-number">1.</span><span class="hljs-built_in">push</span>(cur-&gt;l);
+        }
+        <span class="hljs-keyword">if</span>(cur-&gt;r)
+        {
+            s<span class="hljs-number">1.</span><span class="hljs-built_in">push</span>(cur-&gt;r);
+        }
+    }
+    <span class="hljs-keyword">while</span>(!s<span class="hljs-number">2.</span><span class="hljs-built_in">empty</span>())
+    {
+        cout &lt;&lt; s<span class="hljs-number">2.</span><span class="hljs-built_in">top</span>()-&gt;val &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+        s<span class="hljs-number">2.</span><span class="hljs-built_in">pop</span>();
+    }
+}
+</code></pre>
+<h3 id="后序单栈迭代">后序单栈迭代</h3>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">postOrder</span><span class="hljs-params">(TreeNode *root)</span>
+</span>{
+    stack&lt;TreeNode*&gt; s;
+    TreeNode *cur = root;
+    TreeNode *last = <span class="hljs-literal">nullptr</span>;  <span class="hljs-comment">// 记录上次访问的节点</span>
+    
+    <span class="hljs-keyword">while</span>(cur || !s.<span class="hljs-built_in">empty</span>())
+    {
+        <span class="hljs-keyword">while</span>(cur)
+        {
+            s.<span class="hljs-built_in">push</span>(cur);
+            cur = cur-&gt;l;
+        }
+        
+        cur = s.<span class="hljs-built_in">top</span>();
+        
+        <span class="hljs-comment">// 如果右子树不存在或右子树已经访问过</span>
+        <span class="hljs-keyword">if</span>(cur-&gt;r == <span class="hljs-literal">nullptr</span> || cur-&gt;r == last)
+        {
+            cout &lt;&lt; cur-&gt;val &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;
+            s.<span class="hljs-built_in">pop</span>();
+            last = cur;
+            cur = <span class="hljs-literal">nullptr</span>;
+        }
+        <span class="hljs-keyword">else</span>
+        {
+            cur = cur-&gt;r; <span class="hljs-comment">// 转向右子树</span>
+        }
+    }
+}
+</code></pre>
+<h2 id="一些拓展">一些拓展</h2>
+<h3 id="中序-后序-先序">中序、后序 =&gt; 先序</h3>
+<p><a href="https://www.luogu.com.cn/problem/P1030" title="P1030">例题</a></p>
+<p>由后序的末尾得根节点，再由中序的根节点位置，划分出左右子树，递归求解</p>
+<p>注意构造先序时的顺序</p>
+<pre><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+string pre;
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">func</span><span class="hljs-params">(string&amp; in,string&amp; post)</span>
+</span>{
+    <span class="hljs-keyword">if</span> (in.<span class="hljs-built_in">empty</span>() || post.<span class="hljs-built_in">empty</span>())
+    {
+        <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-type">char</span> root = post.<span class="hljs-built_in">back</span>(); <span class="hljs-comment">// 后序变量最后者为根节点</span>
+    post.<span class="hljs-built_in">pop_back</span>(); <span class="hljs-comment">// 弹出根节点</span>
+    string subInL = in.<span class="hljs-built_in">substr</span>(<span class="hljs-number">0</span>, in.<span class="hljs-built_in">find</span>(root)); <span class="hljs-comment">// 0到根节点位置（不含）</span>
+    string subInR = in.<span class="hljs-built_in">substr</span>(in.<span class="hljs-built_in">find</span>(root) + <span class="hljs-number">1</span>); <span class="hljs-comment">// 根节点位置到末尾</span>
+    string subPostL = post.<span class="hljs-built_in">substr</span>(<span class="hljs-number">0</span>, subInL.<span class="hljs-built_in">size</span>());
+    string subPostR = post.<span class="hljs-built_in">substr</span>(subInL.<span class="hljs-built_in">size</span>());
+    pre.<span class="hljs-built_in">push_back</span>(root); <span class="hljs-comment">// 根</span>
+    <span class="hljs-built_in">func</span>(subInL, subPostL); <span class="hljs-comment">// 左</span>
+    <span class="hljs-built_in">func</span>(subInR, subPostR); <span class="hljs-comment">// 右</span>
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+    string in;
+    string post;
+    cin &gt;&gt; in;
+    cin &gt;&gt; post;
+    <span class="hljs-built_in">func</span>(in,post);
+    cout &lt;&lt; pre;
+}
+</code></pre>
+<h3 id="先序-中序-后序">先序、中序 =&gt; 后序</h3>
+<p><a href="https://www.luogu.com.cn/problem/P1827" title="P1827">例题</a></p>
+<p>由先序的开头得根节点，再由中序的根节点位置，划分出左右子树，递归求解</p>
+<p>注意构造后序时的顺序</p>
+<pre><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+string post;
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">func</span><span class="hljs-params">(string &amp;pre,string &amp;in)</span>
+</span>{
+    <span class="hljs-keyword">if</span> (pre.<span class="hljs-built_in">empty</span>() || in.<span class="hljs-built_in">empty</span>())
+    {
+        <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-type">char</span> root = pre.<span class="hljs-built_in">front</span>();
+    string subInL = in.<span class="hljs-built_in">substr</span>(<span class="hljs-number">0</span>,in.<span class="hljs-built_in">find</span>(root));
+    string subInR = in.<span class="hljs-built_in">substr</span>(in.<span class="hljs-built_in">find</span>(root)<span class="hljs-number">+1</span>);
+    string subPreL = pre.<span class="hljs-built_in">substr</span>(<span class="hljs-number">1</span>,subInL.<span class="hljs-built_in">length</span>()); <span class="hljs-comment">// 1始去掉根节点</span>
+    string subPreR = pre.<span class="hljs-built_in">substr</span>(<span class="hljs-number">1</span>+subInL.<span class="hljs-built_in">length</span>());
+    <span class="hljs-built_in">func</span>(subPreL,subInL); <span class="hljs-comment">// 左</span>
+    <span class="hljs-built_in">func</span>(subPreR,subInR); <span class="hljs-comment">// 右</span>
+    post.<span class="hljs-built_in">push_back</span>(root); <span class="hljs-comment">// 根</span>
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+    string pre;
+    string in;
+    cin &gt;&gt; in;
+    cin &gt;&gt; pre;
+    <span class="hljs-built_in">func</span>(pre,in);
+    cout &lt;&lt; post;
+}
+</code></pre>
+<blockquote>
+<p>只要两个序中有中序，就一定能求出另一个序</p>
+</blockquote>
+<h3 id="先序-后序-中序">先序、后序 =&gt; 中序</h3>
+<p><a href="https://www.luogu.com.cn/problem/P1229" title="P1229">例题</a></p>
+<blockquote>
+<p>实际上仅由先序和后序无法确定出唯一一棵树，因为无法确定左右子树</p>
+</blockquote>
+<p>这里由先序和后序确定出可能的中序数量</p>
+<p>假设：先序 <code>abc</code>，后序 <code>cba</code></p>
+<p>中序则有四种情况：<code>cba</code>、<code>bca</code>、<code>acb</code>、<code>abc</code></p>
+<pre><code class="language-md"><span class="hljs-code">    a      a      a       a
+   /      /        \       \
+  b      b          b       b
+ /        \        /         \
+c          c      c           c
+</span></code></pre>
+<p>只有无法确定是左子树还是右子树时中序数量才会增加（两种情况），且树形结构符合乘法原理，故结果为 \(2^{cnt}\)</p>
+<p>那什么情况才不能确定左右子树？</p>
+<pre><code class="language-md"><span class="hljs-code">    a
+   / \
+  b   c
+</span></code></pre>
+<p>先序 <code>abc</code>，后序 <code>bca</code></p>
+<pre><code class="language-md"><span class="hljs-code">    a      a
+   /        \
+  b          b
+</span></code></pre>
+<p>先序 <code>ab</code>，后序 <code>ba</code></p>
+<p>可见<strong>当先序和后序相邻两个字符位置相反时，此时子树根节点只有一个后代，无法确定左右子树</strong></p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+    string pre;
+    string post;
+    cin &gt;&gt; pre &gt;&gt; post;
+    <span class="hljs-type">long</span> <span class="hljs-type">long</span> cnt = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; pre.<span class="hljs-built_in">size</span>()<span class="hljs-number">-1</span>; i++)
+    {
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> j = <span class="hljs-number">1</span>; j &lt; post.<span class="hljs-built_in">size</span>(); j++)
+        {
+            <span class="hljs-keyword">if</span> (pre[i] == post[j] &amp;&amp; pre[i<span class="hljs-number">+1</span>] == post[j<span class="hljs-number">-1</span>])
+            {
+                cnt++;
+            }
+        }
+    }
+    cout &lt;&lt; (<span class="hljs-number">1</span> &lt;&lt; cnt); <span class="hljs-comment">// 2^cnt，注意必须带括号</span>
+}
+</code></pre>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：二叉树遍历</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-01-16 19:08:20</p>
+      <p><strong>更新于</strong>：2026-08-07 16:17:52</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/二叉树遍历.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">二叉树遍历</div>
+      <ul><li class="toc-l2"><a href="#层序遍历">层序遍历</a></li><li class="toc-l3"><a href="#数组存储">数组存储</a></li><li class="toc-l3"><a href="#指针">指针</a></li><li class="toc-l3"><a href="#逐层操作">逐层操作</a></li><li class="toc-l2"><a href="#先序遍历">先序遍历</a></li><li class="toc-l3"><a href="#先序递归">先序递归</a></li><li class="toc-l3"><a href="#先序迭代">先序迭代</a></li><li class="toc-l2"><a href="#中序遍历">中序遍历</a></li><li class="toc-l3"><a href="#中序递归">中序递归</a></li><li class="toc-l3"><a href="#中序迭代">中序迭代</a></li><li class="toc-l2"><a href="#后序遍历">后序遍历</a></li><li class="toc-l3"><a href="#后序递归">后序递归</a></li><li class="toc-l3"><a href="#后序双栈迭代">后序双栈迭代</a></li><li class="toc-l3"><a href="#后序单栈迭代">后序单栈迭代</a></li><li class="toc-l2"><a href="#一些拓展">一些拓展</a></li><li class="toc-l3"><a href="#中序-后序-先序">中序、后序 =&gt; 先序</a></li><li class="toc-l3"><a href="#先序-中序-后序">先序、中序 =&gt; 后序</a></li><li class="toc-l3"><a href="#先序-后序-中序">先序、后序 =&gt; 中序</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/二叉树操作.html">&lt; 二叉树操作</a>
+      <a class="pager-next" href="/posts/二叉搜索树.html">二叉搜索树 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786091881542"></script>
+<script src="/assets/js/main.js?v=1786091881542" defer></script>
+<script src="/assets/js/search.js?v=1786091881542" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786091881542"></script>
+</body>
+</html>

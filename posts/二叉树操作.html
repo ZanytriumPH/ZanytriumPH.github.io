@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二叉树操作 · Zwing&#39;s blog</title>
+<meta name="description" content="定义树：">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786091881542">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786091881542" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786091881542">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">二叉树操作</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-01-16T11:10:18.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-01-16 19:10:18</time>
+            <time class="meta-item" datetime="2026-08-07T16:17:52+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-07 16:17:52</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 1084 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 4 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#数据结构与算法"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>数据结构与算法</a>
+              <a class="tag-chip" href="/tags.html#二叉树"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>二叉树</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><blockquote>
+<p>多为力扣题目，旨在熟悉二叉树的各种操作，以及深搜时通过子树汇总信息的思想</p>
+</blockquote>
+<p>定义树：</p>
+<pre><code class="language-cpp"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">TreeNode</span> {
+    <span class="hljs-type">int</span> val;
+    TreeNode *left;
+    TreeNode *right;
+    <span class="hljs-built_in">TreeNode</span>() : <span class="hljs-built_in">val</span>(<span class="hljs-number">0</span>), <span class="hljs-built_in">left</span>(<span class="hljs-literal">nullptr</span>), <span class="hljs-built_in">right</span>(<span class="hljs-literal">nullptr</span>) {}
+    <span class="hljs-built_in">TreeNode</span>(<span class="hljs-type">int</span> x) : <span class="hljs-built_in">val</span>(x), <span class="hljs-built_in">left</span>(<span class="hljs-literal">nullptr</span>), <span class="hljs-built_in">right</span>(<span class="hljs-literal">nullptr</span>) {}
+    <span class="hljs-built_in">TreeNode</span>(<span class="hljs-type">int</span> x, TreeNode *left, TreeNode *right) : <span class="hljs-built_in">val</span>(x), <span class="hljs-built_in">left</span>(left), <span class="hljs-built_in">right</span>(right) {}
+};
+</code></pre>
+<h2 id="计算高度-最大深度">计算高度（最大深度）</h2>
+<p>问题：传入一个根节点，计算该树的高度</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">maxDepth</span><span class="hljs-params">(TreeNode* root)</span> </span>{
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">max</span>(<span class="hljs-built_in">maxDepth</span>(root-&gt;left), <span class="hljs-built_in">maxDepth</span>(root-&gt;right)) + <span class="hljs-number">1</span>;
+}
+</code></pre>
+<h2 id="计算最小深度">计算最小深度</h2>
+<p><strong>递归实现</strong>：</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">minDepth</span><span class="hljs-params">(TreeNode* root)</span>
+</span>{
+    <span class="hljs-keyword">if</span>(!root){
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-keyword">if</span>(!root-&gt;left &amp;&amp; !root-&gt;right){
+        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+    }
+
+    <span class="hljs-type">int</span> minn = <span class="hljs-number">1e9</span>; <span class="hljs-comment">// 找左右子树的最小</span>
+    <span class="hljs-keyword">if</span>(root-&gt;left){
+        minn = <span class="hljs-built_in">min</span>(<span class="hljs-built_in">minDepth</span>(root-&gt;left),minn);
+    }
+    <span class="hljs-keyword">if</span>(root-&gt;right){
+        minn = <span class="hljs-built_in">min</span>(<span class="hljs-built_in">minDepth</span>(root-&gt;right),minn);
+    }
+
+    <span class="hljs-keyword">return</span> minn<span class="hljs-number">+1</span>;
+}
+</code></pre>
+<p><strong>迭代实现</strong>：思路比较清晰，逐层操作</p>
+<h2 id="计算直径">计算直径</h2>
+<p>二叉树的直径是指树中任意两个节点之间最长路径的长度，两节点之间路径的长度由它们之间边数表示</p>
+<p>注意：这条最长路径可能不经过根节点</p>
+<p>解法：遍历每个节点，计算该节点的两个子树的最大深度和，取最大者</p>
+<h2 id="计算坡度">计算坡度</h2>
+<ul>
+<li>一个树的节点的坡度定义为，该节点左子树的节点之和和右子树节点之和的差的绝对值</li>
+<li>如果没有左子树的话，左子树的节点之和为 0；没有右子树的话也是一样。空结点的坡度是 0</li>
+<li>整个树 的坡度就是其所有节点的坡度之和</li>
+</ul>
+<p><strong>官方题解</strong>：</p>
+<pre><code class="language-cpp"><span class="hljs-type">int</span> ans = <span class="hljs-number">0</span>;
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">findTilt</span><span class="hljs-params">(TreeNode* root)</span> </span>{
+    <span class="hljs-built_in">dfs</span>(root);
+    <span class="hljs-keyword">return</span> ans;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">dfs</span><span class="hljs-params">(TreeNode* root)</span></span>{
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    <span class="hljs-type">int</span> lsum = <span class="hljs-built_in">dfs</span>(root-&gt;left);
+    <span class="hljs-type">int</span> rsum = <span class="hljs-built_in">dfs</span>(root-&gt;right);
+    ans += <span class="hljs-built_in">abs</span>(lsum - rsum);
+    <span class="hljs-keyword">return</span> root-&gt;val + lsum + rsum; <span class="hljs-comment">// 返回给上层节点使用</span>
+}
+</code></pre>
+<h2 id="判断相同">判断相同</h2>
+<p>问题：传入两个根节点，判断这两棵树是否相同</p>
+<p>可能会想到通过前序和中序遍历结果来判断，但如果两棵树的每个元素都相同而只是结构不同，则所有遍历方式的结果都相同；除非加入判断左右子树的标志，而这种情况下只使用一种遍历方式结果</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">isSameTree</span><span class="hljs-params">(TreeNode* p, TreeNode* q)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">pre</span>(p) == <span class="hljs-built_in">pre</span>(q);
+}
+
+<span class="hljs-function">string <span class="hljs-title">pre</span><span class="hljs-params">(TreeNode* root)</span></span>{
+    <span class="hljs-keyword">if</span>(root == <span class="hljs-literal">nullptr</span>){
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>;
+    }
+    string s;
+    s.<span class="hljs-built_in">append</span>(<span class="hljs-built_in">to_string</span>(root-&gt;val));
+    s+=<span class="hljs-string">&#x27;l&#x27;</span>;
+    s.<span class="hljs-built_in">append</span>(<span class="hljs-built_in">pre</span>(root-&gt;left));
+    s+=<span class="hljs-string">&#x27;r&#x27;</span>;
+    s.<span class="hljs-built_in">append</span>(<span class="hljs-built_in">pre</span>(root-&gt;right));
+    <span class="hljs-keyword">return</span> s;
+}
+</code></pre>
+<p><strong>官方题解</strong>:</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">isSameTree</span><span class="hljs-params">(TreeNode* p, TreeNode* q)</span> </span>{
+    <span class="hljs-keyword">if</span> (p == <span class="hljs-literal">nullptr</span> &amp;&amp; q == <span class="hljs-literal">nullptr</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (p == <span class="hljs-literal">nullptr</span> || q == <span class="hljs-literal">nullptr</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (p-&gt;val != q-&gt;val) {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">isSameTree</span>(p-&gt;left, q-&gt;left) &amp;&amp; <span class="hljs-built_in">isSameTree</span>(p-&gt;right, q-&gt;right);
+    }
+}
+</code></pre>
+<h2 id="判断对称">判断对称</h2>
+<p>问题：传入一个根节点，判断该树是否对称</p>
+<p>对称树的特点是：对于每个节点，其左子树和右子树是对称的，即左子树的左节点等于右子树的右节点，左子树的右节点等于右子树的左节点</p>
+<p><strong>官方题解（递归）</strong>:</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">isSymmetric</span><span class="hljs-params">(TreeNode* root)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">check</span>(root-&gt;left, root-&gt;right);
+}
+
+<span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">check</span><span class="hljs-params">(TreeNode* u,TreeNode* v)</span></span>{
+    <span class="hljs-keyword">if</span>(!u &amp;&amp; !v) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">if</span>(!u || !v || u-&gt;val != v-&gt;val) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">check</span>(u-&gt;left, v-&gt;right) &amp;&amp; <span class="hljs-built_in">check</span>(u-&gt;right, v-&gt;left);
+}
+</code></pre>
+<p><strong>官方题解（迭代）</strong>:</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">isSymmetric</span><span class="hljs-params">(TreeNode* root)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">check</span>(root-&gt;left,root-&gt;right);
+}
+
+<span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">check</span><span class="hljs-params">(TreeNode* u,TreeNode* v)</span></span>{
+    queue&lt;TreeNode*&gt; q;
+    q.<span class="hljs-built_in">push</span>(u); q.<span class="hljs-built_in">push</span>(v);
+    <span class="hljs-keyword">while</span>(!q.<span class="hljs-built_in">empty</span>()){
+        u = q.<span class="hljs-built_in">front</span>(); q.<span class="hljs-built_in">pop</span>();
+        v = q.<span class="hljs-built_in">front</span>(); q.<span class="hljs-built_in">pop</span>();
+        <span class="hljs-keyword">if</span>(!u &amp;&amp; !v){
+            <span class="hljs-keyword">continue</span>;
+        }
+        <span class="hljs-keyword">if</span>((!u || !v) || u-&gt;val != v-&gt;val){
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        }
+
+        q.<span class="hljs-built_in">push</span>(u-&gt;left);
+        q.<span class="hljs-built_in">push</span>(v-&gt;right);
+
+        q.<span class="hljs-built_in">push</span>(u-&gt;right);
+        q.<span class="hljs-built_in">push</span>(v-&gt;left);
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+}
+</code></pre>
+<h2 id="判断平衡">判断平衡</h2>
+<p>平衡二叉树是指所有节点的左右子树的高度相差不超过 1 的二叉树</p>
+<p>先上一个错误代码</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">getHeight</span><span class="hljs-params">(TreeNode* root)</span> </span>{
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">max</span>(<span class="hljs-built_in">getHeight</span>(root-&gt;left), <span class="hljs-built_in">getHeight</span>(root-&gt;right)) + <span class="hljs-number">1</span>;
+}
+
+<span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">isBalanced</span><span class="hljs-params">(TreeNode* root)</span> </span>{
+    <span class="hljs-keyword">if</span>(!root){
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">abs</span>(<span class="hljs-built_in">getHeight</span>(root-&gt;left) - <span class="hljs-built_in">getHeight</span>(root-&gt;right)) &lt;= <span class="hljs-number">1</span>;
+}
+</code></pre>
+<p>错误之处在于只判断了根，而没有考虑每个子树</p>
+<pre><code class="language-planetext">        1      &lt;-- 根节点：左高 3，右高 2。差 1。你的代码判定：平衡 (Pass)
+       / \
+      2   3    &lt;-- 节点 2：左高 2，右高 0。差 2。实际情况：不平衡 (Fail)
+     /     \
+    4       5
+   /
+  6
+</code></pre>
+<p>正确做法要自顶向下递归，遍历每个节点，计算其左右子树的高度，并判断是否平衡</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">getHeight</span><span class="hljs-params">(TreeNode* root)</span> </span>{
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">max</span>(<span class="hljs-built_in">getHeight</span>(root-&gt;left), <span class="hljs-built_in">getHeight</span>(root-&gt;right)) + <span class="hljs-number">1</span>;
+}
+
+<span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">isBalanced</span><span class="hljs-params">(TreeNode* root)</span> </span>{
+    <span class="hljs-keyword">if</span>(!root){
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword">if</span>(<span class="hljs-built_in">abs</span>(<span class="hljs-built_in">getHeight</span>(root-&gt;left)-<span class="hljs-built_in">getHeight</span>(root-&gt;right)) &gt; <span class="hljs-number">1</span>){
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">isBalanced</span>(root-&gt;left) &amp;&amp; <span class="hljs-built_in">isBalanced</span>(root-&gt;right);
+}
+</code></pre>
+<h2 id="路径总和">路径总和</h2>
+<p>问题：断二叉树中是否存在根节点到叶子节点的路径，这条路径上所有节点值相加等于目标和</p>
+<p>先放个<strong>错误代码</strong>：</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">hasPathSum</span><span class="hljs-params">(TreeNode* root, <span class="hljs-type">int</span> targetSum)</span> </span>{
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">helper</span>(root, targetSum, <span class="hljs-number">0</span>);
+}
+
+<span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">helper</span><span class="hljs-params">(TreeNode* root, <span class="hljs-type">int</span> targetSum, <span class="hljs-type">int</span> sum)</span> </span>{
+    <span class="hljs-keyword">if</span>(!root){
+        <span class="hljs-keyword">if</span>(sum == targetSum) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">helper</span>(root-&gt;left, targetSum, sum + root-&gt;val)
+            || <span class="hljs-built_in">helper</span>(root-&gt;right, targetSum, sum + root-&gt;val);
+}
+</code></pre>
+<p>错在把<strong>叶子节点</strong>的判断视为了 <code>!root</code> 的前驱</p>
+<pre><code class="language-planetext">    1 // 目标和为 1，此时进入 1 的右子节点时会错误地把 1 当作叶子结点
+   /
+  2
+</code></pre>
+<p>我的AC代码：</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">hasPathSum</span><span class="hljs-params">(TreeNode* root, <span class="hljs-type">int</span> targetSum)</span> </span>{
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">helper</span>(root, targetSum, <span class="hljs-number">0</span>);
+}
+
+<span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">helper</span><span class="hljs-params">(TreeNode* root, <span class="hljs-type">int</span> targetSum, <span class="hljs-type">int</span> sum)</span> </span>{
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">if</span>(!root-&gt;left &amp;&amp; !root-&gt;right){ <span class="hljs-comment">// 修正</span>
+        <span class="hljs-keyword">if</span>(sum+root-&gt;val == targetSum) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">helper</span>(root-&gt;left, targetSum, sum + root-&gt;val)
+            || <span class="hljs-built_in">helper</span>(root-&gt;right, targetSum, sum + root-&gt;val);
+}
+</code></pre>
+<p><strong>官方题解</strong>：</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">hasPathSum</span><span class="hljs-params">(TreeNode* root, <span class="hljs-type">int</span> targetSum)</span> </span>{
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    targetSum -= root-&gt;val;
+    <span class="hljs-keyword">if</span>(!root-&gt;left &amp;&amp; !root-&gt;right) <span class="hljs-keyword">return</span> targetSum == <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">hasPathSum</span>(root-&gt;left, targetSum) || <span class="hljs-built_in">hasPathSum</span>(root-&gt;right, targetSum);
+}
+</code></pre>
+<blockquote>
+<p>如果要把所有路径都求出来呢？</p>
+<pre><code class="language-cpp"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Solution</span> {
+<span class="hljs-keyword">public</span>:
+   vector&lt;vector&lt;<span class="hljs-type">int</span>&gt;&gt; ret;
+   vector&lt;<span class="hljs-type">int</span>&gt; path;
+
+   <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">dfs</span><span class="hljs-params">(TreeNode* root, <span class="hljs-type">int</span> targetSum)</span> </span>{
+       <span class="hljs-keyword">if</span> (root == <span class="hljs-literal">nullptr</span>) {
+           <span class="hljs-keyword">return</span>;
+       }
+       path.<span class="hljs-built_in">emplace_back</span>(root-&gt;val);
+       targetSum -= root-&gt;val;
+       <span class="hljs-keyword">if</span> (root-&gt;left == <span class="hljs-literal">nullptr</span> &amp;&amp; root-&gt;right == <span class="hljs-literal">nullptr</span> &amp;&amp; targetSum == <span class="hljs-number">0</span>) {
+           ret.<span class="hljs-built_in">emplace_back</span>(path);
+       }
+       <span class="hljs-built_in">dfs</span>(root-&gt;left, targetSum);
+       <span class="hljs-built_in">dfs</span>(root-&gt;right, targetSum);
+       path.<span class="hljs-built_in">pop_back</span>(); <span class="hljs-comment">// &lt;-- 注意这里</span>
+   }
+
+   vector&lt;vector&lt;<span class="hljs-type">int</span>&gt;&gt; <span class="hljs-built_in">pathSum</span>(TreeNode* root, <span class="hljs-type">int</span> targetSum) {
+       <span class="hljs-built_in">dfs</span>(root, targetSum);
+       <span class="hljs-keyword">return</span> ret;
+   }
+};
+</code></pre>
+</blockquote>
+<h2 id="最近公共祖先-todo">最近公共祖先 // todo</h2>
+<blockquote>
+<p>思路：后序遍历。左边找到了吗？右边找到了吗？如果左右都找到了，那我就是祖先。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>以下为与<strong>二叉搜索树相关</strong></p>
+</blockquote>
+<hr>
+<h2 id="验证二叉搜索树">验证二叉搜索树</h2>
+<blockquote>
+<p>当然，利用中序遍历有序的方式也可以进行验证，但这里讨论其他方法</p>
+</blockquote>
+<p>先放个<strong>错误代码</strong>：</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">isValidBST</span><span class="hljs-params">(TreeNode* root)</span> </span>{
+    <span class="hljs-keyword">if</span> (root == <span class="hljs-literal">nullptr</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">if</span> (root-&gt;left &amp;&amp; root-&gt;left-&gt;val &gt;= root-&gt;val) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">if</span> (root-&gt;right &amp;&amp; root-&gt;right-&gt;val &lt;= root-&gt;val) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">isValidBST</span>(root-&gt;left) &amp;&amp; <span class="hljs-built_in">isValidBST</span>(root-&gt;right);
+}
+</code></pre>
+<p>只能通过大部分样例（77/86），误区在于该代码只比较了上下层的关系，跨层关系未进行判断</p>
+<pre><code class="language-planetext">  10
+ /  \
+5    15
+    /
+   6  &lt;-- 错误在这里
+</code></pre>
+<p>而二叉树搜索树定义为：“左子树所有节点值 &lt;= 根节点值，右子树所有节点值 &gt;= 根节点值” 的二叉树，左、右子树也需满足该规则</p>
+<p>比较的不应是上下层，而是根与左右子树各节点的最值</p>
+<p>我的初版AC代码：</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">isValidBST</span><span class="hljs-params">(TreeNode* root)</span> </span>{
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    <span class="hljs-type">bool</span> f1, f2;
+    <span class="hljs-keyword">if</span>(root-&gt;left){
+        f1 = root-&gt;val &gt;= <span class="hljs-built_in">maxsub</span>(root-&gt;left);
+    }
+    <span class="hljs-keyword">else</span>{
+        f1 = <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword">if</span>(root-&gt;right){
+        f2 = root-&gt;val &lt;= <span class="hljs-built_in">minsub</span>(root-&gt;right);
+    }
+    <span class="hljs-keyword">else</span>{
+        f2 = <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">isValidBST</span>(root-&gt;left) &amp;&amp; <span class="hljs-built_in">isValidBST</span>(root-&gt;right) &amp;&amp; f1 &amp;&amp; f2;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">maxsub</span><span class="hljs-params">(TreeNode* root)</span></span>{
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> <span class="hljs-number">-1e9</span>;
+    <span class="hljs-type">int</span> maxx = root-&gt;val;
+    <span class="hljs-keyword">if</span>(root-&gt;left){
+        maxx = <span class="hljs-built_in">max</span>(<span class="hljs-built_in">maxsub</span>(root-&gt;left),maxx);
+    }
+    <span class="hljs-keyword">if</span>(root-&gt;right){
+        maxx = <span class="hljs-built_in">max</span>(<span class="hljs-built_in">maxsub</span>(root-&gt;right),maxx);
+    }
+    <span class="hljs-keyword">return</span> maxx;
+}
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">minsub</span><span class="hljs-params">(TreeNode* root)</span></span>{
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> <span class="hljs-number">1e9</span>;
+    <span class="hljs-type">int</span> minn = root-&gt;val;
+    <span class="hljs-keyword">if</span>(root-&gt;left){
+        minn = <span class="hljs-built_in">min</span>(<span class="hljs-built_in">minsub</span>(root-&gt;left),minn);
+    }
+    <span class="hljs-keyword">if</span>(root-&gt;right){
+        minn = <span class="hljs-built_in">min</span>(<span class="hljs-built_in">minsub</span>(root-&gt;right),minn);
+    }
+    <span class="hljs-keyword">return</span> minn;
+}
+</code></pre>
+<p>当然，这个 <code>isValidBST</code> 还可以再简洁化：</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">isValidBST</span><span class="hljs-params">(TreeNode* root)</span> </span>{
+    <span class="hljs-keyword">if</span>(!root) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">if</span>(root-&gt;left &amp;&amp; root-&gt;val &lt;= <span class="hljs-built_in">maxsub</span>(root-&gt;left)){
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+    <span class="hljs-keyword">if</span>(root-&gt;right &amp;&amp; root-&gt;val &gt;= <span class="hljs-built_in">minsub</span>(root-&gt;right)){
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">isValidBST</span>(root-&gt;left) &amp;&amp; <span class="hljs-built_in">isValidBST</span>(root-&gt;right);
+}
+</code></pre>
+<p>但依然比较丑陋，性能也比较低下。下面为<strong>官方题解</strong>：</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">helper</span><span class="hljs-params">(TreeNode* root, <span class="hljs-type">long</span> <span class="hljs-type">long</span> lower, <span class="hljs-type">long</span> <span class="hljs-type">long</span> upper)</span> </span>{
+    <span class="hljs-keyword">if</span>(root == <span class="hljs-literal">nullptr</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">if</span>(root-&gt;val &lt;= lower || root -&gt; val &gt;= upper){
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">helper</span>(root-&gt;left, lower, root-&gt;val) &amp;&amp; <span class="hljs-built_in">helper</span>(root-&gt;right, root-&gt;val, upper);
+}
+<span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">isValidBST</span><span class="hljs-params">(TreeNode* root)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">helper</span>(root, <span class="hljs-number">-1e18</span>, <span class="hljs-number">1e18</span>);
+}
+</code></pre>
+<h2 id="有序数组转二叉搜索树">有序数组转二叉搜索树</h2>
+<p>问题：给定一个整数数组 <code>nums</code>，其中元素已经按<strong>升序</strong>排列，将其转换为一棵<strong>平衡</strong>二叉搜索树</p>
+<p>选择中间数字作为二叉搜索树的根节点，这样分给左右子树的数字个数相同或只相差 1，可以使得树保持平衡</p>
+<pre><code class="language-cpp"><span class="hljs-function">TreeNode* <span class="hljs-title">sortedArrayToBST</span><span class="hljs-params">(vector&lt;<span class="hljs-type">int</span>&gt;&amp; nums)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">helper</span>(nums, <span class="hljs-number">0</span>, nums.<span class="hljs-built_in">size</span>()<span class="hljs-number">-1</span>);
+}
+
+<span class="hljs-function">TreeNode* <span class="hljs-title">helper</span><span class="hljs-params">(vector&lt;<span class="hljs-type">int</span>&gt;&amp; nums, <span class="hljs-type">int</span> l, <span class="hljs-type">int</span> r)</span></span>{
+    <span class="hljs-keyword">if</span>(l &gt; r) <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>;
+    <span class="hljs-type">int</span> mid = (l+r)/<span class="hljs-number">2</span>;
+    TreeNode* root = <span class="hljs-keyword">new</span> <span class="hljs-built_in">TreeNode</span>(nums[mid]);
+    root-&gt;left = <span class="hljs-built_in">helper</span>(nums, l, mid<span class="hljs-number">-1</span>);
+    root-&gt;right = <span class="hljs-built_in">helper</span>(nums, mid<span class="hljs-number">+1</span>, r);
+    <span class="hljs-keyword">return</span> root;
+}
+</code></pre>
+<blockquote>
+<p>有序链表转二叉搜索树？
+同理可用上述方法，获取中间节点可以采用快慢指针的方式，快指针一次移两个单位，慢指针移一个，当快指针到达边界时，慢指针即指向中间节点
+或者还有另一种也是通用的方法，<strong>bfs 建树 + dfs 填值</strong> ？</p>
+</blockquote>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：二叉树操作</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-01-16 19:10:18</p>
+      <p><strong>更新于</strong>：2026-08-07 16:17:52</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/二叉树操作.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">二叉树操作</div>
+      <ul><li class="toc-l2"><a href="#计算高度-最大深度">计算高度（最大深度）</a></li><li class="toc-l2"><a href="#计算最小深度">计算最小深度</a></li><li class="toc-l2"><a href="#计算直径">计算直径</a></li><li class="toc-l2"><a href="#计算坡度">计算坡度</a></li><li class="toc-l2"><a href="#判断相同">判断相同</a></li><li class="toc-l2"><a href="#判断对称">判断对称</a></li><li class="toc-l2"><a href="#判断平衡">判断平衡</a></li><li class="toc-l2"><a href="#路径总和">路径总和</a></li><li class="toc-l2"><a href="#最近公共祖先-todo">最近公共祖先 // todo</a></li><li class="toc-l2"><a href="#验证二叉搜索树">验证二叉搜索树</a></li><li class="toc-l2"><a href="#有序数组转二叉搜索树">有序数组转二叉搜索树</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/Honor-7X-刷机指南.html">&lt; Honor 7X 刷机指南</a>
+      <a class="pager-next" href="/posts/二叉树遍历.html">二叉树遍历 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786091881542"></script>
+<script src="/assets/js/main.js?v=1786091881542" defer></script>
+<script src="/assets/js/search.js?v=1786091881542" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786091881542"></script>
+</body>
+</html>

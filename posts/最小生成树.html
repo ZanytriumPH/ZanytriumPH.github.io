@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>最小生成树 · Zwing&#39;s blog</title>
+<meta name="description" content="最小生成树（Minimum Spanning Tree，MST）是图论中的一种概念，用于找到连接所有顶点且边权总和最小的…">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786091881542">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786091881542" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786091881542">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">最小生成树</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2025-12-16T15:31:21.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2025-12-16 23:31:21</time>
+            <time class="meta-item" datetime="2026-08-07T16:17:52+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-07 16:17:52</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 332 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 2 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#数据结构与算法"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>数据结构与算法</a>
+              <a class="tag-chip" href="/tags.html#图论"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>图论</a> <a class="tag-chip" href="/tags.html#生成树"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>生成树</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><p>最小生成树（Minimum Spanning Tree，MST）是图论中的一种概念，用于找到连接所有顶点且边权总和最小的树（默认带权无向图）</p>
+<p><a href="https://www.luogu.com.cn/problem/P3366">最小生成树模板题</a></p>
+<h2 id="kruskal-算法">Kruskal 算法</h2>
+<p>Kruskal 算法是一种贪心算法，其基本思想是<strong>从边出发</strong>：每次选择权值最小的边，若该边连接的两个顶点不在同一个连通分量中，则将其加入生成树中，直到生成树包含 \(n-1\) 条边为止</p>
+<blockquote>
+<p>从边出发的视角使用<strong>边列表</strong>存储图
+无向图连通性的判断使用<strong>并查集</strong></p>
+</blockquote>
+<pre><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;algorithm&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;queue&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DS</span> <span class="hljs-comment">// 并查集</span>
+{
+    vector&lt;<span class="hljs-type">int</span>&gt; parent;
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">DS</span><span class="hljs-params">(<span class="hljs-type">int</span> n)</span>
+    </span>{
+        parent.<span class="hljs-built_in">resize</span>(n);
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i++) parent[i] = i;
+    }
+    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">find</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (parent[x] != x)
+        {
+            parent[x] = <span class="hljs-built_in">find</span>(parent[x]);
+        }
+        <span class="hljs-keyword">return</span> parent[x];
+    }
+    <span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">unite</span><span class="hljs-params">(<span class="hljs-type">int</span> x, <span class="hljs-type">int</span> y)</span>
+    </span>{
+        <span class="hljs-type">int</span> xroot = <span class="hljs-built_in">find</span>(x);
+        <span class="hljs-type">int</span> yroot = <span class="hljs-built_in">find</span>(y);
+        <span class="hljs-keyword">if</span> (xroot == yroot) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        parent[xroot] = yroot;
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    }
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+    ios::<span class="hljs-built_in">sync_with_stdio</span>(<span class="hljs-literal">false</span>);
+    cin.<span class="hljs-built_in">tie</span>(<span class="hljs-literal">nullptr</span>);
+    <span class="hljs-type">int</span> n, m; cin &gt;&gt; n &gt;&gt; m;
+    vector&lt;tuple&lt;<span class="hljs-type">int</span>,<span class="hljs-type">int</span>,<span class="hljs-type">int</span>&gt;&gt; edges; <span class="hljs-comment">// 边列表</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; m; i++)
+    {
+        <span class="hljs-type">int</span> u, v, w;
+        cin &gt;&gt; u &gt;&gt; v &gt;&gt; w;
+        u--; v--; <span class="hljs-comment">// 根据题目选择 0/1 based</span>
+        <span class="hljs-comment">// 只需记录连通性，无需考虑方向</span>
+        edges.<span class="hljs-built_in">emplace_back</span>(w,u,v);
+    }
+    ranges::<span class="hljs-built_in">sort</span>(edges); <span class="hljs-comment">// 权重放 tuple 第一位</span>
+    <span class="hljs-type">long</span> <span class="hljs-type">long</span> ans = <span class="hljs-number">0</span>;
+    <span class="hljs-type">int</span> cnt = <span class="hljs-number">0</span>; <span class="hljs-comment">// 边数</span>
+    <span class="hljs-function">DS <span class="hljs-title">ds</span><span class="hljs-params">(n)</span></span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> [w, u, v] : edges)
+    {
+        <span class="hljs-keyword">if</span> (ds.<span class="hljs-built_in">unite</span>(u, v))
+        {
+            ans += w;
+            cnt++;
+            <span class="hljs-keyword">if</span> (cnt == n<span class="hljs-number">-1</span>) <span class="hljs-keyword">break</span>;
+        }
+    }
+
+    <span class="hljs-keyword">if</span> (cnt != n<span class="hljs-number">-1</span>) <span class="hljs-comment">// 不连通</span>
+    {
+        cout &lt;&lt; <span class="hljs-string">&quot;orz&quot;</span>; <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+    cout &lt;&lt; ans;
+}
+</code></pre>
+<ul>
+<li>时间复杂度：\(O(m\log m)\)，其中 \(m\) 为边数，瓶颈在于排序</li>
+</ul>
+<h2 id="prim-算法">Prim 算法</h2>
+<p>Prim 算法也是一种贪心算法，其基本思想是<strong>从点出发</strong>：从任意一个顶点开始，每次选择距离生成树最近的顶点，将其加入生成树中，直到生成树包含 \(n\) 个顶点为止</p>
+<blockquote>
+<p>从点出发的视角使用<strong>邻接表</strong>存储图
+最近点的选择使用<strong>优先队列</strong></p>
+</blockquote>
+<pre><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;queue&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+    ios::<span class="hljs-built_in">sync_with_stdio</span>(<span class="hljs-literal">false</span>);
+    cin.<span class="hljs-built_in">tie</span>(<span class="hljs-literal">nullptr</span>);
+    <span class="hljs-type">int</span> n, m; cin &gt;&gt; n &gt;&gt; m;
+    <span class="hljs-function">vector <span class="hljs-title">adj</span><span class="hljs-params">(n, vector&lt;tuple&lt;<span class="hljs-type">int</span>,<span class="hljs-type">int</span>&gt;&gt;())</span></span>; <span class="hljs-comment">// 邻接表</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; m; i++)
+    {
+        <span class="hljs-type">int</span> u, v, w;
+        cin &gt;&gt; u &gt;&gt; v &gt;&gt; w;
+        u--; v--; <span class="hljs-comment">// 根据题目选择 0/1 based</span>
+        adj[u].<span class="hljs-built_in">emplace_back</span>(v,w); <span class="hljs-comment">// 无向图</span>
+        adj[v].<span class="hljs-built_in">emplace_back</span>(u,w);
+    }
+
+    <span class="hljs-comment">// 权重，点号</span>
+    priority_queue&lt;tuple&lt;<span class="hljs-type">int</span>, <span class="hljs-type">int</span>&gt;, vector&lt;tuple&lt;<span class="hljs-type">int</span>,<span class="hljs-type">int</span>&gt;&gt;, greater&lt;&gt;&gt; pq;
+    pq.<span class="hljs-built_in">emplace</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>); <span class="hljs-comment">// 任意点开始，权重设为 0</span>
+    <span class="hljs-type">long</span> <span class="hljs-type">long</span> ans = <span class="hljs-number">0</span>;
+    <span class="hljs-function">vector <span class="hljs-title">visited</span><span class="hljs-params">(n, <span class="hljs-literal">false</span>)</span></span>;
+    <span class="hljs-type">int</span> cnt = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">while</span> (!pq.<span class="hljs-built_in">empty</span>())
+    {
+        <span class="hljs-keyword">auto</span> [w, u] = pq.<span class="hljs-built_in">top</span>();
+        pq.<span class="hljs-built_in">pop</span>();
+        <span class="hljs-keyword">if</span> (visited[u]) <span class="hljs-keyword">continue</span>; <span class="hljs-comment">// 出堆再特判，防死循环</span>
+        visited[u] = <span class="hljs-literal">true</span>;
+        ans += w; <span class="hljs-comment">// 出堆时更新全局最小权重</span>
+        cnt++;
+        <span class="hljs-keyword">if</span> (cnt == n) <span class="hljs-keyword">break</span>;
+        
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> [v, ww] : adj[u])
+        {
+            <span class="hljs-keyword">if</span> (visited[v]) <span class="hljs-keyword">continue</span>; <span class="hljs-comment">// 剪枝！</span>
+            pq.<span class="hljs-built_in">emplace</span>(ww, v);
+        }
+    }
+    <span class="hljs-keyword">if</span> (cnt != n) <span class="hljs-comment">// 不连通</span>
+    {
+        cout &lt;&lt; <span class="hljs-string">&quot;orz&quot;</span>; <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+    cout &lt;&lt; ans;
+}
+</code></pre>
+<ul>
+<li>时间复杂度：\(O(m\log m)\)</li>
+</ul>
+<blockquote>
+<p>Gemini 3.0 pro 的一句话总结：</p>
+<ul>
+<li>如果图非常稠密（边多），用朴素版 Prim</li>
+<li>如果是稀疏图（大多数算法题），用 Kruskal</li>
+</ul>
+<p>Prim 与 Dijkstra 算法十分类似，故在该总结中的原理也相同（<a href="https://zanytriumph.github.io/2025/12/01/%E5%8D%95%E6%BA%90%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/#Dijkstra-%E7%AE%97%E6%B3%95">如有需要请移步这里</a>）</p>
+</blockquote>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：最小生成树</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2025-12-16 23:31:21</p>
+      <p><strong>更新于</strong>：2026-08-07 16:17:52</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/最小生成树.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">最小生成树</div>
+      <ul><li class="toc-l2"><a href="#kruskal-算法">Kruskal 算法</a></li><li class="toc-l2"><a href="#prim-算法">Prim 算法</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/动态规划.html">&lt; 动态规划</a>
+      <a class="pager-next" href="/posts/全源最短路径.html">全源最短路径 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786091881542"></script>
+<script src="/assets/js/main.js?v=1786091881542" defer></script>
+<script src="/assets/js/search.js?v=1786091881542" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786091881542"></script>
+</body>
+</html>

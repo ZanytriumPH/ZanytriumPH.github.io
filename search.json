@@ -37,5 +37,206 @@
     ],
     "description": "第一篇博客，顺便演示这个博客支持的三种 Markdown 扩展语法。",
     "date": "2026-08-05"
+  },
+  {
+    "title": "为了偷懒，我给自己开发了一款 VS Code 插件并上线了？",
+    "url": "/posts/为了偷懒，我给自己开发了一款-VS-Code-插件并上线了.html",
+    "tags": [
+      "碎碎念",
+      "VS Code"
+    ],
+    "categories": [
+      "其他"
+    ],
+    "description": "Obsidian 在笔记圈可谓是小有名气，但我依然选择在万能的 VS Code 中以 Markdown 格式来做笔记、写…",
+    "date": "2026-03-27"
+  },
+  {
+    "title": "C++ STL高级",
+    "url": "/posts/CPP-STL高级.html",
+    "tags": [
+      "C++"
+    ],
+    "categories": [
+      "C++"
+    ],
+    "description": "union 的所有成员 共享同一块内存的起始地址，不存在独立的内存空间。具体来说：",
+    "date": "2026-03-20"
+  },
+  {
+    "title": "C++ 模版",
+    "url": "/posts/CPP模版.html",
+    "tags": [
+      "C++"
+    ],
+    "categories": [
+      "C++"
+    ],
+    "description": "- C++ 的另一种编程思想称为 泛型编程，主要利用的技术就是模板",
+    "date": "2026-03-20"
+  },
+  {
+    "title": "C++ 类和对象",
+    "url": "/posts/CPP类和对象.html",
+    "tags": [
+      "C++"
+    ],
+    "categories": [
+      "C++"
+    ],
+    "description": "万事万物皆为对象，对象有其属性和行为",
+    "date": "2026-03-18"
+  },
+  {
+    "title": "Honor 7X 刷机指南",
+    "url": "/posts/Honor-7X-刷机指南.html",
+    "tags": [
+      "服务器",
+      "Linux",
+      "Android"
+    ],
+    "categories": [
+      "刷机"
+    ],
+    "description": "在我 2025 秋季学期的选修课 “自动化测试” 的代码大作业中，有将自行实现的模糊测试工具在目标程序上运行 24h 的…",
+    "date": "2026-01-21"
+  },
+  {
+    "title": "二叉树操作",
+    "url": "/posts/二叉树操作.html",
+    "tags": [
+      "二叉树"
+    ],
+    "categories": [
+      "数据结构与算法"
+    ],
+    "description": "定义树：",
+    "date": "2026-01-16"
+  },
+  {
+    "title": "二叉树遍历",
+    "url": "/posts/二叉树遍历.html",
+    "tags": [
+      "二叉树",
+      "遍历"
+    ],
+    "categories": [
+      "数据结构与算法"
+    ],
+    "description": "层序遍历从顶部到底部逐层遍历二叉树，并在每一层按照从左到右的顺序访问节点。",
+    "date": "2026-01-16"
+  },
+  {
+    "title": "二叉搜索树",
+    "url": "/posts/二叉搜索树.html",
+    "tags": [
+      "搜索树",
+      "二叉树"
+    ],
+    "categories": [
+      "数据结构与算法"
+    ],
+    "description": "字典抽象数据类型 (Dictionary Abstract Data Type) 用于表示一组 “键 - 值对” 元素，…",
+    "date": "2026-01-16"
+  },
+  {
+    "title": "并查集",
+    "url": "/posts/并查集.html",
+    "tags": [
+      "并查集"
+    ],
+    "categories": [
+      "数据结构与算法"
+    ],
+    "description": "支持三大核心操作：",
+    "date": "2026-01-16"
+  },
+  {
+    "title": "哈希表",
+    "url": "/posts/哈希表.html",
+    "tags": [
+      "哈希表"
+    ],
+    "categories": [
+      "数据结构与算法"
+    ],
+    "description": "哈希表（Hash Table）是一种以键值对（key-value）存储数据的结构，主要思想是使用 哈希函数 将键映射到存…",
+    "date": "2026-01-16"
+  },
+  {
+    "title": "排序",
+    "url": "/posts/排序.html",
+    "tags": [
+      "排序",
+      "选择"
+    ],
+    "categories": [
+      "数据结构与算法"
+    ],
+    "description": "1. 比较相邻的元素。如果第一个比第二个大，就交换他们两个。",
+    "date": "2026-01-16"
+  },
+  {
+    "title": "动态规划",
+    "url": "/posts/动态规划.html",
+    "tags": [
+      "动规"
+    ],
+    "categories": [
+      "数据结构与算法"
+    ],
+    "description": "标准 0-1 背包问题",
+    "date": "2025-12-18"
+  },
+  {
+    "title": "最小生成树",
+    "url": "/posts/最小生成树.html",
+    "tags": [
+      "图论",
+      "生成树"
+    ],
+    "categories": [
+      "数据结构与算法"
+    ],
+    "description": "最小生成树（Minimum Spanning Tree，MST）是图论中的一种概念，用于找到连接所有顶点且边权总和最小的…",
+    "date": "2025-12-16"
+  },
+  {
+    "title": "全源最短路径",
+    "url": "/posts/全源最短路径.html",
+    "tags": [
+      "图论",
+      "最短路"
+    ],
+    "categories": [
+      "数据结构与算法"
+    ],
+    "description": "全源最短路径 (All-Pairs Shortest Path, APSP) 问题是指给定一个带权图，求图中任意两点之间…",
+    "date": "2025-12-01"
+  },
+  {
+    "title": "单源最短路径",
+    "url": "/posts/单源最短路径.html",
+    "tags": [
+      "图论",
+      "最短路"
+    ],
+    "categories": [
+      "数据结构与算法"
+    ],
+    "description": "单源最短路径（Single-Source Shortest Path，SSSP）问题，即给定一个图，求从单一起点到任意给…",
+    "date": "2025-12-01"
+  },
+  {
+    "title": "开站之篇👋",
+    "url": "/posts/开站之篇.html",
+    "tags": [
+      "碎碎念"
+    ],
+    "categories": [
+      "其他"
+    ],
+    "description": "首先感谢我 “亦友亦师” 的高中同学 Ferne（Github，博客，微信公众号），为我提供了这个基于 Hexo 使用 …",
+    "date": "2025-11-11"
   }
 ]

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C++ 模版 · Zwing&#39;s blog</title>
+<meta name="description" content="- C++ 的另一种编程思想称为 泛型编程，主要利用的技术就是模板">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786091881542">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786091881542" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786091881542">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">C++ 模版</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-03-20T15:33:21.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-03-20 23:33:21</time>
+            <time class="meta-item" datetime="2026-08-07T16:17:52+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-07 16:17:52</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 1607 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 6 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#C++"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>C++</a>
+              <a class="tag-chip" href="/tags.html#C++"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>C++</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><blockquote>
+<p>多态的一种形式，“类属多态”</p>
+</blockquote>
+<ul>
+<li>C++ 的另一种编程思想称为 <strong>泛型编程</strong>，主要利用的技术就是模板</li>
+<li>C++ 提供两种模板机制：<strong>函数模板</strong> 和 <strong>类模板</strong></li>
+</ul>
+<h2 id="1-函数模版">1 函数模版</h2>
+<h3 id="1-1-语法">1.1 语法</h3>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt;
+<span class="hljs-type">void</span> <span class="hljs-title">mySwap</span><span class="hljs-params">(T &amp;a, T &amp;b)</span>
+</span>{
+    T temp = a;
+    a = b;
+    b = temp;
+}
+</code></pre>
+<ul>
+<li><code>template</code> 声明创建模板</li>
+<li><code>typename</code> 表示其后面的符号是一种数据类型，可以<strong>用 <code>class</code> 替换</strong></li>
+<li><code>T</code> 通用的数据类型，名称可以替换，通常为大写字母</li>
+</ul>
+<p>两种函数模版的使用方式：</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-type">int</span> a = <span class="hljs-number">2</span>, b = <span class="hljs-number">3</span>;
+    <span class="hljs-built_in">mySwap</span>(a, b); <span class="hljs-comment">// 自动类型推导</span>
+    <span class="hljs-built_in">mySwap</span>&lt;<span class="hljs-type">int</span>&gt;(a, b); <span class="hljs-comment">// 显示指定类型</span>
+}
+</code></pre>
+<h3 id="1-2-注意事项">1.2 注意事项</h3>
+<ul>
+<li><mark>自动类型推导，必须推导出一致的数据类型 T 才可以使用</mark></li>
+<li>模板必须要确定出 T 的数据类型才可以使用</li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-type">int</span> a = <span class="hljs-number">2</span>;
+    <span class="hljs-type">char</span> c = <span class="hljs-string">&#x27;1&#x27;</span>;
+    <span class="hljs-comment">// mySwap(a, c); // Err，自动类型推导，必须推导出一致的数据类型 T 才可以使用</span>
+}
+</code></pre>
+<blockquote>
+<p>当然，如果用显式类型转换也是可以的 <code>mySwap(a, (int)c);</code></p>
+</blockquote>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> T&gt;
+<span class="hljs-type">void</span> <span class="hljs-title">func</span><span class="hljs-params">()</span>
+</span>{
+    cout &lt;&lt; <span class="hljs-built_in">typeid</span>(T).<span class="hljs-built_in">name</span>() &lt;&lt; endl;
+}
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-comment">// func(); // Err，模板必须要确定出 T 的数据类型才可以使用</span>
+    <span class="hljs-built_in">func</span>&lt;string&gt;(); <span class="hljs-comment">// 显示指定类型</span>
+}
+</code></pre>
+<h3 id="1-3-普通函数-vs-函数模版">1.3 普通函数 VS 函数模版</h3>
+<ul>
+<li><mark>普通函数 调用可以发生隐式类型转换</mark></li>
+<li>函数模版 如果用<strong>自动类型推导，不可以发生隐式类型转换</strong></li>
+<li>函数模版 如果用<strong>显示指定类型，可以发生隐式类型转换</strong></li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">add1</span><span class="hljs-params">(<span class="hljs-type">int</span> a, <span class="hljs-type">int</span> b)</span>
+</span>{
+    <span class="hljs-keyword">return</span> a + b;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> T&gt;
+T <span class="hljs-title">add2</span><span class="hljs-params">(T a, T b)</span>
+</span>{
+    <span class="hljs-keyword">return</span> a + b;
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-type">int</span> a = <span class="hljs-number">2</span>; <span class="hljs-type">char</span> c = <span class="hljs-string">&#x27;a&#x27;</span>;
+    cout &lt;&lt; <span class="hljs-built_in">add1</span>(a, c) &lt;&lt; endl; <span class="hljs-comment">// OK，输出 99</span>
+    <span class="hljs-comment">// cout &lt;&lt; add2(a, c) &lt;&lt; endl; // Err</span>
+    cout &lt;&lt; <span class="hljs-built_in">add2</span>&lt;<span class="hljs-type">int</span>&gt;(a, c) &lt;&lt; endl; <span class="hljs-comment">// OK，输出 99</span>
+    cout &lt;&lt; <span class="hljs-built_in">add2</span>&lt;<span class="hljs-type">char</span>&gt;(a, c) &lt;&lt; endl; <span class="hljs-comment">// OK，输出 c</span>
+}
+</code></pre>
+<h3 id="1-4-普通函数与函数模版的调用规则">1.4 普通函数与函数模版的调用规则</h3>
+<ul>
+<li>如果函数模版和普通函数<strong>都可以实现，优先调用普通函数</strong></li>
+<li>可以通过<mark>空模版参数列表来强制调用函数模版</mark></li>
+<li><mark>函数模版也可以发生重载</mark></li>
+<li><mark>如果函数模版可以产生更好的匹配，优先调用函数模版</mark></li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">myPrint</span><span class="hljs-params">(<span class="hljs-type">int</span> a)</span>
+</span>{
+    cout &lt;&lt; <span class="hljs-string">&quot;common&quot;</span> &lt;&lt; endl;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> T&gt;
+<span class="hljs-type">void</span> <span class="hljs-title">myPrint</span><span class="hljs-params">(T a)</span>
+</span>{
+    cout &lt;&lt; <span class="hljs-string">&quot;template&quot;</span> &lt;&lt; endl;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> T&gt;
+<span class="hljs-type">void</span> <span class="hljs-title">myPrint</span><span class="hljs-params">(T a, T b)</span>
+</span>{
+    cout &lt;&lt; <span class="hljs-string">&quot;override template&quot;</span> &lt;&lt; endl;
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-type">int</span> a = <span class="hljs-number">10</span>;
+    <span class="hljs-built_in">myPrint</span>(a); <span class="hljs-comment">// common</span>
+    myPrint&lt;&gt;(a); <span class="hljs-comment">// template</span>
+    <span class="hljs-built_in">myPrint</span>(a, a); <span class="hljs-comment">// override template</span>
+    <span class="hljs-type">char</span> b = <span class="hljs-string">&#x27;1&#x27;</span>; <span class="hljs-built_in">myPrint</span>(b); <span class="hljs-comment">// template</span>
+}
+</code></pre>
+<blockquote>
+<p>实际开发中，有模版就不要再写普通函数了</p>
+</blockquote>
+<h3 id="1-5-模版具体化-特化">1.5 模版具体化（特化）</h3>
+<p>考虑这样以下场景</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> T&gt;
+<span class="hljs-type">bool</span> <span class="hljs-title">myComp</span><span class="hljs-params">(T a, T b)</span>
+</span>{
+    <span class="hljs-keyword">return</span> a == b;
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-type">const</span> <span class="hljs-type">char</span>* p1 = <span class="hljs-string">&quot;hello&quot;</span>;
+    <span class="hljs-type">const</span> <span class="hljs-type">char</span>* p2 = <span class="hljs-string">&quot;hello&quot;</span>;
+    cout &lt;&lt; <span class="hljs-built_in">myComp</span>(p1, p2) &lt;&lt; endl; <span class="hljs-comment">// 输出 ？</span>
+}
+</code></pre>
+<blockquote>
+<p>输出实则不确定</p>
+</blockquote>
+<p>这里比较的是地址，如果编译器有优化则相同，否则不同（如果是用 <code>new char[]</code> 则一定不同）</p>
+<p>而实际上想要比较的是内容，而针对这种<mark>特殊行为的添加可以使用模版具体化</mark></p>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span>&lt;&gt;  <span class="hljs-comment">// 特化标志：空模板参数列表（表示「不需要泛化参数，针对具体类型」）</span>
+返回值类型 函数名&lt;具体类型&gt;(参数列表) {  <span class="hljs-comment">// 函数名后用 &lt;具体类型&gt; 指定特化类型</span>
+    <span class="hljs-comment">// 该类型的专属逻辑</span>
+}
+</code></pre>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> T&gt;
+<span class="hljs-type">bool</span> <span class="hljs-title">myComp</span><span class="hljs-params">(T a, T b)</span>
+</span>{
+    <span class="hljs-keyword">return</span> a == b;
+}
+
+<span class="hljs-keyword">template</span>&lt;&gt; <span class="hljs-comment">// 空模板参数列表</span>
+<span class="hljs-type">bool</span> <span class="hljs-built_in">myComp</span>&lt;<span class="hljs-type">const</span> <span class="hljs-type">char</span>*&gt;(<span class="hljs-type">const</span> <span class="hljs-type">char</span>* p1, <span class="hljs-type">const</span> <span class="hljs-type">char</span>* p2)
+{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">strcmp</span>(p1, p2) == <span class="hljs-number">0</span>;
+}
+</code></pre>
+<p>当然，如果是类，<mark>若没有对 == 操作符进行重载也无法使用该函数模板，也可以通过特化来实现</mark></p>
+<h2 id="2-类模版">2 类模版</h2>
+<h3 id="2-1-语法">2.1 语法</h3>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T</span>&gt;
+<span class="hljs-keyword">class</span> 类名
+</code></pre>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">nameType</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">ageType</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span>
+{
+<span class="hljs-keyword">public</span>:
+    nameType name;
+    ageType age;
+    <span class="hljs-built_in">Person</span>(nameType name, ageType age)
+    {
+        <span class="hljs-keyword">this</span>-&gt;name = name;
+        <span class="hljs-keyword">this</span>-&gt;age = age;
+    }
+};
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-function">Person&lt;string,<span class="hljs-type">int</span>&gt; <span class="hljs-title">p</span><span class="hljs-params">(<span class="hljs-string">&quot;Tom&quot;</span>,<span class="hljs-number">10</span>)</span></span>;
+}
+</code></pre>
+<h3 id="2-2-参数">2.2 参数</h3>
+<ul>
+<li><mark>类模版在模版参数列表中可以有默认参数</mark></li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T</span> = <span class="hljs-type">int</span>&gt;
+<span class="hljs-keyword">class</span> Stack
+{
+    T buffer[<span class="hljs-number">100</span>];
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">push</span><span class="hljs-params">(T x)</span> </span>{}
+};
+
+Stack st1; <span class="hljs-comment">// 不显示指定，为默认参数类型 int</span>
+Stack &lt;<span class="hljs-type">double</span>&gt; st2;
+</code></pre>
+<ul>
+<li>可以带普通参数，但一般放在类型参数之后</li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T</span>, <span class="hljs-type">int</span> size&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Stack</span>
+{     T buffer[size];
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">push</span><span class="hljs-params">(T x)</span> </span>{}
+};
+
+Stack&lt;<span class="hljs-type">int</span>, <span class="hljs-number">100</span>&gt; st1; <span class="hljs-comment">// 使用时需要显式实例化（不然 100 怎么推）</span>
+</code></pre>
+<h3 id="2-3-类模板中成员函数创建时机">2.3 类模板中成员函数创建时机</h3>
+<ul>
+<li>普通类中的成员函数一开始就可以创建</li>
+<li><strong>类模版中的成员函数在调用时才创建</strong></li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Person1</span>
+{
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">show1</span><span class="hljs-params">()</span> </span>{ cout &lt;&lt; <span class="hljs-string">&quot;p1&quot;</span> &lt;&lt; endl; }
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Person2</span>
+{
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">show2</span><span class="hljs-params">()</span> </span>{ cout &lt;&lt; <span class="hljs-string">&quot;p2&quot;</span> &lt;&lt; endl; }
+};
+
+<span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MyClass</span>
+{
+<span class="hljs-keyword">public</span>:
+    T obj;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">func1</span><span class="hljs-params">()</span> </span>{ obj.<span class="hljs-built_in">show1</span>(); }
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">func2</span><span class="hljs-params">()</span> </span>{ obj.<span class="hljs-built_in">show2</span>(); }
+};
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span>
+</span>{
+    MyClass&lt;Person1&gt; obj;
+    obj.<span class="hljs-built_in">func1</span>(); <span class="hljs-comment">// OK</span>
+    <span class="hljs-comment">// obj.func2(); // Err</span>
+}
+</code></pre>
+<p>可以通过编译，即使 Person1 没有 show2 ，因为该成员函数还未创建，在调用时才会创建</p>
+<h3 id="2-4-类模板对象做函数参数">2.4 类模板对象做函数参数</h3>
+<p>类模板实例化的对象，一共有三种向函数传参的方式</p>
+<ol>
+<li><strong>指定传入的类型</strong>：直接显示对象类型</li>
+<li>参数模板化：将对象中的参数变为模板进行传递</li>
+<li>整个类模板化：将这个对象类型模板化进行传递</li>
+</ol>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T1</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">T2</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span>
+{
+<span class="hljs-keyword">public</span>:
+    T1 name;
+    T2 age;
+    <span class="hljs-built_in">Person</span>(T1 name, T2 age) : <span class="hljs-built_in">name</span>(name), <span class="hljs-built_in">age</span>(age){}
+};
+
+<span class="hljs-comment">// 1.指定传入类型</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">printP1</span><span class="hljs-params">(Person&lt;string, <span class="hljs-type">int</span>&gt;&amp;p)</span>
+</span>{
+    cout&lt;&lt; <span class="hljs-string">&quot;Name: &quot;</span> &lt;&lt; p.name &lt;&lt; endl;
+}
+
+<span class="hljs-comment">// 2.参数模板化</span>
+<span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> T1, <span class="hljs-keyword">class</span> T2&gt;
+<span class="hljs-type">void</span> <span class="hljs-title">printP2</span><span class="hljs-params">(Person&lt;T1, T2&gt;&amp;p)</span>
+</span>{
+    cout&lt;&lt;<span class="hljs-built_in">typeid</span>(T1).<span class="hljs-built_in">name</span>()&lt;&lt;<span class="hljs-string">&quot; &quot;</span>&lt;&lt;<span class="hljs-built_in">typeid</span>(T2).<span class="hljs-built_in">name</span>()&lt;&lt;endl;
+}
+
+<span class="hljs-comment">// 3.整个类模板化</span>
+<span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> T&gt;
+<span class="hljs-type">void</span> <span class="hljs-title">printP3</span><span class="hljs-params">(T &amp;p)</span>
+</span>{
+    cout&lt;&lt;<span class="hljs-built_in">typeid</span>(p).<span class="hljs-built_in">name</span>();
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span>
+</span>{
+    Person&lt;string,<span class="hljs-type">int</span>&gt;<span class="hljs-built_in">p</span>(<span class="hljs-string">&quot;Tom&quot;</span>,<span class="hljs-number">10</span>);
+    <span class="hljs-built_in">printP1</span>(p);
+    <span class="hljs-built_in">printP2</span>(p);
+    <span class="hljs-built_in">printP3</span>(p);
+}
+</code></pre>
+<blockquote>
+<p>第一种方式最常用</p>
+</blockquote>
+<h3 id="2-5-类模板与继承">2.5 类模板与继承</h3>
+<p>当类模板遇到继承时，需要注意：</p>
+<ol>
+<li><mark>当子类继承的父类是一个类模板时，子类在声明的时候要指定出父类中的 T 类型</mark>，否则编译器无法给子类分配内存</li>
+<li><mark>如果想灵活指定父类中的 T 类型，子类也需变为类模板</mark>，并在子类模板中指定出父类模板中的 T 类型</li>
+</ol>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Base</span>
+{
+    T m;
+};
+
+<span class="hljs-comment">// class Son : public Base {}; // Err</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Son1</span> : <span class="hljs-keyword">public</span> Base&lt;<span class="hljs-type">int</span>&gt; {}; <span class="hljs-comment">// OK</span>
+
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T1</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">T2</span>&gt; <span class="hljs-comment">// T1 T2</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Son2</span> : <span class="hljs-keyword">public</span> Base&lt;T1&gt;
+{
+    T2 obj;
+};
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span>
+</span>{
+    Son1 s1; <span class="hljs-comment">// int m</span>
+    Son2&lt;<span class="hljs-type">int</span>, string&gt; s2; <span class="hljs-comment">// int m, string obj</span>
+}
+</code></pre>
+<h3 id="2-6-类模板成员函数的类外实现">2.6 类模板成员函数的类外实现</h3>
+<p>类模板中的成员函数类外实现时，需要<mark>加上模版参数列表</mark></p>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T1</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">T2</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span>
+{
+<span class="hljs-keyword">public</span>:
+    T1 name;
+    T2 age;
+    <span class="hljs-built_in">Person</span>(T1 name, T2 age);
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">show</span><span class="hljs-params">()</span></span>;
+};
+
+<span class="hljs-comment">// 构造函数类外实现</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T1</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">T2</span>&gt;
+Person&lt;T1, T2&gt;::<span class="hljs-built_in">Person</span>(T1 name, T2 age) : <span class="hljs-built_in">name</span>(name), <span class="hljs-built_in">age</span>(age) {}
+
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T1</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">T2</span>&gt;
+<span class="hljs-type">void</span> Person&lt;T1, T2&gt;::<span class="hljs-built_in">show</span>()
+{
+    cout &lt;&lt; <span class="hljs-string">&quot;Name and Age: &quot;</span> &lt;&lt; name &lt;&lt; <span class="hljs-string">&quot; &quot;</span> &lt;&lt; age &lt;&lt; endl;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-function">Person&lt;string, <span class="hljs-type">int</span>&gt; <span class="hljs-title">p</span><span class="hljs-params">(<span class="hljs-string">&quot;Tom&quot;</span>,<span class="hljs-number">10</span>)</span></span>;
+    p.<span class="hljs-built_in">show</span>();
+}
+</code></pre>
+<h3 id="2-7-类模板分文件编写">2.7 类模板分文件编写</h3>
+<p>问题：</p>
+<ul>
+<li><strong>类模板中成员函数<mark>创建时机是在调用阶段</mark>，导致分文件编写时链接不到</strong></li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-comment">// Person.h</span>
+<span class="hljs-meta">#<span class="hljs-keyword">pragma</span> once</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T1</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">T2</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span>
+{
+<span class="hljs-keyword">public</span>:
+    T1 name;
+    T2 age;
+    <span class="hljs-built_in">Person</span>(T1 name, T2 age);
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">show</span><span class="hljs-params">()</span></span>;
+};
+
+<span class="hljs-comment">// Person.cpp</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;Person.h&quot;</span></span>
+
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T1</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">T2</span>&gt;
+Person&lt;T1, T2&gt;::<span class="hljs-built_in">Person</span>(T1 name, T2 age) : <span class="hljs-built_in">name</span>(name), <span class="hljs-built_in">age</span>(age) {}
+
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T1</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">T2</span>&gt;
+<span class="hljs-type">void</span> Person&lt;T1, T2&gt;::<span class="hljs-built_in">show</span>()
+{
+    cout &lt;&lt; <span class="hljs-string">&quot;Name and Age: &quot;</span> &lt;&lt; name &lt;&lt; <span class="hljs-string">&quot; &quot;</span> &lt;&lt; age &lt;&lt; endl;
+}
+
+<span class="hljs-comment">// main.cpp</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;Person.h&quot;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-function">Person&lt;string, <span class="hljs-type">int</span>&gt; <span class="hljs-title">p</span><span class="hljs-params">(<span class="hljs-string">&quot;Tom&quot;</span>,<span class="hljs-number">10</span>)</span></span>;
+    p.<span class="hljs-built_in">show</span>();
+}
+</code></pre>
+<p>一运行就崩了</p>
+<p>解决：</p>
+<ul>
+<li>直接包含 .cpp 源文件</li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-comment">// main.cpp</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;Person.cpp&quot;</span></span>
+<span class="hljs-comment">// ... OK</span>
+</code></pre>
+<ul>
+<li><strong>将声明和实现写到同一个文件中</strong>，后缀名 <mark>.hpp</mark> (约定俗成)</li>
+</ul>
+<blockquote>
+<p>主流的方法，C++ 中模板的完整定义通常出现在头文件中</p>
+</blockquote>
+<h3 id="2-8-类模板与友元">2.8 类模板与友元</h3>
+<ul>
+<li>全局函数类内实现：直接在类内声明友元即可</li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T1</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">T2</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span>
+{
+    <span class="hljs-comment">// 全局函数类内实现</span>
+    <span class="hljs-function"><span class="hljs-keyword">friend</span> <span class="hljs-type">void</span> <span class="hljs-title">show</span><span class="hljs-params">(Person&lt;T1, T2&gt; p)</span>
+    </span>{
+        cout &lt;&lt; p.name &lt;&lt; <span class="hljs-string">&quot; &quot;</span> &lt;&lt; p.age &lt;&lt; endl;
+    }
+
+    T1 name;
+    T2 age;
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-built_in">Person</span>(T1 name, T2 age) : <span class="hljs-built_in">name</span>(name), <span class="hljs-built_in">age</span>(age) {}
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-function">Person&lt;string, <span class="hljs-type">int</span>&gt; <span class="hljs-title">p</span><span class="hljs-params">(<span class="hljs-string">&quot;Tom&quot;</span>,<span class="hljs-number">10</span>)</span></span>;
+    <span class="hljs-built_in">show</span>(p);
+}
+</code></pre>
+<blockquote>
+<p>类内部用 friend 声明的函数，本质是外部函数（全局函数或其他类的成员函数），而非当前类的成员</p>
+</blockquote>
+<ul>
+<li>全局函数类外实现：<strong>需要提前让编译器知道全局函数的存在</strong></li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-comment">// 类模板前向声明</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T1</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">T2</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span>;
+
+<span class="hljs-comment">// 模板友元函数声明，当然也可以放声明，后面再实现</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T1</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">T2</span>&gt;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">show</span><span class="hljs-params">(Person&lt;T1, T2&gt;&amp; p)</span>
+</span>{
+    cout &lt;&lt; p.name &lt;&lt; <span class="hljs-string">&quot; &quot;</span> &lt;&lt; p.age &lt;&lt; endl;
+}
+
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T1</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">T2</span>&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span>
+{
+    <span class="hljs-comment">// 全局函数类外实现</span>
+    <span class="hljs-comment">// 友元声明时加 &lt;&gt;，绑定第一步声明的模板函数</span>
+    <span class="hljs-keyword">friend</span> <span class="hljs-type">void</span> show&lt;&gt;(Person&lt;T1, T2&gt;&amp; p);
+
+    T1 name;
+    T2 age;
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-built_in">Person</span>(T1 name, T2 age) : <span class="hljs-built_in">name</span>(name), <span class="hljs-built_in">age</span>(age) {}
+};
+</code></pre>
+<blockquote>
+<p>建议使用全局函数类内实现的方式</p>
+</blockquote>
+<h2 id="3-补充">3 补充</h2>
+<h3 id="杂杂">杂杂</h3>
+<ul>
+<li>
+<p><mark>是否实例化模板的某个实例由使用点来决定</mark>；如果未使用到一个模板的某个实例，则编译系统不会生成相应<mark>实例的代码</mark></p>
+</li>
+<li>
+<p><strong>类模板中的静态成员属于实例化后的类</strong></p>
+<ul>
+<li><code>vector&lt;int&gt;</code> <code>vector&lt;double&gt;</code> 各有 static，因为分开编译，各有自己的一段代码</li>
+</ul>
+</li>
+</ul>
+<h3 id="if-constexpr">if constexpr</h3>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> T&gt; <span class="hljs-function">std::string <span class="hljs-title">autoToString</span><span class="hljs-params">(T val)</span> </span>{
+    <span class="hljs-keyword">if</span> (std::is_same_v&lt;T, std::string&gt;) { <span class="hljs-comment">// T 为 string 类型</span>
+        <span class="hljs-keyword">return</span> val;
+    } <span class="hljs-keyword">else</span> { <span class="hljs-comment">// T 为数字类型</span>
+        <span class="hljs-keyword">return</span> std::<span class="hljs-built_in">to_string</span>(val);
+    }
+}
+</code></pre>
+<p>先看这个代码，如果 <code>T</code> 为 <code>string</code> 类型，则返回 <code>val</code>，若为 <code>int</code> 返回 <code>to_string(val)</code>，但编译上均有问题</p>
+<ul>
+<li>若 <code>T</code> 为 <code>string</code>，else 分支的 <code>to_string(val)</code> 方法不能传入 <code>string</code>，编译出错</li>
+<li>若 <code>T</code> 为 <code>int</code>，if 分支的返回值类型是 int，但这个函数返回值是 <code>string</code>，编译出错</li>
+</ul>
+<p>核心是 <strong>用运行时的普通 if 处理模板的编译期类型分支，导致无效分支的代码编译报错</strong></p>
+<p>使用 <code>if constexpr</code> 可以解决，让编译器在编译期丢弃无效分支，直接删掉与类型无关的代码</p>
+<blockquote>
+<p>实际上这不是一个运行阶段的 <code>if else</code>，而是编译阶段的 <code>if else</code> 分支选择</p>
+</blockquote>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> T&gt; <span class="hljs-function">std::string <span class="hljs-title">autoToString</span><span class="hljs-params">(T val)</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">if</span> <span class="hljs-title">constexpr</span> <span class="hljs-params">(std::is_same_v&lt;T, std::string&gt;)</span> </span>{
+        <span class="hljs-keyword">return</span> val;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> std::<span class="hljs-built_in">to_string</span>(val);
+    }
+}
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    std::cout &lt;&lt; <span class="hljs-built_in">typeid</span>(<span class="hljs-built_in">autoToString</span>(<span class="hljs-number">20</span>)).<span class="hljs-built_in">name</span>(); <span class="hljs-comment">// string</span>
+}
+</code></pre>
+<p>if constexpr 是编译时判断，if 是运行时判断，所以 if constexpr 的条件必须是编译时就能确定的，否则编译出错</p>
+<h3 id="元编程-metaprogramming">元编程（MetaProgramming）</h3>
+<p>是一种编程范式，核心定义是：让程序在 “编译期” 或 “运行时” 将 “代码本身作为数据来操作”</p>
+<p>C++ 以编译期元编程为核心，主要是利用<mark>模板元编程</mark></p>
+<blockquote>
+<p>功能强大，但实则很少使用</p>
+</blockquote>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span> &lt;<span class="hljs-type">int</span> N&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Fib</span>
+{
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-keyword">enum</span> { value = Fib&lt;N<span class="hljs-number">-1</span>&gt;::value + Fib&lt;N<span class="hljs-number">-2</span>&gt;::value };
+};
+
+<span class="hljs-keyword">template</span> &lt;&gt; <span class="hljs-comment">// 全特化</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Fib</span>&lt;<span class="hljs-number">0</span>&gt;
+{
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-keyword">enum</span> { value = <span class="hljs-number">1</span> };
+};
+
+<span class="hljs-keyword">template</span> &lt;&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Fib</span>&lt;<span class="hljs-number">1</span>&gt;
+{
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-keyword">enum</span> { value = <span class="hljs-number">1</span> };
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+    std::cout &lt;&lt; Fib&lt;<span class="hljs-number">8</span>&gt;::value &lt;&lt; std::endl;
+}
+</code></pre>
+<pre><code class="language-cpp"><span class="hljs-keyword">template</span> &lt;<span class="hljs-type">int</span> N&gt;
+<span class="hljs-function"><span class="hljs-keyword">constexpr</span> <span class="hljs-type">int</span> <span class="hljs-title">Fib</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-function"><span class="hljs-keyword">if</span> <span class="hljs-title">constexpr</span> <span class="hljs-params">(N &lt;= <span class="hljs-number">1</span>)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+    }
+    <span class="hljs-keyword">else</span>
+    {
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Fib</span>&lt;N<span class="hljs-number">-1</span>&gt;() + <span class="hljs-built_in">Fib</span>&lt;N<span class="hljs-number">-2</span>&gt;();
+    }
+}
+</code></pre>
+<h3 id="编译期类型推导-auto">编译期类型推导 auto</h3>
+<ul>
+<li>必须初始化，否则无法推导，编译器报错</li>
+<li><mark>默认情况下 auto 推导出的类型是值拷贝</mark></li>
+</ul>
+<pre><code class="language-cpp">    vector&lt;<span class="hljs-type">int</span>&gt; v = {<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>};
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> i : v)
+    {
+        i = i * <span class="hljs-number">2</span>; <span class="hljs-comment">// 无效修改</span>
+    }
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; i : v)
+    {
+        i = i * <span class="hljs-number">2</span>; <span class="hljs-comment">// 有效修改</span>
+    }
+</code></pre>
+<ul>
+<li>默认<strong>丢弃引用和顶层 const 限定符</strong></li>
+</ul>
+<pre><code class="language-cpp">    <span class="hljs-type">const</span> <span class="hljs-type">int</span> a = <span class="hljs-number">5</span>;
+    <span class="hljs-comment">// a = 20; // Err</span>
+    <span class="hljs-keyword">auto</span> a_auto = a; <span class="hljs-comment">// int</span>
+    a_auto = <span class="hljs-number">10</span>; <span class="hljs-comment">// OK</span>
+
+    <span class="hljs-type">int</span> b = <span class="hljs-number">15</span>;
+    <span class="hljs-type">int</span>&amp; c = b;
+    c = <span class="hljs-number">20</span>;
+    cout &lt;&lt; b &lt;&lt; endl; <span class="hljs-comment">// 20</span>
+    <span class="hljs-keyword">auto</span> c_auto = c; <span class="hljs-comment">// int</span>
+    c_auto = <span class="hljs-number">25</span>;
+    cout &lt;&lt; b &lt;&lt; endl; <span class="hljs-comment">// 20</span>
+</code></pre>
+<ul>
+<li>不会忽略底层 const（<mark>指针指向的内容</mark>）</li>
+</ul>
+<pre><code class="language-cpp">    <span class="hljs-type">const</span> <span class="hljs-type">char</span>* s = <span class="hljs-string">&quot;Hello World!&quot;</span>;
+    <span class="hljs-keyword">auto</span> s_auto = s;
+    <span class="hljs-comment">// s_auto[1] = &#x27;h&#x27;; // Err</span>
+    s_auto = <span class="hljs-string">&quot;hello&quot;</span>; <span class="hljs-comment">// OK</span>
+</code></pre>
+<p><code>const char*</code>: const 修饰的是 char（字符串内容），而非 *s（指针本身）</p>
+<p>故可以修改指针本身，但不能修改其指向的内容</p>
+<pre><code class="language-cpp">    <span class="hljs-type">char</span>* <span class="hljs-type">const</span> s = <span class="hljs-string">&quot;Hello World!&quot;</span>;
+    <span class="hljs-keyword">auto</span> s_auto = s;
+    s_auto[<span class="hljs-number">1</span>] = <span class="hljs-string">&#x27;h&#x27;</span>; <span class="hljs-comment">// Are you OK ?</span>
+</code></pre>
+<p>再补充一点，这段代码编译器不会报错，但运行时会报错，s 的内容存放在只读区内存，而 auto 丢弃顶层 const，试图修改只读内存而导致运行时错误</p>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：C++ 模版</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-03-20 23:33:21</p>
+      <p><strong>更新于</strong>：2026-08-07 16:17:52</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/CPP模版.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">C++ 模版</div>
+      <ul><li class="toc-l2"><a href="#1-函数模版">1 函数模版</a></li><li class="toc-l3"><a href="#1-1-语法">1.1 语法</a></li><li class="toc-l3"><a href="#1-2-注意事项">1.2 注意事项</a></li><li class="toc-l3"><a href="#1-3-普通函数-vs-函数模版">1.3 普通函数 VS 函数模版</a></li><li class="toc-l3"><a href="#1-4-普通函数与函数模版的调用规则">1.4 普通函数与函数模版的调用规则</a></li><li class="toc-l3"><a href="#1-5-模版具体化-特化">1.5 模版具体化（特化）</a></li><li class="toc-l2"><a href="#2-类模版">2 类模版</a></li><li class="toc-l3"><a href="#2-1-语法">2.1 语法</a></li><li class="toc-l3"><a href="#2-2-参数">2.2 参数</a></li><li class="toc-l3"><a href="#2-3-类模板中成员函数创建时机">2.3 类模板中成员函数创建时机</a></li><li class="toc-l3"><a href="#2-4-类模板对象做函数参数">2.4 类模板对象做函数参数</a></li><li class="toc-l3"><a href="#2-5-类模板与继承">2.5 类模板与继承</a></li><li class="toc-l3"><a href="#2-6-类模板成员函数的类外实现">2.6 类模板成员函数的类外实现</a></li><li class="toc-l3"><a href="#2-7-类模板分文件编写">2.7 类模板分文件编写</a></li><li class="toc-l3"><a href="#2-8-类模板与友元">2.8 类模板与友元</a></li><li class="toc-l2"><a href="#3-补充">3 补充</a></li><li class="toc-l3"><a href="#杂杂">杂杂</a></li><li class="toc-l3"><a href="#if-constexpr">if constexpr</a></li><li class="toc-l3"><a href="#元编程-metaprogramming">元编程（MetaProgramming）</a></li><li class="toc-l3"><a href="#编译期类型推导-auto">编译期类型推导 auto</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/CPP-STL高级.html">&lt; C++ STL高级</a>
+      <a class="pager-next" href="/posts/CPP类和对象.html">C++ 类和对象 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786091881542"></script>
+<script src="/assets/js/main.js?v=1786091881542" defer></script>
+<script src="/assets/js/search.js?v=1786091881542" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786091881542"></script>
+</body>
+</html>

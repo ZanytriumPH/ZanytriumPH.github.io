@@ -83,7 +83,8 @@
         document.body.classList.add('page-loaded');
       });
     });
-    const panels = document.querySelectorAll('.glass-panel');
+    // 主页卡片列表也参与离场淡出（分页器换页时卡片先淡出再跳转）
+    const panels = document.querySelectorAll('.glass-panel, .home-layout .post-list');
     if (panels.length) {
       let leaving = false;
       document.addEventListener('click', (e) => {
