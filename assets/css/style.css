@@ -1020,8 +1020,12 @@ body.toc-open .toc { display: block; }
 .toc::-webkit-scrollbar-track { background: transparent; }
 
 /* 文章 + 目录整体：flex 让两者贴在一起，作为整体居中；
-   wrap 使内部的上下篇 pager（flex-basis:100%）换行占满整行 */
+   wrap 使内部的上下篇 pager（flex-basis:100%）换行占满整行。
+   relative + z-index:1：文章页恒有全屏 hero 背景图（fixed z-index:0），
+   static 内容会被它盖住拦截点击（翻页按钮点不动）——始终抬升到背景图之上 */
 .post-wrap {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
@@ -1067,11 +1071,16 @@ body.toc-open .toc { display: block; }
 
 /* 目录展开时：容器加宽以容纳「文章 + 目录」整体居中（244 = 24 间距 + 220 目录宽） */
 body.toc-open main.container { max-width: calc(var(--content-width) + 244px); }
+/* 目录展开时：上下篇胶囊（post-wrap 内第二行）限制为文章列宽
+   （容器宽 - 244 目录列 + 间距），不延伸到目录下方 */
+body.toc-open .post-pager { flex-basis: calc(100% - 244px); }
 
 /* 窄屏隐藏目录抽屉（避免挤压文章） */
 @media (max-width: 900px) {
   .toc-toggle, .toc-bg-toggle { display: none; }
   body.toc-open .toc { display: none; }
+  /* 窄屏目录已隐藏且无法展开，pager 恢复整行宽 */
+  body.toc-open .post-pager { flex-basis: 100%; }
 }
 
 /* ---------- 上下篇 ---------- */
@@ -1090,19 +1099,6 @@ body.toc-open main.container { max-width: calc(var(--content-width) + 244px); }
 }
 .post-pager a:hover { color: var(--accent); }
 .pager-next { text-align: right; }
-/* 背景图模式：上下篇胶囊随 post-wrap 一起包进毛玻璃容器内
-   （flex-basis:100% 换行占满整行），各自独立的毛玻璃胶囊左右各一 */
-html.post-glass .post-pager a {
-  max-width: 45%;
-  padding: 8px 16px;
-  font-size: 0.85rem;
-  background: var(--card-glass);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow);
-}
 
 /* ---------- 评论 ---------- */
 .post-comments { padding: 8px 0 48px; }
@@ -1376,14 +1372,21 @@ html[data-theme="dark"] .friend-avatar-empty { background: #4d5763; }
 .about-panel .post-header { padding: 8px 0 20px; }
 /* 关于页加宽：924 - 40(container) - 64(panel 内边距) = 820，文字区与文章页一致 */
 .container-wide { max-width: 924px; }
-/* 关于页玻璃不透明度稍高（其余面板保持默认）；背景图模式下的文章容器同款 */
-.about-panel,
-html.post-glass .post-wrap {
+/* 关于页玻璃不透明度稍高（其余面板保持默认）。
+   背景图模式下的文章容器：容器高度数屏、透出面积远大于「我」页，同等透明度
+   下观感明显更透（headless 渲染实证 CSS 值相同）——不透明度提高至 0.94
+   做视觉补偿，保证任何滚动位置都不比「我」页透 */
+.about-panel {
   background: rgba(255, 255, 255, 0.88);
 }
-html[data-theme="dark"] .about-panel,
-html[data-theme="dark"].post-glass .post-wrap {
+html.post-glass .post-wrap {
+  background: rgba(255, 255, 255, 0.94);
+}
+html[data-theme="dark"] .about-panel {
   background: rgba(13, 17, 23, 0.88);
+}
+html[data-theme="dark"].post-glass .post-wrap {
+  background: rgba(13, 17, 23, 0.94);
 }
 /* 窄屏：友链胶囊单列 */
 @media (max-width: 768px) {
