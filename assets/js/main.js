@@ -87,6 +87,20 @@
     const panels = document.querySelectorAll('.glass-panel, .home-layout .post-list');
     if (panels.length) {
       let leaving = false;
+      // bfcache 恢复：浏览器「后退」从往返缓存恢复时，JS 堆与 DOM 保持离开时状态——
+      // 离场淡出留下的 .leaving 会让卡片保持透明，且 leaving=true 会拦截所有点击。
+      // 恢复时清除 leaving 类、复位标志，并重新触发入场淡入。
+      window.addEventListener('pageshow', (e) => {
+        if (!e.persisted) return;
+        leaving = false;
+        panels.forEach(p => p.classList.remove('leaving'));
+        document.body.classList.remove('page-loaded');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            document.body.classList.add('page-loaded');
+          });
+        });
+      });
       document.addEventListener('click', (e) => {
         if (leaving) { e.preventDefault(); return; } // 淡出过程中再点：阻止二次跳转
         const a = e.target.closest('a[href]');
