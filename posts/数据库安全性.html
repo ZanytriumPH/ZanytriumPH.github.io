@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第4章 数据库安全性 · Zwing&#39;s blog</title>
+<meta name="description" content="第4章 数据库安全性">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">第4章 数据库安全性</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-08T11:03:00.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-08 19:03:00</time>
+            <time class="meta-item" datetime="2026-08-08T12:06:24+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-08 12:06:24</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 1013 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 4 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#数据管理基础"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>数据管理基础</a>
+              <a class="tag-chip" href="/tags.html#数据库"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>数据库</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>对象与操作类型</title>
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 900px;
+        margin: 20px auto;
+        /* 使用宋体/楷体以贴合原图的中文字体风格 */
+        font-family: "KaiTi", "楷体", "SimSun", serif; 
+        text-align: center;
+        font-size: 20px;
+    }
+    th, td {
+        border: 2px solid #000;
+        padding: 12px 16px;
+    }
+    /* 表头背景色 */
+    th {
+        background-color: #fff6da; /* 淡黄色 */
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+    /* 蓝色字体样式 (中文) */
+    .text-blue {
+        color: #0000cd;
+        font-weight: bold;
+    }
+    /* 蓝色字体样式 (英文) */
+    .text-blue-en {
+        color: #0000cd;
+        font-weight: bold;
+        font-family: sans-serif;
+        letter-spacing: 1px;
+    }
+    /* 红色字体样式 (英文) */
+    .text-red-en {
+        color: #c00000;
+        font-weight: bold;
+        font-family: sans-serif;
+        line-height: 1.5;
+        letter-spacing: 1px;
+    }
+</style>
+</head>
+<body>
+<table>
+    <thead>
+        <tr>
+            <th width="15%">对象类型</th>
+            <th width="25%">对象</th>
+            <th width="60%">操作类型</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan="4" class="text-blue">数据库<br>模式</td>
+            <td class="text-blue">模式</td>
+            <td class="text-blue-en">CREATE SCHEMA</td>
+        </tr>
+        <tr>
+            <td class="text-blue">基本表</td>
+            <td class="text-blue-en">CREATE TABLE, ALTER TABLE</td>
+        </tr>
+        <tr>
+            <td class="text-blue">视图</td>
+            <td class="text-blue-en">CREATE VIEW</td>
+        </tr>
+        <tr>
+            <td class="text-blue">索引</td>
+            <td class="text-blue-en">CREATE INDEX</td>
+        </tr>
+        <tr>
+            <td rowspan="2" class="text-blue">数据</td>
+            <td class="text-blue">基本表和视图</td>
+            <td class="text-red-en">
+                SELECT, INSERT, UPDATE, DELETE,<br>
+                REFERENCES,<br>
+                ALL PRIVILEGES
+            </td>
+        </tr>
+        <tr>
+            <td class="text-blue">属性列</td>
+            <td class="text-red-en">
+                SELECT, INSERT, UPDATE,<br>
+                REFERENCES,<br>
+                ALL PRIVILEGES
+            </td>
+        </tr>
+    </tbody>
+</table>
+</body>
+</html>
+<h2 id="1-grant">1 GRANT</h2>
+<pre><code class="language-sql"><span class="hljs-keyword">GRANT</span> <span class="hljs-operator">&lt;</span>权限<span class="hljs-operator">&gt;</span> [, <span class="hljs-operator">&lt;</span>权限<span class="hljs-operator">&gt;</span> ] ... 
+<span class="hljs-keyword">ON</span> <span class="hljs-operator">&lt;</span>对象类型<span class="hljs-operator">&gt;</span> <span class="hljs-operator">&lt;</span>对象名<span class="hljs-operator">&gt;</span> [, <span class="hljs-operator">&lt;</span>对象类型<span class="hljs-operator">&gt;</span> <span class="hljs-operator">&lt;</span>对象名<span class="hljs-operator">&gt;</span> ] ...
+<span class="hljs-keyword">TO</span> <span class="hljs-operator">&lt;</span>用户<span class="hljs-operator">&gt;</span> [ , <span class="hljs-operator">&lt;</span>用户<span class="hljs-operator">&gt;</span> ] ... 
+[ <span class="hljs-keyword">WITH</span> <span class="hljs-keyword">GRANT</span> OPTION ];
+</code></pre>
+<ul>
+<li><code>WITH GRANT OPTION</code>：被授权者可继续将自己接受到的权限授权给其他用户</li>
+</ul>
+<h2 id="2-revoke">2 REVOKE</h2>
+<pre><code class="language-sql"><span class="hljs-keyword">REVOKE</span> <span class="hljs-operator">&lt;</span>权限<span class="hljs-operator">&gt;</span> [, <span class="hljs-operator">&lt;</span>权限<span class="hljs-operator">&gt;</span>] ... 
+<span class="hljs-keyword">ON</span> <span class="hljs-operator">&lt;</span>对象名<span class="hljs-operator">&gt;</span> [, <span class="hljs-operator">&lt;</span>对象名<span class="hljs-operator">&gt;</span>] ...
+<span class="hljs-keyword">FROM</span> <span class="hljs-operator">&lt;</span>用户<span class="hljs-operator">&gt;</span> [, <span class="hljs-operator">&lt;</span>用户<span class="hljs-operator">&gt;</span>] ... [CASCADE <span class="hljs-operator">|</span> RESTRICT];
+</code></pre>
+<ul>
+<li><code>CASCADE</code> 表示要进行权限的 ‘连锁回收’</li>
+<li><code>RESTRICT</code> 表示：只有当不存在连锁回收问题时，才能从指定用户那里回收权限</li>
+</ul>
+<h2 id="3-create-user">3 CREATE USER</h2>
+<pre><code class="language-sql"><span class="hljs-comment">-- CREATE USER &lt;username&gt; [WITH] [DBA | RESOURCE | CONNECT]; 实际上各个数据库相差甚远</span>
+
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">USER</span> username IDENTIFIED <span class="hljs-keyword">BY</span> ‘password’;
+</code></pre>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>数据库角色与权限</title>
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 900px;
+        margin: 20px auto;
+        text-align: center;
+        /* 全局默认使用楷体以贴合原图中文字体 */
+        font-family: "KaiTi", "楷体", "SimSun", serif; 
+        font-size: 22px;
+    }
+    th, td {
+        border: 2px solid #000;
+        padding: 15px 10px;
+    }
+    /* 表头样式及背景色 */
+    th {
+        background-color: #fdf3d0; /* 淡黄色 */
+        font-weight: bold;
+    }
+    /* 表头中的英文字体特定样式 */
+    .th-en {
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+    }
+    /* 第一列角色名称样式 (深蓝色，无衬线粗体) */
+    .role {
+        color: #0000a0;
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+    }
+    /* "可以" 的字体样式 (深蓝色) */
+    .yes {
+        color: #0000a0;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+    /* "不可以" 的字体样式 (暗红色) */
+    .no {
+        color: #b30000;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+</style>
+</head>
+<body>
+<table>
+    <thead>
+        <tr>
+            <th rowspan="2" width="18%">拥有的权限</th>
+            <th colspan="4">可否执行的操作</th>
+        </tr>
+        <tr>
+            <th class="th-en" width="16%">CREATE<br>USER</th>
+            <th class="th-en" width="18%">CREATE<br>SCHEMA</th>
+            <th class="th-en" width="16%">CREATE<br>TABLE</th>
+            <th width="32%">登录数据库，执行<br>数据查询和操纵</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="role">DBA</td>
+            <td class="yes">可以</td>
+            <td class="yes">可以</td>
+            <td class="yes">可以</td>
+            <td class="yes">可以</td>
+        </tr>
+        <tr>
+            <td class="role">RESOURCE</td>
+            <td class="no">不可以</td>
+            <td class="no">不可以</td>
+            <td class="yes">可以</td>
+            <td class="yes">可以</td>
+        </tr>
+        <tr>
+            <td class="role">CONNECT</td>
+            <td class="no">不可以</td>
+            <td class="no">不可以</td>
+            <td class="no">不可以</td>
+            <td class="yes">可以，但必须拥有<br>相应权限</td>
+        </tr>
+    </tbody>
+</table>
+</body>
+</html>
+<h2 id="4-数据库角色">4 数据库角色</h2>
+<pre><code class="language-sql"><span class="hljs-keyword">CREATE</span> ROLE rolename [, rolename] ...;
+</code></pre>
+<p>数据库角色：被命名的一组与数据库操作相关的权限</p>
+<ul>
+<li>角色是权限的集合</li>
+<li>可以为一组具有相同权限的用户创建一个角色</li>
+<li>简化授权的过程</li>
+</ul>
+<p>【例】 通过角色来实现将一组权限授予一个用户</p>
+<ul>
+<li>首先创建一个角色 <code>R1</code></li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">CREATE</span> ROLE R1;
+</code></pre>
+<ul>
+<li>然后使用 <code>GRANT</code> 语句，使角色 <code>R1</code> 拥有 <code>Student</code> 表的 <code>SELECT</code>、<code>UPDATE</code>、<code>INSERT</code> 权限</li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">SELECT</span>, <span class="hljs-keyword">UPDATE</span>, <span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">ON</span> <span class="hljs-keyword">TABLE</span> Student <span class="hljs-keyword">TO</span> R1;
+</code></pre>
+<ul>
+<li>将这个角色的授予王平，张明，赵玲。使他们具有角色 <code>R1</code> 所包含的全部权限：</li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">GRANT</span> R1 <span class="hljs-keyword">TO</span> 王平, 张明, 赵玲;
+</code></pre>
+<ul>
+<li>可以一次性通过 <code>R1</code> 来回收王平的这 <code>3</code> 个权限</li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">REVOKE</span> R1 <span class="hljs-keyword">FROM</span> 王平;
+</code></pre>
+<h2 id="5-视图机制">5 视图机制</h2>
+<p>先创建视图，再把对视图操作的权限授予用户</p>
+<h2 id="6-audit-审计">6 AUDIT（审计）</h2>
+<p>启用一个专用的审计日志（Audit Log）将用户对数据库的所有操作记录在上面</p>
+<ul>
+<li><code>AUDIT</code> 语句：设置审计功能</li>
+<li><code>NOAUDIT</code> 语句：取消审计功能</li>
+</ul>
+<pre><code class="language-sql">AUDIT <span class="hljs-keyword">ALTER</span>, <span class="hljs-keyword">UPDATE</span> <span class="hljs-keyword">ON</span> SC;
+</code></pre>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：第4章 数据库安全性</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-08 19:03:00</p>
+      <p><strong>更新于</strong>：2026-08-08 12:06:24</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/数据库安全性.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">第4章 数据库安全性</div>
+      <ul><li class="toc-l2"><a href="#1-grant">1 GRANT</a></li><li class="toc-l2"><a href="#2-revoke">2 REVOKE</a></li><li class="toc-l2"><a href="#3-create-user">3 CREATE USER</a></li><li class="toc-l2"><a href="#4-数据库角色">4 数据库角色</a></li><li class="toc-l2"><a href="#5-视图机制">5 视图机制</a></li><li class="toc-l2"><a href="#6-audit-审计">6 AUDIT（审计）</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/关系数据库标准语言SQL.html">&lt; 第3章 关系数据库标准语言SQL</a>
+      <a class="pager-next" href="/posts/数据库完整性.html">第5章 数据库完整性 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
+<script src="/assets/js/main.js?v=1786162127971" defer></script>
+<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+</body>
+</html>

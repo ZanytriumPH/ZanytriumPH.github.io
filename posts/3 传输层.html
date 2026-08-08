@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3 传输层 · Zwing&#39;s blog</title>
+<meta name="description" content="传输层">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">3 传输层</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-07T22:49:13.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-08 06:49:13</time>
+            <time class="meta-item" datetime="2026-08-07T23:07:52+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-07 23:07:52</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 12906 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 44 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#计算机网络"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>计算机网络</a>
+              <a class="tag-chip" href="/tags.html#计算机网络"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>计算机网络</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><div class="callout callout-warning"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>杂糅了中科大（学习过程）与南大（考前复习）的课件而成的笔记，排版与质量可能不保证</div></div><h2 id="1-概述和传输层服务">1 概述和传输层服务</h2>
+<h3 id="1-1-传输服务和协议">1.1 传输服务和协议</h3>
+<ul>
+<li>为运行在不同主机上的应用进程提供<strong>逻辑通信</strong></li>
+<li>传输协议运行在端系统
+<ul>
+<li>发送方：将应用层的报文分成报文段，然后传递给网络层</li>
+<li>接收方：将报文段重组成报文，然后传递给应用层</li>
+</ul>
+</li>
+<li>有多个传输层协议可供应用选择
+<ul>
+<li>Internet: <strong>TCP 和 UDP</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="1-2-传输层-vs-网络层">1.2 传输层 vs 网络层</h3>
+<ul>
+<li><mark>网络层服务：主机之间</mark>的逻辑通信</li>
+<li><mark>传输层服务：进程之间</mark>的逻辑通信
+<ul>
+<li><strong>依赖</strong>于网络层的服务
+<ul>
+<li>延时、带宽</li>
+</ul>
+</li>
+<li>并对网络层的服务进行<strong>增强</strong>
+<ul>
+<li>数据丢失、顺序混乱、加密</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>类比：Ann家的12个小孩给另Bill家的12个小孩发信</p>
+<ul>
+<li>主机 = 家庭</li>
+<li>进程 = 小孩</li>
+<li>应用层报文 = 信封中的信件</li>
+<li>传输层协议 = Ann 和 Bill
+<ul>
+<li>为家庭小孩提供<mark>复用解复用</mark>服务(一个人带多封信，一个人收多封信)</li>
+</ul>
+</li>
+<li>网络层协议 = 邮政服务
+<ul>
+<li>家庭-家庭的邮包传输服务</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-3-internet-传输层协议">1.3 Internet 传输层协议</h3>
+<ul>
+<li><strong>可靠、保序</strong>的传输：TCP
+<ul>
+<li>多路复用、解复用</li>
+<li>拥塞控制</li>
+<li>流量控制</li>
+<li>建立连接</li>
+</ul>
+</li>
+<li>不可靠、不保序的传输：UDP
+<ul>
+<li>多路复用、解复用</li>
+<li>没有为尽力而为的 IP 服务添加更多的其它额外服务</li>
+</ul>
+</li>
+<li>都不提供的服务：
+<ul>
+<li>延时保证</li>
+<li>带宽保证</li>
+</ul>
+</li>
+</ul>
+<p>操作系统负责维护<mark>套接字与端口之间的映射关系</mark></p>
+<ul>
+<li>端口存在于数据包中，而套接字存在于操作系统内核中</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>协议类型</th>
+<th>套接字类型</th>
+<th>操作系统存储的映射元组</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UDP</td>
+<td>SOCK_DGRAM</td>
+<td><mark>(本地端口, 本地IP) ⟷ 套接字</mark></td>
+</tr>
+<tr>
+<td>TCP</td>
+<td>SOCK_STREAM</td>
+<td><mark>(本地端口, 本地IP, 远程端口, 远程IP) ⟷ 套接字</mark></td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-多路复用-解复用">2 多路复用/解复用</h2>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-31.webp" alt="alt text" loading="lazy"></p>
+<p>通俗例子：</p>
+<ul>
+<li><strong>主机（Host/IP地址）：</strong> 就像一栋公寓楼。</li>
+<li><strong>应用进程（Process P1/P2/P3/P4）：</strong> 就像公寓里的各个住户。</li>
+<li><strong>套接字（Socket）：</strong> 就像每个住户专属的信箱。</li>
+<li><strong>传输层（Transport Layer）：</strong> 就像公寓楼底层的收发室大爷。</li>
+</ul>
+<p>网络层（即IP层）只负责把数据包送到“哪栋公寓楼”（<strong>主机到主机</strong>），而<strong>传输层则负责把数据准确地送到“哪个住户的信箱”里（进程到进程）</strong>。这个过程就是复用和解复用。</p>
+<p><strong>发送方的“多路复用” (Multiplexing)</strong>：</p>
+<ul>
+<li><strong>场景：</strong> 假设中间的服务器上同时运行着两个应用进程（比如 P1 是 Web 服务，P2 是邮件服务）。这两个进程都需要向外发送数据。</li>
+<li><strong>动作：</strong> P1 和 P2 分别把数据塞进自己的 Socket。传输层（收发室大爷）将这些来自不同 Socket 的数据块收集起来。</li>
+<li><strong>核心封装：</strong> 传输层在每个数据块前面加上一个 <strong>“头部（Header）”</strong>，生成传输层报文段。这个头部里最关键的信息就是<strong>源端口号</strong>和<strong>目的端口号</strong>（写上寄件人和收件人的房间号）。</li>
+<li><strong>结果：</strong> 多个进程的数据被统一打包，顺着网络层的一条网线发了出去。这就是“多路复用”（<mark>把多条路的数据汇聚到一条路上发送</mark>）。</li>
+</ul>
+<p><strong>接收方的“多路解复用” (Demultiplexing)</strong>：</p>
+<ul>
+<li><strong>场景：</strong> 接收方主机（比如右侧的 PC 或者中间的服务器）从网络层接收到了一个数据报文。</li>
+<li><strong>动作：</strong> 数据到达传输层后，传输层（收发室大爷）会拆开网络层的包装，查看传输层头部（Header）里的信息。</li>
+<li><strong>核心分发：</strong> 它提取出头部中的<strong>目的 IP 地址和目的端口号</strong>。根据这个端口号，它就能精确地找到对应的 Socket（Socket 中又包含 pid）。</li>
+<li><strong>结果：</strong> 传输层将数据准确无误地投入到对应的 Socket 中，最终被对应的应用程序（如 P4）读取。这就是“多路解复用”（把一条路上来的数据，分发给多条路上的不同进程）。</li>
+</ul>
+<blockquote>
+<p><a href="https://www.bilibili.com/video/BV1JV411t7ow?spm_id_from=333.788.videopod.episodes&amp;p=24">网课</a></p>
+</blockquote>
+<h2 id="3-无连接传输-udp">3 无连接传输 UDP</h2>
+<p>UDP: User Datagram Protocol（用户数据报协议）</p>
+<ul>
+<li>“尽力而为”的服务，报文段可能
+<ul>
+<li>丢失、乱序</li>
+</ul>
+</li>
+<li>无连接：
+<ul>
+<li>UDP发送端和接收端之间没有握手</li>
+<li>每个UDP报文段都被独立地处理</li>
+</ul>
+</li>
+<li>UDP 被用于:
+<ul>
+<li>流媒体（丢失不敏感，速率敏感、应用可控制传输速率）</li>
+<li>DNS</li>
+</ul>
+</li>
+<li>在UDP上可行可靠传输:
+<ul>
+<li><mark>在应用层增加可靠性</mark></li>
+<li>应用特定的差错恢复</li>
+</ul>
+</li>
+</ul>
+<p>为什么要有 UDP?</p>
+<ul>
+<li><strong>不建立连接（会增加延时）</strong></li>
+<li><strong>简单</strong>：在发送端和接收端没有连接状态</li>
+<li>报文段的<strong>头部很小(开销小)</strong></li>
+<li>无拥塞控制和流量控制：
+<ul>
+<li>UDP可以<strong>尽可能快</strong>的发送报文段</li>
+<li>应用-&gt;传输的速率= 主机-&gt;网络的速率</li>
+</ul>
+</li>
+</ul>
+<p>UDP报文段格式:</p>
+<pre><code class="language-planetext">&lt;-----------------32 bits------------------&gt;
++--------------------+---------------------+
+|      源端口号       |     目的端口号       |
++--------------------+---------------------+
+|        长度         |        校验和       |
++--------------------+---------------------+
+|            应用程序数据（报文）            |
++------------------------------------------+
+
+长度：UDP报文段的字节数，包括头部
+</code></pre>
+<h3 id="udp-校验和">UDP 校验和</h3>
+<p>目标：检测在被传输报文段中的差错(如比特反转)</p>
+<p>发送方：</p>
+<ul>
+<li>将报文段的内容视为 16 比特的整数</li>
+<li>校验和：所有报文段的加法和（1的补运算）</li>
+<li>发送方将校验和放在 UDP 的校验和字段</li>
+</ul>
+<p>接收方：</p>
+<ul>
+<li>计算接收到的报文段的校验和</li>
+<li>检查计算出的校验和与校验和字段的内容是否相等：
+<ul>
+<li>不相等 —— 检测到差错</li>
+<li>相等 —— 没有检测到差错，但也许还是有差错
+<ul>
+<li>残存错误</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="internet-校验和的例子">Internet 校验和的例子</h4>
+<ul>
+<li>注意：求和时，在最高位的<strong>进位要回卷</strong>，再加到结果上</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-32.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li><mark>校验和是<strong>对和的取反</strong></mark></li>
+<li><mark>目标端：校验范围 + 校验和 = 1111111111111111 则通过校验</mark></li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-178.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>对分组内容进行可选的差错校验
+<ul>
+<li>（校验和字段 = 0 表示“不验证校验和”）</li>
+</ul>
+</li>
+<li>源端口号也是可选的
+<ul>
+<li>在某些情况下可用于回复发送方</li>
+</ul>
+</li>
+</ul>
+<h2 id="4-可靠数据传输的原理">4 可靠数据传输的原理</h2>
+<blockquote>
+<p><strong>可靠数据传输（rdt）</strong> 在<mark>应用层、传输层和数据链路层都很重要</mark></p>
+</blockquote>
+<h3 id="rdt1-0-在可靠信道上的可靠数据传输">rdt1.0：在可靠信道上的可靠数据传输</h3>
+<ul>
+<li>下层的信道是完全可靠的
+<ul>
+<li>没有比特出错</li>
+<li>没有分组丢失</li>
+</ul>
+</li>
+<li>发送方将数据发送到下层信道（封装）</li>
+<li>接收方从下层信道接收数据（解封装）</li>
+</ul>
+<h3 id="rdt2-0-具有比特差错的信道">rdt2.0：具有比特差错的信道</h3>
+<ul>
+<li>下层信道可能会出错：将分组中的比特翻转
+<ul>
+<li>用校验和来检测比特差错</li>
+</ul>
+</li>
+<li>问题：怎样从差错中恢复：
+<ul>
+<li>确认(ACK)：接收方显式地告诉发送方分组已被正确接收</li>
+<li><strong>否定确认(NAK)</strong>: <mark>接收方显式地告诉发送方分组发生了差错</mark>
+<ul>
+<li><mark>发送方收到 NAK 后，发送方重传分组</mark></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>rdt2.0 中的新机制：采用差错控制编码进行差错检测
+<ul>
+<li>发送方差错控制编码、缓存</li>
+<li>接收方使用编码检错</li>
+<li>接收方的反馈：控制报文（ACK，NAK）：接收方 -&gt; 发送方</li>
+<li>发送方收到反馈做相应的动作</li>
+</ul>
+</li>
+</ul>
+<p>rdt2.0 的致命缺陷：如果 ACK/NAK 出错</p>
+<ul>
+<li>重传？可能出错</li>
+<li>不重传？可能死锁（或出错）</li>
+<li>需要引入新的机制：序号</li>
+</ul>
+<h3 id="rdt2-1-处理出错的ack-nak">rdt2.1：处理出错的ACK/NAK</h3>
+<p>处理重复：</p>
+<ul>
+<li>发送方在每个分组中加入序号</li>
+<li>如果 ACK/NAK 出错，发送方重传当前分组</li>
+<li>接收方由序号丢弃（不发给上层）重复分组</li>
+</ul>
+<blockquote>
+<p>这里使用的是<strong>停等协议</strong>：发送方发送一个分组，然后等待接收方的应答</p>
+</blockquote>
+<p>发送方：</p>
+<ul>
+<li>在分组中加入序列号</li>
+<li>两个序列号（0，1）就足够了
+<ul>
+<li>一次只发送一个未经确认的分组</li>
+</ul>
+</li>
+<li>必须检测 ACK/NAK 是否出错（需要差错检测码 EDC）</li>
+<li>状态数变成了两倍
+<ul>
+<li>必须记住当前分组的序列号为 0 还是 1</li>
+</ul>
+</li>
+</ul>
+<p>接收方：</p>
+<ul>
+<li>必须检测接收到的分组是否是重复的
+<ul>
+<li>状态会指示希望接收到的分组的序号为 0 还是 1</li>
+</ul>
+</li>
+<li>注意：接收方并不知道发送方是否正确收到了其 ACK/NAK
+<ul>
+<li>没有安排确认的确认</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-42.webp" alt="alt text" loading="lazy"></p>
+<p>接收方不知道它最后发送的 ACK/NAK 是否被正确地收到</p>
+<ul>
+<li>发送方不对收到的 ack/nak 给确认，没有所谓的确认的确认</li>
+<li>接收方发送 ack，如果后面接收方收到的是：
+<ul>
+<li>老分组 p0？则 ack 错误</li>
+<li>下一个分组？P1，ack 正确</li>
+</ul>
+</li>
+</ul>
+<h3 id="rdt2-2-无-nak-的协议">rdt2.2：无 NAK 的协议</h3>
+<ul>
+<li>功能同 rdt2.1，但只使用ACK（ack 要编号）</li>
+<li>接收方对最后正确接收的分组发 ACK，以替代 NAK
+<ul>
+<li><mark>接收方必须显式地包含被正确接收分组的序号</mark></li>
+</ul>
+</li>
+<li>当<mark>收到重复的ACK时，发送方与收到 NAK 采取相同的动作：重传当前分组</mark></li>
+<li>为后面的一次发送多个数据单位做一个准备
+<ul>
+<li>一次能够发送多个</li>
+<li>每一个的应答都有：ACK、NAK，麻烦</li>
+<li>使用对前一个数据单位的ACK，代替本数据单位的 NAK</li>
+<li><strong>确认信息减少一半，协议处理简单</strong></li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-43.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-44.webp" alt="alt text" loading="lazy"></p>
+<h3 id="rdt3-0-具有比特差错和分组丢失的信道">rdt3.0：具有比特差错和分组丢失的信道</h3>
+<p>新的假设：下层信道可能会丢失分组（数据或ACK）</p>
+<ul>
+<li>会死锁</li>
+<li>机制还不够处理这种状况：
+<ul>
+<li>检验和</li>
+<li>序列号</li>
+<li>ACK</li>
+<li>重传</li>
+</ul>
+</li>
+</ul>
+<p>方法：发送方等待 ACK 一段合理的时间，超时重传</p>
+<ul>
+<li>发送方<strong>超时重传</strong>：如果到时没有收到 ACK-&gt;重传</li>
+<li>问题：如果分组（或ACK）只是被延迟了：
+<ul>
+<li>重传将会导致数据重复，但利用序列号已经可以处理这个问题</li>
+<li>接收方必须指明被正确接收的序列号</li>
+</ul>
+</li>
+<li>需要一个倒计数定时器</li>
+</ul>
+<div class="callout callout-note"><p>链路层的 timeout 时间确定的，传输层 timeout 时间是适应式的</p>
+</div><p>发送方：</p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-47.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-48.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li><mark>过早超时（延迟的ACK）也能够正常工作</mark>
+<ul>
+<li><mark>但是效率较低，一半的分组和确认是重复的</mark></li>
+</ul>
+</li>
+<li>设置一个合理的超时时间也是比较重要的</li>
+</ul>
+<h4 id="rdt3-0-的性能">rdt3.0 的性能</h4>
+<ul>
+<li>rdt3.0可以工作，但链路容量比较大的情况下，性能很差
+<ul>
+<li>链路容量比较大，一次发一个 PDU 的不能够充分利用链路的传输能力</li>
+</ul>
+</li>
+</ul>
+<p>例：1 Gbps的链路，15 ms 端-端传播延时，分组大小为1<strong>kB</strong>：</p>
+<div class="math-block">\[
+T_{\text{transmit}} = \frac{L \, (\text{分组长度，比特})}{R \, (\text{传输速率，bps})} = \frac{8 \, \text{kb/pkt}}{10^9 \, \text{b/sec}} = 8 \, \mu\text{s}
+\]</div>
+<div class="math-block">\[
+U_{\text{sender}} = \frac{L/R}{\text{RTT} + L/R} = \frac{0.008}{30.008} = 0.00027
+\]</div>
+<ul>
+<li>\(U_{\text{sender}}\)：利用率 – 忙于发送的时间比例</li>
+<li>每 30ms 发送 1KB 的分组 -&gt; 270kbps=33.75kB/s 的吞吐量（在1Gbps 链路上）</li>
+<li>瓶颈在于：网络协议限制了物理资源的利用</li>
+</ul>
+<p><strong>停 - 等操作</strong>：</p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-49.webp" alt="alt text" loading="lazy"></p>
+<p>流水线：提高链路利用率</p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-50.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>增加 n，能提高链路利用率</li>
+<li>但当达到某个 n，其 u=100% 时，无法再通过增加n，提高利用率</li>
+<li>瓶颈转移了 -&gt; 链路带宽</li>
+</ul>
+<h3 id="流水线协议">流水线协议</h3>
+<p>流水线：允许发送方在未得到对方确认的情况下一次发送多个分组</p>
+<ul>
+<li><mark>必须增加序号的范围</mark>: 用多个bit表示分组的序号</li>
+<li><mark>在发送方/接收方要有缓冲区</mark>
+<ul>
+<li><strong>发送方</strong>缓冲：
+<ul>
+<li><strong>未得到确认，可能需要重传</strong></li>
+</ul>
+</li>
+<li><strong>接收方</strong>缓存：
+<ul>
+<li><strong>上层用户取用数据的速率 ≠ 接收到的数据速率</strong></li>
+<li><strong>接收到的数据可能乱序，排序交付（可靠）</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>两种通用的流水线协议：<strong>回退N步（GBN）</strong> 和 <strong>选择重传（SR）</strong></p>
+<blockquote>
+<p><em>先补充介绍滑动窗口协议作为铺垫</em></p>
+</blockquote>
+<h3 id="通用-滑动窗口协议">通用：滑动窗口协议</h3>
+<p>滑动窗口协议：<strong>发送方</strong>和<strong>接收方</strong>都维护一个窗口</p>
+<ul>
+<li>发送缓冲区
+<ul>
+<li>形式：内存中的一个区域，落入缓冲区的分组可以发送</li>
+<li>功能：用于<mark>存放已发送，但是没有得到确认的分组</mark></li>
+<li>必要性：<mark>需要重发时可用</mark></li>
+</ul>
+</li>
+<li>发送缓冲区的大小：一次最多可以发送多少个未经确认的分组
+<ul>
+<li>停止等待协议 = 1</li>
+<li>流水线协议 &gt; 1，合理的值，不能很大，链路利用率不能够超 100%</li>
+</ul>
+</li>
+<li>发送缓冲区中的分组
+<ul>
+<li>未发送的：落入发送缓冲区的分组，可以连续发送出去</li>
+<li>已经发送出去的、等待对方确认的分组：<mark>发送缓冲区的分组只有得到确认才能删除</mark></li>
+</ul>
+</li>
+</ul>
+<h4 id="发送窗口-发送缓冲区的一个子集">发送窗口：发送缓冲区的一个子集</h4>
+<ul>
+<li><mark>已发送但是未经确认分组的序号构成的空间</mark></li>
+<li>一开始没有发生任何一个分组
+<ul>
+<li>后沿 = 前沿</li>
+<li>发送窗口尺寸为 0</li>
+</ul>
+</li>
+<li>每发送一个分组，前沿前移一个单位</li>
+<li>发送窗口前沿移动的极限：不能够超过发送缓冲区</li>
+<li>发送窗口后沿移动
+<ul>
+<li>条件：收到老分组的确认</li>
+<li>结果：发送缓冲区罩住新的分组，来了分组可以发送</li>
+<li>移动的极限：不能够超过前沿</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-51.webp" alt="alt text" loading="lazy"></p>
+<h4 id="接收窗口-接收缓冲区">接收窗口 = 接收缓冲区</h4>
+<ul>
+<li><strong>接收窗口用于控制哪些分组可以接收</strong>
+<ul>
+<li><mark>只有收到的分组序号落入接收窗口内才允许接收</mark></li>
+<li>若序号在接收窗口之外，则丢弃</li>
+</ul>
+</li>
+<li>接收窗口尺寸 <strong>Wr=1，则只能顺序接收</strong></li>
+<li>接收窗口尺寸 Wr&gt;1 ，则可以乱序接收
+<ul>
+<li>但提交给上层的分组，要按序</li>
+</ul>
+</li>
+</ul>
+<p>接收窗口的滑动和发送确认</p>
+<ul>
+<li>滑动：
+<ul>
+<li>低序号的分组到来，接收窗口移动</li>
+<li>高序号分组乱序到，缓存但不交付（rdt 不允许失序），不滑动</li>
+</ul>
+</li>
+<li>发送确认：
+<ul>
+<li><strong>接收窗口尺寸 = 1：发送连续收到的最大的分组确认（累计确认，顺序接收）</strong></li>
+<li>接收窗口尺寸 &gt; 1：收到分组，发送那个分组的确认（非累计确认）
+<ul>
+<li>收到分组3，发送ACK3，但不代表分组2已被收到</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-52.webp" alt="alt text" loading="lazy"></p>
+<hr>
+<p>滑动窗口的吞吐量</p>
+<ul>
+<li>如果窗口大小为 n，则吞吐量大约为
+<ul>
+<li><mark>MIN(n*DATA/RTT, 链路带宽)</mark></li>
+</ul>
+</li>
+<li>与停等协议对比：Data/RTT</li>
+<li>当 n 过大时会发生什么？
+<ul>
+<li><strong>网络拥塞与丢包</strong>：发送方往网络里注入了远超路由器/交换机缓存承受能力的数据包，导致<strong>路由器排队溢出</strong>，从而引起严重的丢包</li>
+<li><strong>延迟激增</strong>：大量数据包在路由器的队列里<strong>排队，导致 RTT 异常增大</strong>，网络出现明显卡顿</li>
+<li><strong>触发大量重传</strong>：一旦发生丢包，滑动窗口协议需要重传丢失的数据，反而会导致有效吞吐量大幅下降</li>
+<li><strong>接收方内存溢出</strong></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="gbn-协议和-sr-协议的异同">GBN 协议和 SR 协议的异同</h3>
+<p><strong>相同之处</strong>：</p>
+<ul>
+<li><mark>发送窗口 &gt; 1</mark></li>
+<li>一次能够可发送多个未经确认的分组</li>
+</ul>
+<p><strong>不同之处</strong>：</p>
+<ul>
+<li><mark>GBN: 接收窗口尺寸 = 1</mark>
+<ul>
+<li>接收端：只能顺序接收</li>
+<li>发送端：从表现来看，一旦一个分组没有发成功，如：<code>0,1,2,3,4</code>；假如<code>1</code>未成功，<code>2,3,4</code>都发送出去了，要返回<code>1</code>再发送 <code>GB1</code>（<strong>超时重发的是整个发送窗口</strong>）</li>
+</ul>
+</li>
+<li><mark>SR : 接收窗口尺寸 &gt; 1</mark>
+<ul>
+<li>接收端：可以乱序接收</li>
+<li>发送端：发送<code>0,1,2,3,4</code>，一旦<code>1</code>未成功，<code>2,3,4</code>已发送，无需重发，选择性发送<code>1</code>（独立确认，每个分组单独一个计时器，<strong>超时重发的只是这个分组</strong>）</li>
+</ul>
+</li>
+</ul>
+<h4 id="go-back-n">Go-back-N</h4>
+<ul>
+<li>发送端最多在流水线中有 N 个未确认的分组</li>
+<li>接收端只是发送累计确认
+<ul>
+<li>接收端如果发现 gap，不确认新到来的分组</li>
+</ul>
+</li>
+<li><mark><strong>发送端</strong>拥有对<strong>最老的未确认分组</strong>的定时器</mark>
+<ul>
+<li>只需设置<mark>一个定时器</mark></li>
+<li><mark>当定时器到时时，<strong>重传所有未确认分组</strong></mark></li>
+</ul>
+</li>
+</ul>
+<p>接收方:</p>
+<ul>
+<li>只发送 ACK：对顺序接收的最高序号的分组
+<ul>
+<li>可能会产生重复的 ACK</li>
+<li>接收窗口 = 1，只一个变量就可表示接收窗口</li>
+</ul>
+</li>
+<li>对乱序的分组：
+<ul>
+<li><strong>丢弃（不缓存）</strong></li>
+<li>对顺序接收的最高序号的分组进行确认-累计确认</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-56.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-57.webp" alt="alt text" loading="lazy"></p>
+<h4 id="selective-repeat">Selective Repeat</h4>
+<ul>
+<li><mark>接收方对每个正确接收的分组，分别发送 ACKn（非累积确认）</mark>
+<ul>
+<li>接收窗口 &gt; 1
+<ul>
+<li>可以缓存乱序的分组</li>
+</ul>
+</li>
+<li>最终将分组按顺序交付给上层</li>
+</ul>
+</li>
+<li>发送方只对那些没有收到 ACK 的分组进行重发 —— 选择性重发
+<ul>
+<li><mark>发送方为每个未确认的分组设定一个定时器</mark></li>
+</ul>
+</li>
+<li>发送窗口的最大值（发送缓冲区）限制发送未确认分组的个数</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-58.webp" alt="alt text" loading="lazy"></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>GBN</th>
+<th>SR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>优 点</td>
+<td><mark>简单，所需资源少</mark>（接收方一个缓存单元）</td>
+<td><mark>出错时，重传一个代价小</mark></td>
+</tr>
+<tr>
+<td>缺 点</td>
+<td>一旦出错，回退 N 步代价大</td>
+<td>复杂，所需要资源多（接收方多个缓存单元）</td>
+</tr>
+<tr>
+<td>适用范围</td>
+<td><mark>出错率低</mark></td>
+<td><mark>链路容量大（延迟大、带宽大）</mark></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<ul>
+<li>链路利用率与窗口大小
+滑动窗口机制能够实现链路的完全利用，但这有一个前提条件：窗口的大小必须足够大，以覆盖传输延迟带来的 “在途” 数据量</li>
+<li>发送方的缓冲需求
+发送方必须缓存所有已发送但尚未被确认的分组。这是为了应对可能发生的丢包情况，确保在需要时能够对这些分组进行重传。</li>
+<li>接收方的处理能力
+接收方具备一定的能力来接收和处理乱序到达的分组，但这种能力受限于接收方自身的缓冲区大小。</li>
+<li>实现复杂度
+协议的具体实现难度取决于所采用的策略细节，主要体现为回退 N 步与选择重传之间的区别</li>
+</ul>
+<hr>
+<h4 id="窗口的最大尺寸">窗口的最大尺寸*</h4>
+<p>假设<strong>序列号用 \(n\) 位比特</strong>表示，那么序列号的总数是 \(k = 2^n\)</p>
+<ul>
+<li>GBN：\(2^n - 1\)</li>
+<li>SR：\(2^{n-1}\)（即序列号空间的一半）</li>
+</ul>
+<p>例：\(n=2\)，序列号为 0, 1, 2, 3，若 SP 窗口为 3（超过限制2）</p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-53.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>接收方收到重传的旧 pkt0 后，误以为这是全新的数据并接受它</li>
+</ul>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>序号大小与窗口大小之间的关系？</div></div><p>为了避免上述重叠问题，必须满足：</p>
+<div class="math-block">\[发送窗口大小 + 接收窗口大小 \leq 序列号总空间\]</div>
+<p><mark>对于 SR 协议，由于发送窗口和接收窗口大小通常相等</mark>（设为 \(W\)），公式变为：</p>
+<div class="math-block">\[2W \leq 2^n \implies W \leq 2^{n-1}\]</div>
+<p><mark>对于 GBN 协议，由于接收窗口大小始终为 1</mark>，公式变为：</p>
+<div class="math-block">\[W + 1 \leq 2^n \implies W \leq 2^n - 1\]</div>
+<h2 id="5-面向连接的传输-tcp">5 面向连接的传输：TCP</h2>
+<ul>
+<li>点对点：
+<ul>
+<li>一个发送方，一个接收方</li>
+</ul>
+</li>
+<li>可靠的、按顺序的<strong>字节流</strong>：
+<ul>
+<li><strong>没有报文边界</strong></li>
+</ul>
+</li>
+<li>管道化（流水线）：
+<ul>
+<li>TCP 拥塞控制和流量控制设置窗口大小</li>
+</ul>
+</li>
+<li>发送和接收缓存</li>
+<li>全双工数据：
+<ul>
+<li>在同一连接中数据流双向流动</li>
+<li><mark><strong>MSS</strong>：最大报文段大小（把应用进程传下来的字节流切片）</mark></li>
+</ul>
+</li>
+<li>面向连接：
+<ul>
+<li>在数据交换之前，通过握手（交换控制报文）初始化发送方、接收方的状态变量</li>
+</ul>
+</li>
+<li>有流量控制：
+<ul>
+<li>发送方不会淹没接收方</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-1-段结构">5.1 段结构</h3>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-180.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>IP 分组
+<ul>
+<li>不超过最大传输单元（MTU）</li>
+<li>例如，以太网中最多 1500 字节</li>
+</ul>
+</li>
+<li>TCP 分组
+<ul>
+<li>包含 TCP 头部和数据的 IP 分组</li>
+<li>TCP 头部 ≥ 20 字节</li>
+</ul>
+</li>
+<li><strong>TCP 报文段</strong>
+<ul>
+<li><strong>不超过最大报文段大小（MSS）字节</strong></li>
+<li>例如，从字节流中取最多 1460 个连续字节</li>
+<li><mark>MSS = MTU –（IP 头部）–（TCP 头部）</mark></li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-59.webp" alt="alt text" loading="lazy"></p>
+<p><em>首部长度：Number of 4-byte words in the header</em></p>
+<h4 id="序号-确认号">序号，确认号</h4>
+<ul>
+<li>序号：对字节计数
+<ul>
+<li><mark>报文段首字节的在<strong>字节流</strong>的编号</mark></li>
+<li>(body <mark>起始字节在整个字节流中的偏移量</mark>)</li>
+</ul>
+</li>
+<li>确认号:
+<ul>
+<li>期望从另一方收到的下一个字节的序号</li>
+<li>确认号 - 1 （包括）以前的字节都已经收到</li>
+<li><mark>累积确认</mark></li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-179.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-60.webp" alt="alt text" loading="lazy"></p>
+<p><mark>下一个要发送的数据包的<strong>序列号（Seqno）</strong>，等于上一次接收到的 <strong>ACK 字段（确认号）</strong> 的值</mark></p>
+<h5 id="1-发送方的行为">1. 发送方的行为</h5>
+<ul>
+<li><strong>发送数据包</strong>：发送方发送一个数据包，其中包含 \(B\) 字节的数据。</li>
+<li><strong>序列号分配</strong>：该数据包的数据起始序列号为 \(X\)，因此数据覆盖的序列号范围为 \([X, X+1, \dots, X+B-1]\)。</li>
+</ul>
+<h5 id="2-接收方的确认机制">2. 接收方的确认机制</h5>
+<p>当接收方收到数据包后，会根据接收情况发送确认号：</p>
+<ul>
+<li>
+<p><strong>情况一：数据按序到达</strong></p>
+<ul>
+<li>如果接收方已经成功接收了序列号 \(X\) 之前的所有数据，那么当前的数据包是连续的。</li>
+<li><strong>ACK 行为</strong>：接收方发送 ACK <mark>确认号为 <strong>\(X+B\)</strong></mark>。</li>
+<li><strong>含义</strong>：表示 \(X+B-1\) 及之前的字节都已收到，<mark><strong>期望</strong>接收的下一个字节是 \(X+B\)</mark>。</li>
+</ul>
+</li>
+<li>
+<p><strong>情况二：存在数据缺失</strong></p>
+<ul>
+<li>如果接收方已接收的<mark>最高连续字节序列号为 \(Y\)</mark>，且 \(Y+1 < X\)（说明序列号 \(Y+1\) 到 \(X-1\) 之间的数据尚未收到，当前包是乱序或重复的）。</li>
+<li><strong>ACK 行为</strong>：接收方发送 <mark>ACK 确认号为 <strong>\(Y+1\)</strong></mark>。</li>
+<li><strong>注意</strong>：即使这个 ACK (\(Y+1\)) 之前已经发送过，接收方仍会再次发送，以此告知发送方它仍在等待 \(Y+1\) 这个字节。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>发送方发送每个 100B 的分组，序列号为：
+<ul>
+<li>100, 200, 300, 400, 500, 600, 700, 800, 900, …</li>
+</ul>
+</li>
+<li>假设第五个分组（序列号 500）丢失，其他正常</li>
+<li>确认号序列将为：
+<ul>
+<li>200, 300, 400, 500（确认 seqno:600）, 500（确认 seqno:700）, 500（确认 seqno:800）, 500（确认 seqno:900）, …</li>
+</ul>
+</li>
+</ul>
+<h4 id="tcp-往返延时-rtt-和超时">TCP 往返延时（RTT）和超时</h4>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>怎样设置 TCP 的超时？</div></div><ul>
+<li><mark><strong>比 RTT 要长</strong></mark>：但 RTT 是变化的（远距离的很多跳）
+<ul>
+<li>长时间的 RTT 分布比较分散</li>
+<li>短时间的 RTT 分布比较集中</li>
+</ul>
+</li>
+<li>太短：太早超时不必要的重传</li>
+<li>太长：对报文段丢失反应太慢，消极</li>
+</ul>
+<p>怎样估计 RTT？</p>
+<ul>
+<li>SampleRTT：测量从报文段发出到收到确认的时间
+<ul>
+<li><mark>如果有重传，忽略此次测量</mark></li>
+</ul>
+</li>
+<li>SampleRTT 会变化，因此估计的 RTT 应该比较平滑
+<ul>
+<li>对几个最近的测量值求平均，而不是仅用当前的 SampleRTT</li>
+</ul>
+</li>
+</ul>
+<div class="math-block">\[EstimatedRTT = (1-\alpha)\times EstimatedRTT + \alpha \times SampleRTT\]</div>
+<ul>
+<li>指数加权移动平均</li>
+<li><strong>过去样本的影响呈指数衰减</strong></li>
+<li>推荐值：\(\alpha\) = 0.125</li>
+</ul>
+<p>但光有平均值不够，网络波动大的时候，需要多留一点<strong>安全边界</strong>，即</p>
+<div class="math-block">\[超时 = EstimtedRTT + 安全边界时间\]</div>
+<p><mark>计算 SampleRTT 会偏离 EstimatedRTT 多远</mark>：</p>
+<div class="math-block">\[
+\text{DevRTT} = (1 - \beta) \times \text{DevRTT} + \beta \times |\text{SampleRTT} - \text{EstimatedRTT}|
+\]</div>
+<ul>
+<li>推荐值: \(\beta = 0.25\)</li>
+</ul>
+<p>故超时时间间隔设置为：</p>
+<div class="math-block">\[TimeoutInterval = EstimatedRTT + 4 \times \text{DevRTT}\]</div>
+<hr>
+<h4 id="karn-partridge-algorithm">Karn/Partridge algorithm</h4>
+<h5 id="1-样本选择与-rtt-估算">1. 样本选择与 RTT 估算</h5>
+<ul>
+<li><mark><strong>忽略重传样本</strong></mark>：在计算往返时间时，<strong>不使用</strong>来自重传分组的 SampleRTT。一旦某个分组被重传，后续该分组的确认将不再用于 RTT 测量（以避免歧义）。</li>
+<li><strong>计算 EstimatedRTT</strong>：使用指数加权移动平均算法，权重系数 <strong>\(\alpha = 0.125\)</strong>。</li>
+</ul>
+<h5 id="2-超时时间-rto-的设定">2. 超时时间（RTO）的设定</h5>
+<ul>
+<li><strong>基础设定</strong>：超时值通常设定为估算 RTT 的两倍，即：
+$\(RTO = 2 \times EstimatedRTT\)$</li>
+</ul>
+<h5 id="3-动态调整机制">3. 动态调整机制</h5>
+<ul>
+<li><strong>指数退避</strong>：每当 RTO 定时器超时（发生超时事件），RTO 的值会翻倍（\(RTO \leftarrow 2 \times RTO\)），直到达到最大值（\(\ge 60\) 秒）。</li>
+<li><strong>测量值恢复</strong>：每当有新的测量值进入（即原始传输成功确认），RTO 会立即<strong>回缩</strong>并重置为 \(2 \times EstimatedRTT\)。</li>
+</ul>
+<h5 id="4-局限性">4. 局限性</h5>
+<ul>
+<li>该机制被指出对 RTT 的变化<strong>不够敏感</strong>。</li>
+</ul>
+<h4 id="jacobson-karels-algorithm">Jacobson/Karels algorithm</h4>
+<p>Problem: need to better capture variability in RTT</p>
+<ul>
+<li>Directly measure deviation
+$\(Deviation = | SampleRTT – EstimatedRTT |\)$</li>
+<li>DevRTT: exponential average of Deviation
+$\(RTO = EstimatedRTT + 4 \times DevRTT\)$</li>
+</ul>
+<div class="math-block">\[
+\begin{aligned}
+& SRTT(k+1) = (1-g) \times SRTT(k) + g \times RTT(k+1) \\
+& SERR(k+1) = RTT(k+1) - SRTT(k) \\
+& SDEV(k+1) = (1-h) \times SDEV(k) + h \times |SERR(k+1)| \\
+& RTO(k+1) = SRTT(k+1) + f \times SDEV(k+1) \\
+& g = \frac{1}{8} = 0.125 \quad h = \frac{1}{4} = 0.25 \quad f = 2 \text{ or } 4
+\end{aligned}
+\]</div>
+<hr>
+<h3 id="5-2-可靠数据传输">5.2 可靠数据传输</h3>
+<ul>
+<li><strong>TCP 在 IP 不可靠服务的基础上建立了 rdt</strong>
+<ul>
+<li>管道化的报文段
+<ul>
+<li>GBN or SR</li>
+</ul>
+</li>
+<li><mark>累积确认</mark>（像GBN）</li>
+<li><mark>单个重传定时器</mark>（像GBN）</li>
+<li>是否可以接受乱序的，没有规范</li>
+</ul>
+</li>
+<li>通过以下事件触发重传
+<ol>
+<li><mark>超时</mark>（<mark>只重发那个最早的未确认段：SR</mark>）</li>
+<li><mark>重复的确认</mark>
+<ul>
+<li>例子：收到了 ACK50，之后又收到 3 个 ACK50</li>
+<li>此时还没有超时，“快速重传”</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<h4 id="tcp-发送方事件">TCP 发送方事件</h4>
+<h5 id="从应用层接收数据">从应用层接收数据</h5>
+<ul>
+<li>用 nextseq 创建报文段</li>
+<li>序号 nextseq 为报文段首字节的字节流编号</li>
+<li>如果还没有运行，启动定时器
+<ul>
+<li>定时器与最早未确认的报文段关联</li>
+<li>过期间隔：TimeOutInterval</li>
+</ul>
+</li>
+</ul>
+<h5 id="超时">超时</h5>
+<ul>
+<li><strong>重传后沿最老的报文段</strong>
+<ul>
+<li><mark>区别于GBN，GBN全部重传</mark></li>
+</ul>
+</li>
+<li><strong>重新启动定时器</strong>
+<ul>
+<li><mark>区别于SR，定时器只有一个</mark></li>
+</ul>
+</li>
+<li>既不是GBN也不是SR，而是混合体</li>
+</ul>
+<h5 id="收到确认">收到确认</h5>
+<ul>
+<li>如果是对尚未确认的报文段确认
+<ul>
+<li>更新已被确认的报文序号</li>
+<li>如果当前还有未被确认的报文段，重新启动定时器</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-c">NextSeqNum = InitialSeqNum  
+SendBase = InitialSeqNum
+<span class="hljs-comment">/* SendBase-1: 最后一个累积确认的字节 */</span>
+
+loop (forever) {  
+    <span class="hljs-keyword">switch</span>(event)  
+
+    event: data received from application above  
+        create TCP segment with sequence number NextSeqNum  
+        <span class="hljs-keyword">if</span> (timer currently not running)  
+            start timer  
+        pass segment to IP  
+        NextSeqNum = NextSeqNum + length(data)  
+
+    event: timer timeout  
+        retransmit not-yet-acknowledged segment with smallest sequence number  
+        start timer  
+
+    event: ACK received, with ACK field value of y  
+        <span class="hljs-keyword">if</span> (y &gt; SendBase) {  
+            SendBase = y  
+            <span class="hljs-keyword">if</span> (there are currently not-yet-acknowledged segments)  
+                start timer  
+        }  
+} <span class="hljs-comment">/* end of loop forever */</span>
+</code></pre>
+<h5 id="重传">重传</h5>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-62.webp" alt="alt text" loading="lazy"></p>
+<h4 id="接收方产生tcp-ack的建议">接收方产生TCP ACK的建议</h4>
+<table>
+<thead>
+<tr>
+<th>接收方的事件</th>
+<th>TCP接收方动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>所期望序号的报文段按序到达。所有在期望序号之前的都已被确认</td>
+<td>延迟的ACK（顺顺利利，不干扰发送方）。对另一个按序报文段的到达最多等待500ms。如果下一个报文段在这个时间间隔内没有到达，则发送一个ACK。</td>
+</tr>
+<tr>
+<td>有期望序号的报文段到达。另一个按序报文段等待发送ACK（接着上面的那种情况，当前ACK还未发，但预期的下一个包到达了）</td>
+<td>立即发送单个累积ACK，以确认两个按序报文段。</td>
+</tr>
+<tr>
+<td>比期望序号大的报文段乱序到达。检测出数据流中的间隔</td>
+<td>立即发送重复的ACK，指明下一个期待字节的序号</td>
+</tr>
+<tr>
+<td>能部分或完全填充接收数据间隔的报文段到达。</td>
+<td>若该报文段起始于间隔（gap）的低端，则立即发送ACK。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="快速重传">快速重传</h4>
+<ul>
+<li>超时周期往往太长：
+<ul>
+<li>在重传丢失报文段之前的延时太长</li>
+</ul>
+</li>
+<li><mark>通过 k 个重复的 ACK 来检测报文段丢失</mark>（TCP 使用 k = 3）
+<ul>
+<li>发送方通常连续发送大量报文段</li>
+<li>如果报文段丢失，通常会引起多个重复的 ACK</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-63.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li><mark>如果发送方收到同一数据的 3 个冗余ACK，重传最小序号的段</mark>
+<ul>
+<li>快速重传：在定时器过时之前重发报文段</li>
+<li>它假设跟在被确认的数据后面的数据丢失了
+<ul>
+<li>第一个 ACK 是正常的</li>
+<li>收到第二个该段的 ACK，表示接收方收到一个该段后的乱序段</li>
+<li>收到第 3，4 个该段的 ACK，表示接收方收到该段之后的 2 个，3 个乱序段，可能性非常大</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-c">event: ACK received, with ACK field value of `y`  
+  <span class="hljs-keyword">if</span> (y &gt; SendBase) {
+      SendBase = y
+      <span class="hljs-keyword">if</span> (there are currently not-yet-acknowledged segments) {
+          start timer
+      }
+  } <span class="hljs-keyword">else</span> {
+      increment count of dup ACKs received <span class="hljs-keyword">for</span> y
+      <span class="hljs-keyword">if</span> (count of dup ACKs received <span class="hljs-keyword">for</span> y = <span class="hljs-number">3</span>) {
+          resend segment with sequence number y
+      }
+  }
+</code></pre>
+<p>重传后的两种选择：</p>
+<ul>
+<li>发送丢失分组，并将滑动窗口向前移动重复 ACK 的数量
+<ul>
+<li>加快传输速度，但可能出错</li>
+</ul>
+</li>
+<li>发送丢失分组，等待 ACK 来移动滑动窗口
+<ul>
+<li>会因单个丢包而变慢</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><em>TCP 应该选择哪一种？—— TCP 的几种变体</em></p>
+</blockquote>
+<h3 id="5-3-连接管理">5.3 连接管理</h3>
+<p>在正式交换数据之前，发送方和接收方握手建立通信关系:</p>
+<ul>
+<li>同意建立连接（每一方都知道对方愿意建立连接）</li>
+<li>同意连接参数</li>
+</ul>
+<h4 id="2-次握手">2 次握手</h4>
+<p>在网络中，2次握手建立连接总是可行吗？</p>
+<ul>
+<li>变化的延迟（连接请求的段没有丢，但可能超时）</li>
+<li>由于丢失造成的重传 (e.g. req_conn(x))</li>
+<li>报文乱序</li>
+<li>相互看不到对方</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-65.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>半连接即虚假连接，浪费服务器资源</li>
+</ul>
+<h4 id="3-次握手">3 次握手</h4>
+<p>2 次握手缺陷的解决方案：<mark><strong>变化的初始序号 + 双方确认对方的序号（3次握手）</strong></mark></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-67.webp" alt="alt text" loading="lazy"></p>
+<h5 id="初始状态">初始状态</h5>
+<ul>
+<li><strong>客户端 (Client) 和 服务器 (Server)</strong> 一开始都处于 <code>LISTEN</code>（监听）状态，准备接收或发起连接。</li>
+</ul>
+<h5 id="第一次握手-客户端发起连接请求">第一次握手：<mark>客户端发起连接请求</mark></h5>
+<ul>
+<li><strong>动作：</strong> 客户端选择一个<strong>随机的初始序号 \(x\)</strong>。</li>
+<li><strong>发送报文：</strong> 客户端向服务器发送一个 <strong>SYN 报文</strong>。报文头部中同步标志位 <code>SYNbit = 1</code>，序列号 <code>Seq = x</code>。</li>
+<li><strong>状态变化：</strong> 客户端状态由 <code>LISTEN</code> 变为 <code>SYNSENT</code>（同步已发送），开始等待服务器的确认。</li>
+<li><em>目的：告诉服务器，“我想建立连接，我的初始数据序号是 \(x\)”。</em></li>
+</ul>
+<h5 id="第二次握手-服务器接收请求并确认-同时发起自己的连接请求">第二次握手：<mark>服务器接收请求并确认，同时发起自己的连接请求</mark></h5>
+<ul>
+<li><strong>动作：</strong> 服务器收到客户端的 SYN 报文后，同意建立连接。它也会为自己选择一个随机的初始序号 \(y\)。</li>
+<li><strong>发送报文：</strong> 服务器向客户端发送一个 <strong>SYNACK 报文</strong>。这个报文包含两部分功能：
+<ol>
+<li><strong>确认 (ACK)：</strong> 确认标志位 <code>ACKbit = 1</code>，确认号 <code>ACKnum = x + 1</code>（表示序号 \(x\) 已经收到，期待收到 \(x+1\) 及之后的数据）。</li>
+<li><strong>同步 (SYN)：</strong> 同步标志位 <code>SYNbit = 1</code>，序列号 <code>Seq = y</code>。</li>
+</ol>
+</li>
+<li><strong>状态变化：</strong> 服务器状态变为 <code>SYN RCVD</code>（同步已接收）。</li>
+<li><em>目的：告诉客户端，“我收到你的请求了（确认号 \(x+1\)），我也同意连接。我的初始数据序号是 \(y\)”。</em></li>
+</ul>
+<h5 id="第三次握手-客户端确认服务器的请求">第三次握手：<mark>客户端确认服务器的请求</mark></h5>
+<ul>
+<li><strong>动作：</strong> 客户端收到服务器的 SYNACK 报文后，知道服务器是活跃的并且同意了连接。</li>
+<li><strong>发送报文：</strong> 客户端再次发送确认报文。确认标志位 <code>ACKbit = 1</code>，确认号 <code>ACKnum = y + 1</code>（表示收到了服务器的序号 \(y\)）。
+<ul>
+<li><strong>第三次握手的报文是可以携带客户端到服务器的实际数据的</strong>。</li>
+</ul>
+</li>
+<li><strong>状态变化：</strong> 客户端发送完确认后，立刻进入 <code>ESTAB</code>（Established，已建立连接）状态。服务器在收到这个确认报文后，也进入 <code>ESTAB</code> 状态。</li>
+<li><em>目的：告诉服务器，“我收到了你的确认和你的初始序号（确认号 \(y+1\)），我们可以开始正式传输数据了”。</em></li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-68.webp" alt="alt text" loading="lazy"></p>
+<p>注意接收老数据问题中有两种情况：</p>
+<ul>
+<li>连接不存在，没建立起来，丢弃</li>
+<li>新连接建立了，旧数据来了
+<ul>
+<li>连接的序号不在当前连接的范围之内，丢弃
+<ul>
+<li>故<strong>初始序号的选取是随机的</strong>，不是固定序号开始</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-181.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-182.webp" alt="alt text" loading="lazy">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-183.webp" alt="alt text" loading="lazy">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-184.webp" alt="alt text" loading="lazy">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-185.webp" alt="alt text" loading="lazy"></p>
+<p><strong>SYN 丢失与 Web 下载</strong></p>
+<ul>
+<li>用户点击超链接
+<ul>
+<li>浏览器创建套接字并执行“connect”</li>
+<li>“connect”触发操作系统发送 SYN</li>
+</ul>
+</li>
+<li>如果 SYN 丢失…
+<ul>
+<li>3–6 秒的延迟：可能非常漫长</li>
+<li>用户可能会不耐烦并重试</li>
+</ul>
+</li>
+<li>用户触发“connect”的“中止”
+<ul>
+<li>浏览器创建新套接字并发起另一次“connect”</li>
+<li>在某些情况下可能有效</li>
+</ul>
+</li>
+</ul>
+<h4 id="关闭连接">关闭连接</h4>
+<ul>
+<li>客户端、服务器<strong>分别关闭它自己这一侧的连接</strong>
+<ul>
+<li>发送 FIN bit = 1 的 TCP 段</li>
+</ul>
+</li>
+<li>一旦接收到 FIN，用 ACK 回应
+<ul>
+<li>接到 FIN 段，ACK 可以和它自己发出的 FIN 段一起发送</li>
+</ul>
+</li>
+<li>可以处理同时的 FIN 交换</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-69.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>但关闭实则不完美，参考“山谷白军3000人，两边红军2000人，放通讯兵”</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-186.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>A 向 B 发送 RESET（RST）
+<ul>
+<li>例如，因为 A 上的应用进程崩溃了</li>
+</ul>
+</li>
+<li>就这样
+<ul>
+<li>B 不会对 RST 进行确认</li>
+<li>因此，RST 不会被可靠传递，且所有正在传输中的数据都将丢失</li>
+<li>但是：如果 B 再发送任何数据，将会触发另一个 RST</li>
+</ul>
+</li>
+</ul>
+<p><em>FIN 是礼貌的告别，而 RST 是粗暴的断交</em></p>
+<p><strong>TCP client lifecycle</strong></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-187.webp" alt="alt text" loading="lazy"></p>
+<p><strong>TCP server lifecycle</strong></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-188.webp" alt="alt text" loading="lazy"></p>
+<blockquote>
+<p>上图 TCP server lifecycle 有误，底部 FIN_WAIT_1 应改为 ESTABLISHED</p>
+</blockquote>
+<h3 id="5-4-流量控制">5.4 流量控制</h3>
+<p><mark><strong>接收方控制发送方</strong>，不让发送方发送的太多、太快以至于让<strong>接收方的缓冲区溢出</strong></mark></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-64.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li><mark>接收方在其向发送方的 <strong>TCP 段头部的 RWND 字段</strong> “通告” 其空闲 buffer 大小</mark>
+<ul>
+<li>RcvBuffer 大小通过 socket 选项设置 (典型默认大小为4096 字节)</li>
+<li>很多操作系统自动调整 RcvBuffer</li>
+</ul>
+</li>
+<li><mark>发送方限制未确认（在途）字节的个数 ≤ 接收方发送过来的 RWND 值</mark>
+<ul>
+<li>保证接收方不会被淹没</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-plaintext">                    到应用进程
+                        ⭡
+LastByteRead -&gt; +-----------------+ ---------------
+                |                 |           ⭡
+                |  buffered data  |           |
+                |                 |       RcvBuffer
+LastByteRcvd -&gt; +-----------------+ ----      |
+                |                 |  ⭡        |
+                |free buffer space| RWND      |
+                |                 |  ↓        ↓
+                +-----------------+ ---------------
+                        ⭡
+                TCP segment payloads
+</code></pre>
+<p>假设 TCP 接收方丢弃乱序的报文段</p>
+<p>缓存中的可用的空间
+= RcvWindow
+= RcvBuffer-[LastByteRcvd - LastByteRead]</p>
+<p><strong>发送方滑动窗口</strong></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-189.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-190.webp" alt="alt text" loading="lazy"></p>
+<p><strong>信用分配流量控制机制</strong></p>
+<ul>
+<li>
+<p>假设 B 最后接收到的数据字节序号为 \(i-1\)，B 最后发送的报文段为 \((AN=i, W=j)\)。则：</p>
+<ul>
+<li>在没有新数据到达的情况下，要将信用额度增加到 \(k\)（\(k > j\)），B 发送 \((AN=i, W=k)\)</li>
+<li>要确认一个包含 \(m\) 字节数据（\(m < j\)）的到达报文段而<em>不额外授予信用额度</em>，B 发送 \((AN=i+m, W=j-m)\)</li>
+</ul>
+</li>
+<li>
+<p>如果 ACK/CREDIT 报文段丢失，几乎没有损害。后续的确认将重新同步协议。</p>
+</li>
+<li>
+<p>此外，如果发送方超时并重传数据报文段，它会触发新的确认。</p>
+</li>
+</ul>
+<p><strong>信用分配死锁</strong></p>
+<ul>
+<li>
+<p>B 向 A 发送：带有 <code>AN=i</code>, <code>W=0</code> 的报文段，关闭接收窗口</p>
+</li>
+<li>
+<p>B 向 A 发送：<code>AN=i</code>, <code>W=j</code> 以重新打开，但这个报文可能丢失</p>
+</li>
+<li>
+<p>现在 A 认为窗口已关闭，B 认为窗口已打开并等待</p>
+</li>
+<li>
+<p><strong>处理方法</strong></p>
+<ul>
+<li>使用 <code>窗口定时器</code></li>
+<li>如果定时器超时而没有收到任何数据，（A）发送一些东西</li>
+<li>可以是之前报文段的重传</li>
+</ul>
+</li>
+</ul>
+<h2 id="6-拥塞控制原理">6. 拥塞控制原理</h2>
+<ul>
+<li>拥塞的非正式的定义: “太多的数据需要网络传输，超过了网络的处理能力”</li>
+<li>与流量控制不同</li>
+<li>拥塞的表现:
+<ul>
+<li><mark>分组丢失 (路由器缓冲区溢出)</mark></li>
+<li><mark>分组经历比较长的延迟 (在路由器的队列中排队)</mark></li>
+</ul>
+</li>
+</ul>
+<h3 id="6-1-拥塞的原因-代价">6.1 拥塞的原因/代价</h3>
+<h4 id="场景-1">场景 1</h4>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-70.webp" alt="alt text" loading="lazy"></p>
+<h4 id="场景-2">场景 2</h4>
+<ul>
+<li>一个路由器，有限的缓冲</li>
+<li>分组丢失时，发送端重传
+<ul>
+<li>应用层的输入 = 应用层输出: \(\lambda_{in} = \lambda_{out}\)</li>
+<li>传输层的输入包括重传: \(\lambda^{'}_{in} > \lambda_{in}\)</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-71.webp" alt="alt text" loading="lazy"></p>
+<p>理想化: 发送端有完美的信息</p>
+<ul>
+<li>发送端知道什么时候路由器的缓冲是可用的
+<ul>
+<li>只在缓冲可用时发送</li>
+<li>不会丢失: \(\lambda^{'}_{in} = \lambda_{in}\)</li>
+</ul>
+</li>
+</ul>
+<p>现实情况: 重复</p>
+<ul>
+<li>分组可能丢失，由于缓冲器满而被丢弃</li>
+<li>发送端最终超时，发送第2个拷贝，2个分组都被传出</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-72.webp" alt="alt text" loading="lazy"></p>
+<p><strong>拥塞的“代价”</strong>：</p>
+<ul>
+<li>为了达到一个有效输出，网络需要做更多的工作（重传）</li>
+<li><strong>没有必要的重传，链路中包括了多个分组的拷贝</strong>
+<ul>
+<li><mark>是那些没有丢失，经历的时间比较长（拥塞状态）但是超时的分组</mark></li>
+</ul>
+</li>
+<li>输出比输入少原因
+<ul>
+<li>重传的丢失分组</li>
+<li>没有必要重传的重复分组</li>
+</ul>
+</li>
+</ul>
+<h4 id="场景-3">场景 3</h4>
+<p>4个发送端、多重路径、超时/重传</p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-73.webp" alt="alt text" loading="lazy"></p>
+<p>当红色的 \(\lambda^{'}_{in}\) 增加时，所有到来的蓝色分组都在最上方的队列中丢弃了，蓝色吞吐 -&gt; 0</p>
+<p>蓝色受阻，又不断重传，导致蓝色第一跳的路由器缓冲区溢出，形成“死锁”</p>
+<p><strong>又一个拥塞的代价</strong>:</p>
+<ul>
+<li><mark>当分组丢失时，任何“关于这个分组的上游传输能力”都被浪费了</mark>
+<ul>
+<li>第二跳出不去，第一跳白费了</li>
+</ul>
+</li>
+</ul>
+<h3 id="6-2-拥塞控制方法">6.2 拥塞控制方法</h3>
+<p>2 种常用的拥塞控制方法:</p>
+<p><strong>端到端拥塞控制</strong>:</p>
+<ul>
+<li>没有来自网络的显式反馈</li>
+<li>端系统根据<mark>延迟和丢失</mark>事件推断是否有拥塞</li>
+<li>TCP 采用的方法</li>
+</ul>
+<p><strong>网络辅助的拥塞控制</strong>:</p>
+<ul>
+<li><mark>路由器提供给端系统以反馈信息</mark>
+<ul>
+<li>单个bit置位，显示有拥塞</li>
+<li>显式提供发送端可以采用的速率</li>
+</ul>
+</li>
+</ul>
+<h2 id="7-tcp-拥塞控制">7 TCP 拥塞控制</h2>
+<p>端到端的拥塞控制机制：</p>
+<ul>
+<li>路由器不向主机提供有关拥塞的反馈信息
+<ul>
+<li>路由器的负担较轻</li>
+<li>符合网络核心简单的TCP/IP架构原则</li>
+</ul>
+</li>
+<li>端系统根据自身得到的信息，判断是否发生拥塞，从而采取动作</li>
+</ul>
+<p>拥塞控制的几个问题：</p>
+<ul>
+<li>如何检测拥塞
+<ul>
+<li>轻微拥塞</li>
+<li>拥塞</li>
+</ul>
+</li>
+<li>控制策略
+<ul>
+<li>在拥塞发生时如何动作，降低速率</li>
+<li>在拥塞缓解时如何动作，增加速率</li>
+</ul>
+</li>
+</ul>
+<p><strong>速率调节</strong></p>
+<ul>
+<li>基本结构
+<ul>
+<li>收到 ACK（新数据的确认）时：增大速率</li>
+<li>检测到丢包时：减小速率</li>
+</ul>
+</li>
+<li>增大/减小速率的方式取决于所处的拥塞控制阶段：
+<ul>
+<li>探测可用的瓶颈带宽（<strong>慢启动</strong>）</li>
+<li>适应带宽波动（<strong>拥塞避免：AIMD</strong>）</li>
+</ul>
+</li>
+</ul>
+<h3 id="7-1-拥塞感知">7.1 拥塞感知</h3>
+<p>发送端如何探测到拥塞？</p>
+<ul>
+<li>某个段超时了（丢失事件）：<strong>拥塞</strong>
+<ul>
+<li>原因1：网络拥塞（某个路由器缓冲区没空间了，被丢弃）概率大</li>
+<li>原因2：出错被丢弃了（各级错误，没有通过校验，被丢弃）概率小</li>
+<li>一旦超时，就认为拥塞了，有一定误判，但是总体控制方向是对的</li>
+</ul>
+</li>
+<li>有关某个段的 3 次重复 ACK：<strong>轻微拥塞</strong>
+<ul>
+<li>段的第 1 个 ack，正常，确认绿段，期待红段</li>
+<li>段的第 2 个重复 ack，意味着红段的后一段收到了，蓝段乱序到达</li>
+<li>段的第 2、3、4 个 ack 重复，意味着红段的后第 2、3、4 个段收到了，橙段乱序到达，同时红段丢失的可能性很大（后面 3 个段都到了，红段都没到）</li>
+<li>网络这时还能够进行一定程度的传输，拥塞但情况要比第一种好</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-74.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>上图中的 4 个确认，1 个正常确认，3 个重复确认</li>
+</ul>
+<h3 id="7-2-速率控制方法">7.2 速率控制方法</h3>
+<p>如何控制发送端发送的速率？</p>
+<ul>
+<li>维持一个拥塞窗口的值：CongWin</li>
+<li>发送端限制已发送但是未确认的数据量（的上限）:</li>
+</ul>
+<div class="math-block">\[LastByteSent-LastByteAcked  \leq CongWin\]</div>
+<ul>
+<li>从而粗略地控制发送方的往网络中注入的速率</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-75.webp" alt="alt text" loading="lazy"></p>
+<div class="math-block">\[rate \approx \dfrac {\text{CongWin}}{\text{RTT}} bytes/sec\]</div>
+<p>CongWin 是动态的，是感知到的网络拥塞程度的函数</p>
+<ul>
+<li>超时或者 3 个重复 ack，CongWin ↓
+<ul>
+<li>超时时：CongWin 降为 1MSS，进入 SS 阶段然后再倍增到 CongWin/2（每个RTT），从而进入 CA 阶段</li>
+<li>3个重复ack ：CongWin 降为 CongWin/2，CA 阶段</li>
+</ul>
+</li>
+<li>否则（正常收到Ack，没有发生以上情况）：CongWin跃跃欲试 ↑
+<ul>
+<li>SS 阶段：加倍增加(每个RTT)</li>
+<li>CA 阶段：线性增加(每个RTT)</li>
+</ul>
+</li>
+</ul>
+<p><strong>拥塞控制和流量控制的联合动作</strong>:</p>
+<ul>
+<li>发送端控制发送但是未确认的量同时也不能够超过接收窗口，满足流量控制要求</li>
+</ul>
+<div class="math-block">\[SendWin=min\{CongWin, RecvWin\}\]</div>
+<ul>
+<li><strong>同时满足拥塞控制和流量控制要求</strong></li>
+</ul>
+<h3 id="7-3-拥塞控制策略">7.3 拥塞控制策略</h3>
+<h4 id="慢启动">慢启动</h4>
+<ul>
+<li>连接刚建立，CongWin = 1MSS</li>
+<li>可用带宽可能 &gt;&gt; MSS/RTT
+<ul>
+<li>应该尽快加速，到达希望的速率</li>
+</ul>
+</li>
+<li>当连接开始时，指数性增加（每个RTT）发送速率，直到发生丢失的事件
+<ul>
+<li><mark>每一个 RTT， CongWin 加倍</mark></li>
+<li><mark>每收到一个 ACK 时，CongWin <strong>加1</strong>（即完成加倍）</mark></li>
+<li>慢启动阶段：只要不超时或 3 个重复 ack，一个 RTT， CongWin 加倍</li>
+</ul>
+</li>
+<li>总结: 初始速率很慢，但是加速却是指数性的
+<ul>
+<li>指数增加，SS 时间很短，长期来看可以忽略</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-76.webp" alt="alt text" loading="lazy"></p>
+<h4 id="aimd-超时之后的保守策略">AIMD/超时之后的保守策略</h4>
+<p>AIMD (Additive Increase Multiplicative Decrease): 加性增，乘性减</p>
+<ul>
+<li>阈值变量：ssthresh</li>
+<li>出现丢失，ssthresh 设置成 CongWin 的 1/2</li>
+<li>If CWND（CongWin） &gt; ssthresh, stop Slow Start</li>
+</ul>
+<p><strong>加性增</strong>：</p>
+<ul>
+<li><strong>当 CongWin &gt; 阈值</strong> 时，一个 RTT 如没有发生丢失事件，将 CongWin 加 1MSS：探测</li>
+</ul>
+<p><strong>乘性减</strong>：</p>
+<ul>
+<li>当<strong>收到 3 个重复的 ACKs</strong>:
+<ul>
+<li>ssthresh = CWND/2</li>
+<li>CWND = ssthresh</li>
+<li>进入拥塞避免：每个 RTT 后 cwnd 增加 1（线性而非指数增长）</li>
+</ul>
+</li>
+<li>当<strong>超时</strong>事件发生时:
+<ul>
+<li>ssthresh = CWND/2</li>
+<li>CWND = 1</li>
+<li>启动慢启动</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>什么时候应该将指数性增长变成线性？</div><p>在超时之前，当 CongWin 变成上次发生超时的窗口的一半</p>
+</div><p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-191.webp" alt="alt text" loading="lazy">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-192.webp" alt="alt text" loading="lazy"></p>
+<h4 id="总结-tcp发送端拥塞控制">总结: TCP发送端拥塞控制</h4>
+<ul>
+<li>当<code>CongWin &lt; Threshold</code>，发送端处于慢启动阶段（<code>slow-start</code>），窗口指数性增长</li>
+<li>当<code>CongWin &gt; Threshold</code>，发送端处于拥塞避免阶段（<code>congestion-avoidance</code>），窗口线性增长</li>
+<li>当收到三个重复的ACKs（<code>triple duplicate ACK</code>），<code>Threshold</code>设置成<code>CongWin/2</code>，<code>CongWin = Threshold + 3</code>（+3？3个重复ack）</li>
+<li>当超时事件发生时<code>timeout</code>，<code>Threshold = CongWin / 2</code>，<code>CongWin = 1 MSS</code>，进入SS阶段</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>事件</th>
+<th>状态</th>
+<th>TCP 发送端行为</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>以前没有收到ACK的data被ACKed</td>
+<td>慢启动 (SS)</td>
+<td><code>CongWin = CongWin + MSS</code><br>If (<code>CongWin &gt; Threshold</code>)<br>状态变成 “CA”</td>
+<td>每一个RTT <code>CongWin</code> 加倍</td>
+</tr>
+<tr>
+<td>以前没有收到ACK的data被ACKed</td>
+<td>拥塞避免 (CA)</td>
+<td><code>CongWin = CongWin + MSS * (MSS / CongWin)</code></td>
+<td>加性增加，每一个RTT对 <code>CongWin</code> 加一个 1 MSS</td>
+</tr>
+<tr>
+<td>通过收到3个重复的ACK，发现丢失的事件</td>
+<td>SS or CA</td>
+<td><code>Threshold = CongWin / 2</code><br><code>CongWin = Threshold + 3</code><br>状态变成 “CA”</td>
+<td>快速重传，实现乘性的减。<code>CongWin</code> 没有变成 1 MSS.</td>
+</tr>
+<tr>
+<td>超时</td>
+<td>SS or CA</td>
+<td><code>Threshold = CongWin / 2</code><br><code>CongWin = 1 MSS</code><br>状态变成 “SS”</td>
+<td>进入slow start</td>
+</tr>
+<tr>
+<td>重复的 ACK</td>
+<td>SS or CA</td>
+<td>对被ACKed的segment，增加重复ACK的计数</td>
+<td><code>CongWin</code> and <code>Threshold</code> 不变</td>
+</tr>
+</tbody>
+</table>
+<h3 id="7-4-tcp-吞吐量">7.4 TCP 吞吐量</h3>
+<ul>
+<li>TCP 的平均吞吐量是多少，使用窗口尺寸 W 和 RTT 来描述?
+<ul>
+<li>忽略慢启动阶段，假设发送端总有数据传输</li>
+</ul>
+</li>
+<li>W：发生丢失事件时的窗口尺寸（单位：字节）
+<ul>
+<li>平均窗口尺寸（in flight 字节）：<mark><strong>3/4</strong></mark> W</li>
+<li>平均吞吐量：RTT 时间吞吐 <mark><strong>3/4</strong></mark> W</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-77.webp" alt="alt text" loading="lazy"></p>
+<h3 id="7-5-tcp-公平性">7.5 TCP 公平性</h3>
+<p><strong>公平性目标</strong>: 如果 K 个 TCP 会话分享一个链路带宽为 R 的瓶颈，每一个会话的有效带宽为 R/K</p>
+<p>为什么TCP是公平的？2个竞争的TCP会话:</p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-78.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>会收敛至 x = y</li>
+</ul>
+<p><strong>公平性和 UDP</strong>：</p>
+<ul>
+<li>多媒体应用通常不是用 TCP
+<ul>
+<li>应用发送的数据速率希望不受拥塞控制的节制</li>
+</ul>
+</li>
+<li>使用UDP:
+<ul>
+<li>音视频应用泵出数据的速率是恒定的，忽略数据的丢失</li>
+</ul>
+</li>
+<li>研究领域: TCP 友好性</li>
+</ul>
+<p><strong>公平性和并行TCP连接</strong>：</p>
+<ul>
+<li>2个主机间可以打开多个并行的TCP连接</li>
+<li>Web浏览器</li>
+<li>例如: 带宽为R的链路支持了9个连接
+<ul>
+<li>如果新的应用要求建1个TCP连接，获得带宽R/10</li>
+<li>如果新的应用要求建11个TCP连接，获得带宽R/2</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-193.webp" alt="alt text" loading="lazy">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-195.webp" alt="alt text" loading="lazy">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-194.webp" alt="alt text" loading="lazy">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-196.webp" alt="alt text" loading="lazy"></p>
+<h3 id="7-6-tcp-快速恢复">7.6 TCP 快速恢复</h3>
+<p><strong>TCP协议拥塞控制</strong> 的一个核心机制：<strong>快速恢复 (Fast Recovery)</strong>。它通常与“快速重传”配合使用。</p>
+<p>简单来说，当网络出现轻微拥塞（表现为丢包）时，快速恢复机制允许发送方不要像遇到“超时”那样直接把发送窗口降到1，而是利用一种“临时信用”机制继续发送数据，保持网络的吞吐量。</p>
+<h4 id="1-核心思想-idea">1. 核心思想 (Idea)</h4>
+<blockquote>
+<p><strong>Grant the sender temporary “credit” for each dupACK so as to keep packets in flight</strong>
+（为每一个重复确认ACK赋予发送方临时的“信用额度”，以保持网络中有数据包在飞行）</p>
+</blockquote>
+<ul>
+<li><strong>背景理解</strong>：当发送方收到重复的ACK（dupACK）时，意味着某个特定的数据包丢失了，<strong>但是</strong>后续的数据包已经成功到达接收端（接收端收到乱序包就会触发dupACK）。这说明网络并没有完全瘫痪，只是偶尔丢包。</li>
+<li><strong>做法</strong>：既然知道有包离开了网络（到达了接收端），发送方就可以利用这些 dupACK 作为“信用”，继续向网络中发送新的数据包，而不是停下来干等。</li>
+</ul>
+<hr>
+<h4 id="2-触发条件与初始动作-if-dupackcount-3">2. 触发条件与初始动作 (If dupACKcount = 3)</h4>
+<p>当发送方连续收到 <strong>3个重复的ACK</strong> 时，触发快速重传和快速恢复机制：</p>
+<ul>
+<li>
+<p><strong><code>ssthresh = CWND / 2</code></strong></p>
+<ul>
+<li><strong>解释</strong>：将“慢启动阈值 (ssthresh)”设置为当前“拥塞窗口 (CWND)”的一半。这是因为发生了丢包，说明网络开始拥塞，必须做出退让，将门限值减半。</li>
+</ul>
+</li>
+<li>
+<p><strong><code>CWND = ssthresh + 3</code></strong></p>
+<ul>
+<li><strong>解释</strong>：<mark>将拥塞窗口设置为新的阈值加上 3。</mark></li>
+<li><strong>为什么是 +3？</strong> 因为你收到了3个重复的ACK，这意味着有3个数据包已经成功离开了网络并被接收端缓存。既然网络里腾出了3个包的空间，发送方就可以把窗口人为“放大”3个单位，以便后续能发送新的包.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="3-处于快速恢复阶段-while-in-fast-recovery">3. 处于快速恢复阶段 (While in fast recovery)</h4>
+<blockquote>
+<p><strong>CWND = CWND + 1 for each additional dupACK</strong></p>
+</blockquote>
+<ul>
+<li><strong>解释</strong>：<mark>在快速恢复状态下，每多收到一个额外的重复ACK，就把拥塞窗口 <code>CWND</code> 增加 1。</mark></li>
+<li><strong>原理</strong>：每一个额外的 dupACK 都代表又有一个数据包安全离开了网络到达了接收端缓冲区。窗口加1，发送方就可以借此“额度”再向网络中发送一个新包。这样不仅重传了丢失的包，还保证了网络管道里始终有数据在流动（keep packets in flight）。</li>
+</ul>
+<hr>
+<h4 id="4-退出快速恢复-exit-fast-recovery">4. 退出快速恢复 (Exit fast recovery)</h4>
+<blockquote>
+<p><strong>Exit fast recovery after receiving new ACK</strong>
+<strong>set CWND = ssthresh</strong></p>
+</blockquote>
+<ul>
+<li><strong>解释</strong>：当发送方收到了一个 <strong>新的ACK</strong>（这个ACK确认了之前丢失的包已经被成功接收到了），这就标志着丢失的包已经被补上，快速恢复阶段结束。</li>
+<li><strong>动作</strong>：此时，将 <code>CWND</code> 回调至之前记录的 <code>ssthresh</code> 的值。</li>
+<li><strong>原理</strong>：因为之前那个被放大的 <code>CWND</code>（加了3，又加了若干个1）只是为了在丢包期间人为制造发送额度。现在丢包危机解除，需要把这个“虚高”的窗口收回，恢复到正常的安全门限值（一半的水平），随后TCP会进入<strong>拥塞避免 (Congestion Avoidance)</strong> 阶段，窗口开始缓慢线性增长。</li>
+</ul>
+<hr>
+<h4 id="example">Example</h4>
+<ul>
+<li>Consider a TCP connection with:
+<ul>
+<li>CWND=10 packets</li>
+<li>Last ACK was for packet # 101</li>
+<li>i.e., receiver expecting next packet to have seq. no. 101</li>
+</ul>
+</li>
+<li>10 packets [101, 102, 103,…, 110] are in flight
+<ul>
+<li>Packet 101 is dropped</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>ACK 101 (due to 102) cwnd=10 dup#1</li>
+<li>ACK 101 (due to 103) cwnd=10 dup#2</li>
+<li>ACK 101 (due to 104) cwnd=10 dup#3</li>
+<li><strong>RETRANSMIT 101 ssthresh=5 cwnd=8 (5+3)</strong></li>
+<li>ACK 101 (due to 105) cwnd=9 (no xmit)</li>
+<li>ACK 101 (due to 106) cwnd=10 (no xmit)</li>
+<li>ACK 101 (due to 107) cwnd=11 (xmit 111)</li>
+<li>ACK 101 (due to 108) cwnd=12 (xmit 112)</li>
+<li>ACK 101 (due to 109) cwnd=13 (xmit 113)</li>
+<li>ACK 101 (due to 110) cwnd=14 (xmit 114)</li>
+<li><strong>ACK 111 (due to 101) cwnd = 5 (xmit 115) ← exiting fast recovery</strong></li>
+<li><strong>Packets 111-114 already in flight</strong></li>
+<li>ACK 112 (due to 111) cwnd = 5 + 1/5 ← back in cong. avoidance</li>
+</ul>
+<h4 id="1-触发阶段-收到-3-个重复-ack">1. 触发阶段：收到 3 个重复 ACK</h4>
+<p>接收端每收到一个乱序的包（102, 103, 104），就会回复一个期望收到 101 的 ACK。</p>
+<ul>
+<li><code>ACK 101 (due to 102) cwnd=10 dup#1</code>：收到包 102，回复第 1 个重复 ACK 101。</li>
+<li><code>ACK 101 (due to 103) cwnd=10 dup#2</code>：收到包 103，回复第 2 个重复 ACK 101。</li>
+<li><code>ACK 101 (due to 104) cwnd=10 dup#3</code>：收到包 104，回复第 3 个重复 ACK 101。</li>
+</ul>
+<hr>
+<h4 id="2-进入快速恢复-重传与调整窗口">2. 进入快速恢复：重传与调整窗口</h4>
+<ul>
+<li><strong><code>RETRANSMIT 101 ssthresh=5 cwnd= 8 (5+3)</code></strong></li>
+<li><strong>动作</strong>：集齐 3 个 dupACK，触发<strong>快速重传</strong>，立即重发丢失的包 101。</li>
+<li><strong>状态更新</strong>：根据课件公式，门限值减半：\(ssthresh = 10 / 2 = 5\)。拥塞窗口设置为：\(cwnd = ssthresh + 3 = 8\)。</li>
+<li><strong>进入快速恢复状态</strong>。</li>
+</ul>
+<hr>
+<h4 id="3-快速恢复进行中-窗口-膨胀-与发送新包">3. 快速恢复进行中：窗口“膨胀”与发送新包</h4>
+<p>此时网络中还有其他原本发送的包（105-110）在陆续到达接收端，每到达一个，接收端就会发回一个 dupACK 101。</p>
+<ul>
+<li><code>ACK 101 (due to 105) cwnd= 9 (no xmit)</code>：收到额外的 dupACK，\(cwnd\) 加 1 变成 9。但此时网络中未确认的包数量（101-110，共10个包）仍然大于 \(cwnd\)，所以不发送新包（no xmit）。</li>
+<li><code>ACK 101 (due to 106) cwnd=10 (no xmit)</code>：\(cwnd\) 变成 10。未确认的包数量等于 \(cwnd\)，依然不发送。</li>
+</ul>
+<p><strong>（关键转折点：开始利用“信用额度”发送新包）</strong></p>
+<ul>
+<li><strong><code>ACK 101 (due to 107) cwnd=11 (xmit 111)</code></strong>：收到包 107 的 dupACK，\(cwnd\) 膨胀到 11。此时 \(cwnd\) (11) 终于大于了原来在飞行中的包数量 (10)。发送方利用这个多出来的 1 个“额度”，<strong>发送了全新的数据包 111</strong>。</li>
+<li><code>ACK 101 (due to 108) cwnd=12 (xmit 112)</code>：继续收到 dupACK，窗口继续膨胀，发送新包 112。</li>
+<li><code>ACK 101 (due to 109) cwnd=13 (xmit 113)</code>：发送新包 113。</li>
+<li><code>ACK 101 (due to 110) cwnd=14 (xmit 114)</code>：发送新包 114。</li>
+</ul>
+<blockquote>
+<p><strong>这就是课件中“Keep packets in flight”的完美体现</strong>：虽然我们在等包 101 被确认，但通过人为放大窗口，我们并没有闲着，而是继续把 111-114 这几个新包送进了网络管道。</p>
+</blockquote>
+<hr>
+<h4 id="4-退出快速恢复">4. 退出快速恢复</h4>
+<ul>
+<li><strong><code>ACK 111 (due to 101) cwnd = 5 (xmit 115)</code></strong></li>
+<li><strong>发生了什么</strong>：之前重传的包 101 终于到达了接收端！接收端此时已经完美拼齐了 101 到 110 的所有数据。于是它发送了一个<strong>新的（累积的）ACK 111</strong>（意思是：110及之前的我都收到了，我接下来要 111）。</li>
+<li><strong>动作</strong>：收到新的 ACK，<strong>退出快速恢复 (exiting fast recovery)</strong>。</li>
+<li><strong>状态更新</strong>：根据课件公式，将窗口缩小回安全阈值，即 \(cwnd = ssthresh = 5\)。同时根据此时的窗口情况，发送新包 115。</li>
+</ul>
+<hr>
+<h4 id="5-回到拥塞避免-congestion-avoidance">5. 回到拥塞避免 (Congestion Avoidance)</h4>
+<ul>
+<li><strong><code>ACK 112 (due to 111) cwnd = 5 + 1/5</code></strong></li>
+<li><strong>发生了什么</strong>：刚才在快速恢复期间“偷空”发出去的新包 111 到达了接收端，接收端回复 ACK 112。</li>
+<li><strong>状态更新</strong>：此时 TCP 已经退出了快速恢复，处于<strong>拥塞避免阶段</strong>。在这个阶段，每收到一个 ACK，窗口不再呈指数增长，而是线性增长：\(cwnd = cwnd + 1/cwnd\)。所以 \(cwnd\) 变成了 \(5 + 1/5\)。（每个 RTT 才是 + 1）</li>
+</ul>
+<h3 id="7-7-tcp-state-machine">7.7 TCP state machine</h3>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-197.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>Timeouts ➔ Slow Start</li>
+<li>dupACKs ➔ Fast Recovery</li>
+<li>New ACK changes state ONLY from Fast Recovery</li>
+</ul>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-198.webp" alt="alt text" loading="lazy"></p>
+<h3 id="7-8-tcp-flavors">7.8 TCP flavors</h3>
+<ul>
+<li><strong>TCP-Tahoe</strong><br>
+➤ 收到 3 个重复 ACK 时 CWND = 1</li>
+<li><strong>TCP-Reno</strong><br>
+➤ 超时时 CWND = 1<br>
+➤ 收到 3 个重复 ACK 时 CWND = CWND/2</li>
+<li><strong>TCP-newReno</strong>（我们的默认假设）
+➤ TCP-Reno + 改进的快速恢复</li>
+<li><strong>TCP-SACK</strong><br>
+➤ 引入了选择性确认</li>
+</ul>
+<p>它们如何共存？</p>
+<ul>
+<li>所有变体都遵循同样的原则
+<ul>
+<li>好消息时增大 CWND</li>
+<li>坏消息时减小 CWND</li>
+</ul>
+</li>
+</ul>
+<h3 id="7-9-router-assisted-congestion-control">7.9 Router assisted congestion control</h3>
+<p>ECN 通过在数据包头部设置单个警告位，让路由器在拥塞初期主动通知端主机，使其在不丢包的情况下执行与丢包相同的拥塞控制反应，从而在链路利用率与传输延迟之间取得更优平衡。</p>
+<h4 id="1-信号传递流程">1. 信号传递流程</h4>
+<ul>
+<li><strong>路由器标记</strong>：<mark>当路由器检测到队列即将拥塞时，不是直接丢包，而是将经过的数据包头部中的 <strong>ECN 警告位（Warning Bit）</strong> 置为 1。</mark></li>
+<li><strong>接收方反馈</strong>：<mark>接收方收到带 ECN 标记的数据包后，会在返回的 <strong>ACK 报文</strong>中设置 <strong>ECN-Echo 位</strong>，将拥塞信号传回发送方。</mark></li>
+<li><strong>发送方响应</strong>：发送方收到带 ECN-Echo 的 ACK 后，<strong>立即执行拥塞控制</strong>（如减半 CWND），其反应逻辑与收到丢包信号（3 DupACKs 或 Timeout）<strong>完全一致</strong>。</li>
+</ul>
+<h4 id="2-核心优势-无损拥塞通知">2. 核心优势：无损拥塞通知</h4>
+<ul>
+<li><strong>避免丢包</strong>：传统 TCP 必须等到丢包才知拥塞，而 <mark>ECN 在<strong>丢包前</strong>就发出预警</mark>，消除了不必要的重传和窗口剧烈回退。</li>
+<li><strong>降低延迟</strong>：由于减少了丢包重传，端到端延迟和抖动显著降低，尤其对实时应用（视频、语音）友好。</li>
+<li><strong>提升利用率</strong>：路由器无需通过丢包来“惩罚”发送方，可以更充分地利用链路缓冲，避免因丢包导致的吞吐量骤降。</li>
+</ul>
+<h4 id="3-关键权衡-利用率-vs-延迟">3. 关键权衡：利用率 vs 延迟</h4>
+<ul>
+<li><strong>标记阈值</strong>：路由器在队列多满时设置 ECN 位，是一个关键配置点。
+<ul>
+<li><strong>阈值过低</strong>：过早标记，发送方频繁降速 → <strong>延迟低，但链路利用率不足</strong>。</li>
+<li><strong>阈值过高</strong>：过晚标记，队列积压严重 → <strong>利用率高，但延迟和抖动增大</strong>，甚至可能退化为丢包。</li>
+</ul>
+</li>
+<li><strong>语义等价性</strong>：ECN 的拥塞语义被设计为<strong>与丢包完全等价</strong>，确保与现有 TCP 变体（Reno, SACK 等）的兼容性和公平性，无需修改核心拥塞控制算法。</li>
+</ul>
+<blockquote>
+<p><strong>💡 本质洞察</strong>：ECN 将 TCP 的拥塞反馈从 <strong>“事后惩罚”（丢包）</strong> 升级为 <strong>“事前预警”（标记）</strong>，在不改变端主机行为逻辑的前提下，用更低的代价（一个比特）换取了更平滑的流量控制和更优的网络性能。</p>
+</blockquote>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：3 传输层</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-08 06:49:13</p>
+      <p><strong>更新于</strong>：2026-08-07 23:07:52</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/3 传输层.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">3 传输层</div>
+      <ul><li class="toc-l2"><a href="#1-概述和传输层服务">1 概述和传输层服务</a></li><li class="toc-l3"><a href="#1-1-传输服务和协议">1.1 传输服务和协议</a></li><li class="toc-l3"><a href="#1-2-传输层-vs-网络层">1.2 传输层 vs 网络层</a></li><li class="toc-l3"><a href="#1-3-internet-传输层协议">1.3 Internet 传输层协议</a></li><li class="toc-l2"><a href="#2-多路复用-解复用">2 多路复用/解复用</a></li><li class="toc-l2"><a href="#3-无连接传输-udp">3 无连接传输 UDP</a></li><li class="toc-l3"><a href="#udp-校验和">UDP 校验和</a></li><li class="toc-l2"><a href="#4-可靠数据传输的原理">4 可靠数据传输的原理</a></li><li class="toc-l3"><a href="#rdt1-0-在可靠信道上的可靠数据传输">rdt1.0：在可靠信道上的可靠数据传输</a></li><li class="toc-l3"><a href="#rdt2-0-具有比特差错的信道">rdt2.0：具有比特差错的信道</a></li><li class="toc-l3"><a href="#rdt2-1-处理出错的ack-nak">rdt2.1：处理出错的ACK/NAK</a></li><li class="toc-l3"><a href="#rdt2-2-无-nak-的协议">rdt2.2：无 NAK 的协议</a></li><li class="toc-l3"><a href="#rdt3-0-具有比特差错和分组丢失的信道">rdt3.0：具有比特差错和分组丢失的信道</a></li><li class="toc-l3"><a href="#流水线协议">流水线协议</a></li><li class="toc-l3"><a href="#通用-滑动窗口协议">通用：滑动窗口协议</a></li><li class="toc-l3"><a href="#gbn-协议和-sr-协议的异同">GBN 协议和 SR 协议的异同</a></li><li class="toc-l2"><a href="#5-面向连接的传输-tcp">5 面向连接的传输：TCP</a></li><li class="toc-l3"><a href="#5-1-段结构">5.1 段结构</a></li><li class="toc-l3"><a href="#5-2-可靠数据传输">5.2 可靠数据传输</a></li><li class="toc-l3"><a href="#5-3-连接管理">5.3 连接管理</a></li><li class="toc-l3"><a href="#5-4-流量控制">5.4 流量控制</a></li><li class="toc-l2"><a href="#6-拥塞控制原理">6. 拥塞控制原理</a></li><li class="toc-l3"><a href="#6-1-拥塞的原因-代价">6.1 拥塞的原因/代价</a></li><li class="toc-l3"><a href="#6-2-拥塞控制方法">6.2 拥塞控制方法</a></li><li class="toc-l2"><a href="#7-tcp-拥塞控制">7 TCP 拥塞控制</a></li><li class="toc-l3"><a href="#7-1-拥塞感知">7.1 拥塞感知</a></li><li class="toc-l3"><a href="#7-2-速率控制方法">7.2 速率控制方法</a></li><li class="toc-l3"><a href="#7-3-拥塞控制策略">7.3 拥塞控制策略</a></li><li class="toc-l3"><a href="#7-4-tcp-吞吐量">7.4 TCP 吞吐量</a></li><li class="toc-l3"><a href="#7-5-tcp-公平性">7.5 TCP 公平性</a></li><li class="toc-l3"><a href="#7-6-tcp-快速恢复">7.6 TCP 快速恢复</a></li><li class="toc-l3"><a href="#7-7-tcp-state-machine">7.7 TCP state machine</a></li><li class="toc-l3"><a href="#7-8-tcp-flavors">7.8 TCP flavors</a></li><li class="toc-l3"><a href="#7-9-router-assisted-congestion-control">7.9 Router assisted congestion control</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/2 应用层.html">&lt; 2 应用层</a>
+      <a class="pager-next" href="/posts/4 网络层-数据平面.html">4 网络层：数据平面 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
+<script src="/assets/js/main.js?v=1786162127971" defer></script>
+<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+</body>
+</html>

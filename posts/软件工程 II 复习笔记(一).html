@@ -1,0 +1,2995 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>软件工程 II 复习笔记(一) · Zwing&#39;s blog</title>
+<meta name="description" content="质量保障、配置管理、需求分析与用例建模、体系结构与详细设计、信息隐藏">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">软件工程 II 复习笔记(一)</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-07T22:37:44.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-08 06:37:44</time>
+            <time class="meta-item" datetime="2026-08-07T22:43:32+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-07 22:43:32</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 13009 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 44 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#软件工程"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>软件工程</a>
+              <a class="tag-chip" href="/tags.html#软件工程"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>软件工程</a> <a class="tag-chip" href="/tags.html#课程复习"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>课程复习</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><div class="callout callout-warning"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>考前按复习大纲临时整理而成，排版不美观，内容可能有误，且不保证完整性，仅供参考。若有错误或遗漏，请及时指出。</div></div><div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>名词解释：软件工程</div><p>软件工程是将<strong>系统化的、规范化的、可量化的方法</strong>，应用于软件的<strong>开发、运行和维护的过程</strong>；即将工程化的方法应用于软件。以及对上述中各种方法的研究</p>
+</div><hr>
+<h2 id="软件质量保障有哪些措施">软件质量保障有哪些措施？</h2>
+<ul>
+<li>结合实验进行说明</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>SQA 活动</th>
+<th>传统方式</th>
+<th>AI 增强方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>代码评审</strong></td>
+<td>人工逐行审查</td>
+<td>AI 预审 + 人工聚焦关键逻辑</td>
+</tr>
+<tr>
+<td><strong>静态分析</strong></td>
+<td>规则引擎（SonarQube）</td>
+<td>LLM 语义分析 + 规则引擎</td>
+</tr>
+<tr>
+<td><strong>测试生成</strong></td>
+<td>人工编写测试用例</td>
+<td>AI 自动生成单元测试</td>
+</tr>
+<tr>
+<td><strong>缺陷预测</strong></td>
+<td>历史缺陷密度统计</td>
+<td>ML 模型预测高风险模块</td>
+</tr>
+<tr>
+<td><strong>文档审查</strong></td>
+<td>人工一致性检查</td>
+<td>AI 自动检测文档–代码不一致</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>里程碑</th>
+<th>质量保障活动</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>需求开发</td>
+<td>需求评审、需求度量</td>
+</tr>
+<tr>
+<td>体系结构</td>
+<td>体系结构评审、集成测试（持续集成）</td>
+</tr>
+<tr>
+<td>详细设计</td>
+<td>详细设计评审、设计度量、集成测试（持续集成）</td>
+</tr>
+<tr>
+<td>实现</td>
+<td>代码评审、代码度量、测试（测试驱动、持续集成）</td>
+</tr>
+<tr>
+<td>测试</td>
+<td>测试、测试度量</td>
+</tr>
+</tbody>
+</table>
+<h2 id="软件配置管理有哪些活动">软件配置管理有哪些活动？</h2>
+<ul>
+<li>实验中是如何进行配置管理的？</li>
+</ul>
+<p>配置管理的动机与定义</p>
+<ul>
+<li>软件开发中产生大量中间制品，是不同阶段协同的基础</li>
+<li>制品变更的最大挑战：确保使用者获得最新的制品，避免协同问题</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>SCM 活动</th>
+<th>说明</th>
+<th>具体例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>标识配置项</td>
+<td>确定哪些制品需要纳入配置管理</td>
+<td>将需求文档、设计文档、源代码、测试用例、构建脚本等纳入 Git 仓库管理</td>
+</tr>
+<tr>
+<td>版本管理</td>
+<td>跟踪制品的不同版本，确保版本一致性</td>
+<td>使用 <code>git tag v1.0.0</code> 标记发布版本；通过 commit hash 追踪每次修改的历史</td>
+</tr>
+<tr>
+<td>变更控制</td>
+<td>管理变更请求的提出、评估、决策、执行和验证</td>
+<td>通过 GitHub Issue 提出变更请求，经 PR 评审 → CI 通过 → 合并到 <code>develop</code> 分支</td>
+</tr>
+<tr>
+<td>配置审计</td>
+<td>检查配置项是否与规格一致</td>
+<td>CI 流水线自动校验：代码是否通过所有测试、是否满足编码规范、依赖是否安全</td>
+</tr>
+<tr>
+<td>状态报告</td>
+<td>记录和报告配置管理活动的状态</td>
+<td>项目周报中汇总：本月合并 PR 数、未解决 Issue 数、测试覆盖率变化趋势</td>
+</tr>
+<tr>
+<td>软件发布管理</td>
+<td>管理软件产品的发布过程</td>
+<td>通过 GitHub Release 发布版本，附带 Release Notes 说明新功能、修复的 Bug 和已知问题</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>版本控制：两种策略
+锁定-修改-解锁 vs 复制-修改-合并（git）</p>
+</blockquote>
+<ul>
+<li>分支策略：从混乱走向有序</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>分支</th>
+<th>用途</th>
+<th>保护规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main</code></td>
+<td>生产环境稳定版本</td>
+<td>禁止直接 push，只接受合并请求</td>
+</tr>
+<tr>
+<td><code>develop</code></td>
+<td>持续集成分支</td>
+<td>合并前必须通过 CI 测试</td>
+</tr>
+<tr>
+<td><code>feature/xxx</code></td>
+<td>功能开发隔离</td>
+<td>完成后合并到 <code>develop</code></td>
+</tr>
+<tr>
+<td><code>hotfix/xxx</code></td>
+<td>生产紧急修复</td>
+<td>合并到 <code>main</code> 后同步到 <code>develop</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>用 SCM 四大活动（确定·控制·报告·审计）分类，并对应 Git 操作</li>
+</ul>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th>活动</th>
+<th>核心问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>配置项确定</td>
+<td>哪些制品需要版本控制？</td>
+</tr>
+<tr>
+<td>配置控制</td>
+<td>变更如何审批与执行？</td>
+</tr>
+<tr>
+<td>状态报告</td>
+<td>各节点版本处于什么状态？</td>
+</tr>
+<tr>
+<td>配置审计</td>
+<td>实际配置是否符合规定？</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>情况</th>
+<th>SCM 问题类型</th>
+<th>Git 对应操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>代码覆盖</td>
+<td>配置控制缺失</td>
+<td>分支隔离 + Pull Request 审阅</td>
+</tr>
+<tr>
+<td>环境不一致</td>
+<td>配置项确定缺失</td>
+<td>将配置文件纳入版本控制</td>
+</tr>
+<tr>
+<td>版本内容不清晰</td>
+<td>状态报告缺失</td>
+<td><code>git log</code> + <code>CHANGELOG.md</code></td>
+</tr>
+<tr>
+<td>误删配置</td>
+<td>配置审计缺失</td>
+<td><code>git checkout</code> 恢复历史版本</td>
+</tr>
+<tr>
+<td>版本回滚</td>
+<td>配置控制</td>
+<td><code>git revert</code> / <code>git reset</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>名称解释：需求</div><p>（1）用户为了解决问题或达到某些目标所需要的条件或能力
+（2）系统或系统部件为了满足合同、标准、规范或其它正式文档所规定的要求而需要具备的条件或能力
+（3）对 (1) 或 (2) 中的一个条件或一种能力的一种文档化表述</p>
+</div><h2 id="区分需求的三个层次">区分需求的三个层次</h2>
+<ul>
+<li>给出一个实例，给出其三个层次的例子</li>
+<li>对给定的需求示例，判定其层次（例如课程实验/ATM/图书管理）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>对应产物</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>业务需求</strong></td>
+<td>解决方案与系统特性</td>
+<td>R2：使用 3 个月后，销售额提高 20%</td>
+</tr>
+<tr>
+<td><strong>用户需求</strong></td>
+<td>问题域知识</td>
+<td>R3：系统要帮助收银员完成销售处理</td>
+</tr>
+<tr>
+<td><strong>系统级需求</strong></td>
+<td>需求分析模型</td>
+<td>R4：收银员输入商品时，显示描述、单价、数量和总价</td>
+</tr>
+</tbody>
+</table>
+<h3 id="需求的层次性-业务-用户与系统级需求">需求的层次性：业务、用户与系统级需求</h3>
+<p>这是从<strong>不同干系人视角</strong>来进行的划分。它们是一个从宏观到微观、逐步细化的过程。</p>
+<p><strong>业务需求</strong></p>
+<ul>
+<li><strong>视角：</strong> <mark>投资人、高层管理者、甲方</mark>。</li>
+<li><strong>核心：</strong> 为什么要做这个系统？（Why）它关注高层次的业务目标、期望的回报或要解决的核心业务问题。</li>
+<li><strong>例子：</strong> “为了降低人力成本，公司需要在今年内将线上订单的处理效率提高30%。”</li>
+</ul>
+<p><strong>用户需求</strong></p>
+<ul>
+<li><strong>视角：</strong> <mark>最终使用系统的用户</mark>（终端用户）。</li>
+<li><strong>核心：</strong> 用户能用这个系统做什么？（What）它描述了用户为了完成其工作，需要系统提供哪些支持。</li>
+<li><strong>例子：</strong> “作为一名仓库管理员，我需要能够扫描商品条码来快速完成出库登记，以便减少手动录入的错误。”</li>
+</ul>
+<p><strong>系统级需求</strong></p>
+<ul>
+<li><strong>视角：</strong> <mark>开发团队</mark>（程序员、测试员、架构师）。</li>
+<li><strong>核心：</strong> 系统具体要怎么实现用户的诉求？（How）这是对开发人员最直接的指令，包含了详细的系统行为、接口约束和数据规范。</li>
+<li><strong>例子：</strong> “当接收到扫码枪发送的条码字符串时，系统需在订单数据库中将对应商品状态更新为‘已出库’，并向前端返回更新成功的回执。”</li>
+</ul>
+<h3 id="转化关系与规格化表达">转化关系与规格化表达</h3>
+<h4 id="1-转化关系-自顶向下的推导">1. 转化关系（自顶向下的推导）</h4>
+<ul>
+<li><strong>业务需求 -&gt; 用户需求：</strong> 业务需求圈定了项目的范围和目标。系统分析师根据业务目标，找出相关的用户群体，并推导出他们需要哪些功能（用户需求）来支撑这个业务目标。</li>
+<li><strong>用户需求 -&gt; 系统需求：</strong> 用户需求通常比较通俗且带有主观色彩。开发团队需要将这些需求转化为精确的、无歧义的“机器逻辑”和“规则”，即系统级需求（<mark>包括功能和非功能需求</mark>）。</li>
+</ul>
+<h4 id="2-规格化表达">2. 规格化表达</h4>
+<p><strong>业务需求表达：</strong></p>
+<ul>
+<li><strong>常见文档：</strong> 项目愿景与范围文档。</li>
+<li><strong>表达方式：</strong> 业务背景陈述、目标指标、核心业务流程图。</li>
+</ul>
+<p><strong>用户需求表达：</strong></p>
+<ul>
+<li><strong>常见文档：</strong> 用例文档 (Use Case Specification)。</li>
+<li><strong>表达方式：</strong>
+<ul>
+<li><strong><mark>用例图与用例描述</mark>：</strong> 清晰定义参与者（Actor）与系统的交互流程。</li>
+<li><strong><mark>用户故事</mark>：</strong> 敏捷开发中常用的格式：“作为[角色]，我想要[活动]，以便于[商业价值]”。</li>
+</ul>
+</li>
+</ul>
+<p><strong>系统级需求表达：</strong></p>
+<ul>
+<li><strong>常见文档：</strong> <mark>软件需求规格说明书</mark> (SRS)。</li>
+<li><strong>表达方式：</strong>
+<ul>
+<li>通过自然语言详细描述前置条件、后置条件、异常流。</li>
+<li>结合 <strong>UML图表</strong>（如状态图、顺序图等）辅助表达复杂逻辑。</li>
+<li>接口定义（API 参数、返回值说明，即 PO/VO 数据的传递）。</li>
+</ul>
+</li>
+</ul>
+<h2 id="掌握需求的类型">掌握需求的类型</h2>
+<ul>
+<li>对给定的实例，给出其不同类型的需求例子</li>
+<li>对给定的需求示例，判定其类型（例如课程实验/ATM/图书管理）</li>
+</ul>
+<h3 id="需求的分类-功能性需求-vs-非功能性需求">需求的分类：功能性需求 vs 非功能性需求</h3>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>描述</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>功能</strong>需求</td>
+<td>系统必须提供的功能</td>
+<td>系统允许顾客退回已购买的产品</td>
+</tr>
+<tr>
+<td><strong>性能</strong>需求</td>
+<td>响应时间、吞吐量等</td>
+<td>查询响应时间 &lt; 3 秒</td>
+</tr>
+<tr>
+<td><strong>安全性</strong>需求</td>
+<td>访问控制、数据保护</td>
+<td>用户密码必须加密存储</td>
+</tr>
+<tr>
+<td><strong>可用性</strong>需求</td>
+<td>易学性、易用性</td>
+<td>新用户 10 分钟内学会基本操作</td>
+</tr>
+<tr>
+<td><strong>可靠性</strong>需求</td>
+<td>系统可用时间、故障恢复</td>
+<td>系统可用性达到 99.9%</td>
+</tr>
+<tr>
+<td><strong>可维护性</strong>需求</td>
+<td>修改和扩展的容易程度</td>
+<td>新增支付方式不超过 5 人日</td>
+</tr>
+<tr>
+<td><strong>可移植性</strong>需求</td>
+<td>跨平台、跨环境运行能力</td>
+<td>系统需同时支持 <code>Windows</code> 和 <code>Linux</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>非功能性需求</strong>：性能需求、安全性需求、可用性需求、可靠性需求、可维护性需求、可移植性需求…</p>
+</blockquote>
+<hr>
+<h2 id="用例图">用例图</h2>
+<table>
+<thead>
+<tr>
+<th>元素</th>
+<th>符号</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>用例</strong></td>
+<td>椭圆</td>
+<td>系统提供的一项有价值的服务</td>
+</tr>
+<tr>
+<td><strong>参与者</strong></td>
+<td>小人图标</td>
+<td>与系统交互的外部角色</td>
+</tr>
+<tr>
+<td><strong>关系</strong></td>
+<td>连线</td>
+<td>参与者与用例之间的关系</td>
+</tr>
+<tr>
+<td><strong>系统边界</strong></td>
+<td>矩形框</td>
+<td>划定系统内外的边界</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>参与者</strong>
+<ul>
+<li>一个参与者可以代表多个用户（如 “收银员” 代表所有收银员）</li>
+<li>一个用户可以扮演多个参与者（如某人既是收银员又是管理员）</li>
+<li>参与者不一定是人 —— 外部系统、硬件设备、定时器都可以是参与者</li>
+</ul>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>参与者识别误区</th>
+<th>错误示例</th>
+<th>正确做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>将系统内部组件当参与者</td>
+<td>“数据库”、“缓存服务器”</td>
+<td>数据库是系统内部组成部分，不是外部实体</td>
+</tr>
+<tr>
+<td>用具体人名代替角色</td>
+<td>“张三”、“李经理”</td>
+<td>应写&quot;收银员&quot;、“总经理”——参与者是<strong>角色</strong>不是个人</td>
+</tr>
+<tr>
+<td>遗漏非人类参与者</td>
+<td>只列出人类用户</td>
+<td>外部系统（支付网关）、定时器（每日对账）同样是参与者</td>
+</tr>
+<tr>
+<td>参与者粒度不当</td>
+<td>&quot;青年顾客&quot;和&quot;老年顾客&quot;分两个</td>
+<td>除非功能需求不同，否则统一为&quot;顾客&quot;</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>系统边界</strong>
+<ul>
+<li>参与者始终在系统边界外部（哪些角色是外部交互方）</li>
+<li>用例始终在系统边界内部（哪些功能由系统实现）</li>
+<li>系统边界帮助明确项目范围</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><strong>关系</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>关系类型</th>
+<th>符号</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>关联</td>
+<td>实线</td>
+<td>参与者与用例之间的交互</td>
+</tr>
+<tr>
+<td>包含</td>
+<td>虚线 + <code>&lt;&lt;include&gt;&gt;</code></td>
+<td>一个用例<strong>必须</strong>包含另一个用例的行为</td>
+</tr>
+<tr>
+<td>扩展</td>
+<td>虚线 + <code>&lt;&lt;extend&gt;&gt;</code></td>
+<td>一个用例在<strong>特定条件</strong>下扩展另一个用例</td>
+</tr>
+<tr>
+<td>泛化</td>
+<td>实线 + 空心三角</td>
+<td>参与者之间的继承关系</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-warning"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>extend 的方向其实是反向的</div></div><table>
+<thead>
+<tr>
+<th>对比维度</th>
+<th>Include（包含）</th>
+<th>Extend（扩展）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>是否必须执行</td>
+<td>必须执行</td>
+<td>有条件执行</td>
+</tr>
+<tr>
+<td>方向</td>
+<td>基础用例 → 被包含用例</td>
+<td>扩展用例 → 基础用例</td>
+</tr>
+<tr>
+<td>典型场景</td>
+<td>多个用例共享同一段行为</td>
+<td>基础用例在特定条件下的额外行为</td>
+</tr>
+<tr>
+<td>举例</td>
+<td>销售处理 <code>&lt;&lt;include&gt;&gt;</code> 打印收据</td>
+<td>销售处理 <code>&lt;&lt;extend&gt;&gt;</code> VIP 折扣计算</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>细化用例：用例应对一个业务事件，由一个用户发起，在一个连续时间段内完成</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>原用例</th>
+<th>调整后</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>合并</td>
+<td>特价策略制定 + 赠送策略制定</td>
+<td>→ 销售策略制定</td>
+<td>业务目的相同，属于同一业务事件</td>
+</tr>
+<tr>
+<td>拆分</td>
+<td>会员管理</td>
+<td>→ 发展会员 + 礼品赠送</td>
+<td>两个不同业务事件，不同时间触发</td>
+</tr>
+<tr>
+<td>拆分</td>
+<td>库存管理</td>
+<td>→ 商品出库 + 商品入库 + 库存分析</td>
+<td>三个独立业务事件</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>判断标准：用例必须为参与者提供可感知的、有价值的结果
+<ul>
+<li>错误：登录、数据验证、连接数据库</li>
+</ul>
+</li>
+<li>用例描述应独立于界面设计和技术实现</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image.webp" alt="alt text" loading="lazy"></p>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>实际画用例图时，也要考虑并画出组合、聚合、继承、多重性等标识</div></div><h2 id="概念类图">概念类图</h2>
+<ul>
+<li>或叫分析类图、领域模型，<strong>只有属性，没有方法</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>活动</th>
+<th>关键技巧</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>①</td>
+<td><mark>识别概念类</mark></td>
+<td>从用例描述中<mark>提取名词</mark>，筛选有意义的概念</td>
+</tr>
+<tr>
+<td>②</td>
+<td>确定关联关系</td>
+<td>识别概念之间的 “<strong>有关系</strong>”</td>
+</tr>
+<tr>
+<td>③</td>
+<td>为概念类添加属性</td>
+<td>识别描述概念类的<strong>关键特征</strong></td>
+</tr>
+<tr>
+<td>④</td>
+<td>确定关联的多重性</td>
+<td>标注 <code>1..*</code>、<code>0..1</code> 等数量约束</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-1.webp" alt="alt text" loading="lazy"></p>
+<table>
+<thead>
+<tr>
+<th>关系名称</th>
+<th>概念与使用场景（耦合度）</th>
+<th>箭头画法（指向）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>关联</td>
+<td>一般的引用。表示两个类之间存在语义上的联系，一个类长期&quot;持有&quot;另一个类的引用作为其成员变量（属性）。场景：学生类中有一个属性是&quot;老师&quot;的对象引用。</td>
+<td>实线 + 普通箭头 / 无箭头</td>
+</tr>
+<tr>
+<td>聚合</td>
+<td>部分可以脱离整体</td>
+<td>实线 + 空心菱形（菱形在整体一端）</td>
+</tr>
+<tr>
+<td>组合</td>
+<td>部分不能脱离整体</td>
+<td>实线 + 实心菱形（菱形在整体一端）</td>
+</tr>
+<tr>
+<td>依赖</td>
+<td>一个类&quot;使用&quot;了另一个类。通常是被调用类作为调用类的方法参数、局部变量或返回值存在。场景：展示层依赖逻辑层的接口，或在方法中临时使用了一个工具类。</td>
+<td>虚线 + 鱼骨箭头（指向被依赖的类/接口）</td>
+</tr>
+<tr>
+<td>继承</td>
+<td></td>
+<td>实线 + 空心三角形（指向父类）</td>
+</tr>
+<tr>
+<td>实现</td>
+<td></td>
+<td>实线 + 空心三角形（指向接口）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="顺序图">顺序图</h2>
+<ul>
+<li>描述系统中一次交互的行为过程</li>
+<li>展示参与者、系统对象之间的消息传递时间顺序</li>
+<li><strong>从用例描述的正常流程映射而来</strong></li>
+</ul>
+<blockquote>
+<p>用例描述中的每一步交互 → 顺序图中的一条消息。
+正常流程先画，扩展流程用 <code>alt</code> / <code>opt</code> 片段补充。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>元素</th>
+<th>含义</th>
+<th>表示</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>参与者</td>
+<td>与系统交互的外部角色</td>
+<td>小人</td>
+</tr>
+<tr>
+<td>生命线</td>
+<td>对象在交互过程中的存在时间</td>
+<td>小人/对象下的垂直虚线</td>
+</tr>
+<tr>
+<td>消息</td>
+<td>对象之间传递的请求或响应</td>
+<td>同步调用消息（实线 + 箭头），返回消息（虚线 + 箭头）</td>
+</tr>
+<tr>
+<td>激活框</td>
+<td>对象正在执行操作的时间段</td>
+<td><strong>对象生命线</strong>上的一些垂直细长矩形</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注意这里还有 “对象”，顶部的矩形框</p>
+</blockquote>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-2.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>示例消息编号：</li>
+</ul>
+<pre><code>1: addCommodity(id, qty)
+1.1: addCommodity(id, qty)
+　　 1.1.1: &lt;&lt;create&gt;&gt; CreateMessage()
+　　 1.1.1.1: CommodityPO find(id)
+</code></pre>
+<ul>
+<li>同步消息 实线 + 三角实心箭头
+<ul>
+<li>发送方需要阻塞自己，等待接收方处理完的消息</li>
+</ul>
+</li>
+<li>异步消息 实线 + 鱼骨箭头</li>
+<li>返回消息 虚线 + 鱼骨箭头</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-3.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>交互片段</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>片段</th>
+<th>含义</th>
+<th>本图用法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>opt</code></td>
+<td>可选（0 或 1 次）</td>
+<td>查看详情、翻页</td>
+</tr>
+<tr>
+<td><code>alt</code></td>
+<td>互斥分支</td>
+<td>本图未用</td>
+</tr>
+<tr>
+<td><code>loop</code></td>
+<td>循环（0 到多次）</td>
+<td>本图未用</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Gemini 给的综合示例</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-4.webp" alt="alt text" loading="lazy"></p>
+<h2 id="状态图">状态图</h2>
+<table>
+<thead>
+<tr>
+<th>元素</th>
+<th>符号</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>状态</td>
+<td>圆角矩形</td>
+<td>对象在某一时刻的条件或情况</td>
+</tr>
+<tr>
+<td>转换</td>
+<td>箭头</td>
+<td>从一个状态到另一个状态的变迁</td>
+</tr>
+<tr>
+<td>事件</td>
+<td>转换上的标签</td>
+<td>触发状态转换的外部刺激</td>
+</tr>
+<tr>
+<td>动作</td>
+<td><code>/ action</code></td>
+<td>状态转换时执行的操作</td>
+</tr>
+<tr>
+<td><mark>初始状态</mark></td>
+<td><mark>实心圆</mark></td>
+<td>状态机的起点</td>
+</tr>
+<tr>
+<td><mark>终止状态</mark></td>
+<td><mark>圆中圆</mark></td>
+<td>状态机的终点</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-5.webp" alt="alt text" loading="lazy"></p>
+<table>
+<thead>
+<tr>
+<th>要素</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>状态（State）</td>
+<td>对象满足某条件、执行某活动的时期</td>
+</tr>
+<tr>
+<td>转移（Transition）</td>
+<td><code>event [guard] / action</code></td>
+</tr>
+<tr>
+<td>事件（Event）</td>
+<td>触发转移的信号</td>
+</tr>
+<tr>
+<td>防护条件（Guard）</td>
+<td>允许转移的布尔前提 <code>[cond]</code></td>
+</tr>
+<tr>
+<td>动作（Action）</td>
+<td>进入/退出/转移时执行的操作</td>
+</tr>
+<tr>
+<td><code>entry / do / exit</code></td>
+<td>状态的三种内部行为</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-28.webp" alt="alt text" loading="lazy"></p>
+<h2 id="例题-1">例题 1</h2>
+<ul>
+<li>现在需要开发一个简化了的大学图书馆系统，它有几种类型的借书人，包括教职工借书人、研究生借书人和本科生借书人等。借书人的基本信息包括姓名、地址和电话号码等。对于教职工借书人，还要包括诸如办公室地址和电话等信息。对于研究生借书人，还要包括研究项目和导师信息等。对于本科生借书人，还要包括项目和所有学分信息等。</li>
+<li>图书馆系统要跟踪借出书本信息。当一个借书人捧着一堆书去借书台办理借书手续时，借出这个事件就发生了。随着时间的过去，一个借书人可以多次从图书馆中借书。一次可以借出多本图书。</li>
+<li>如果借书人想要的书已被借出，他可以预约。每个预约只针对一个借书人和一个标题。预约日期、优先权和完成日期等信息需要维护。当借书完成，系统会将这本书与借出联系起来。</li>
+<li>借书人根据图书馆的信息来检索书名，同时检索这本书是否可以被借出。如果一本书的所有副本都被借出了，那么借书人可以根据书名预订这本书。当借书人把书拿到借书台的时候，管理员可以为这些书办理归还手续。管理员要跟踪新书到达的情况。</li>
+<li>图书馆的管理者有属于自己的活动。他们要分类打出关于书的标题的表格，还要在线检查所有过期未还的书，也标出来。而且，图书馆系统还可以从另外一个大学的数据库中访问和下载借书人的信息。</li>
+</ul>
+<p>为上述描述建立用例模型（6分），要求明确给出建模过程（4分）</p>
+<ul>
+<li>
+<p>第一步：<mark>识别参与者</mark></p>
+</li>
+<li>
+<p>第二步：<mark>识别用例</mark></p>
+</li>
+<li>
+<p>第三步：<mark>识别参与者与用例之间的关联</mark></p>
+</li>
+<li>
+<p>第四步：<mark>识别关系</mark>（泛化、包含、扩展）</p>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-7.webp" alt="alt text" loading="lazy"></p>
+<h2 id="例题-2">例题 2</h2>
+<p>A银行计划在B大学开设银行分部，计划使用ATM机提供全部服务。 ATM系统将通过显示屏幕、输入键盘（有数字键和特殊符号键）、银行卡读卡器、存款插槽、收据打印机等设备与客户交互。客户可以使用ATM机进行存款、取款、余额查询等操作，它们对帐户的更新将交由账户系统的一个接口来处理。安全系统将为每个客户分配一个PIN码和安全级别。每次事务执行之前都需要验证该PIN码。在将来，银行还计划使用ATM机支持一些常规的操作，例如地址和电话号码修改</p>
+<ul>
+<li>请依据其建立ATM机系统的领域类图</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-6.webp" alt="alt text" loading="lazy"></p>
+<blockquote>
+<p>其中的虚线 + 箭头表示的是<strong>依赖</strong>关系
+一个类的实现需要另一个类的协助，是一种 “使用” 关系</p>
+</blockquote>
+<hr>
+<h2 id="为什么需要需求规格说明">为什么需要需求规格说明？</h2>
+<ul>
+<li>结合实验进行说明</li>
+</ul>
+<ol>
+<li>统一团队认知，<mark>消除沟通壁垒</mark></li>
+<li>明确项目边界，<mark>防止范围蔓延</mark></li>
+<li>作为系统设计与编码的直接基石</li>
+<li>提供<mark>测试与验收</mark>的客观标准</li>
+<li>降低长期的<mark>维护与交接</mark>成本</li>
+</ol>
+<h2 id="对给定的需求示例-判定并修正其错误">对给定的需求示例，判定并修正其错误</h2>
+<ul>
+<li>对给定的需求规格说明片段，找出并修正其错误</li>
+</ul>
+<blockquote>
+<p>要求：简洁、精确、一致和易于理解</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>验证标准</th>
+<th>检查内容</th>
+<th>常见问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>正确性</strong></td>
+<td>每条需求<mark>准确反映用户意图</mark></td>
+<td>误解用户需求、遗漏约束</td>
+</tr>
+<tr>
+<td><strong>完整性</strong></td>
+<td>需求集<mark>覆盖所有场景</mark></td>
+<td>遗漏异常流程、边界条件</td>
+</tr>
+<tr>
+<td><strong>一致性</strong></td>
+<td>需求之间<mark>无矛盾</mark></td>
+<td>功能冲突、数据定义不一致</td>
+</tr>
+<tr>
+<td><strong>可读性</strong></td>
+<td>文档<mark>易于理解</mark></td>
+<td>术语不统一、表述含糊</td>
+</tr>
+<tr>
+<td><strong>可修改性</strong></td>
+<td>文档<mark>易于维护和更新</mark></td>
+<td>耦合过紧、缺乏模块化</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>歧义、冲突？</p>
+</blockquote>
+<h2 id="对给定的需求示例-设计功能测试用例">对给定的需求示例，设计功能测试用例</h2>
+<ul>
+<li>结合测试方法</li>
+</ul>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>以需求列表为线索，可以开发测试用例套件，覆盖正常和异常流程</div></div><blockquote>
+<p><strong>需求 01：发布代拿任务</strong>
+用户可以发布一个求助任务。必须填写“任务标题”和“送达地点”。必须设置“赏金”，赏金需大于 0 元且不能超过账户当前余额。</p>
+</blockquote>
+<p>测试套件：代拿任务发布功能</p>
+<table>
+<thead>
+<tr>
+<th>用例 ID</th>
+<th>测试场景</th>
+<th>测试流程分类</th>
+<th>使用的测试方法</th>
+<th>输入数据示例</th>
+<th>预期结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TC-01</strong></td>
+<td>填写所有合法信息，成功发布</td>
+<td><strong>正常流程</strong></td>
+<td>正向等价类</td>
+<td>标题：“求拿仙林快递”，地点：“某栋 101”，赏金：5（账户余额 20）</td>
+<td>提示“发布成功”，任务列表新增该记录，账户扣除 5 元。</td>
+</tr>
+<tr>
+<td><strong>TC-02</strong></td>
+<td>赏金设置为 0 元</td>
+<td><strong>异常流程</strong></td>
+<td>边界值分析</td>
+<td>标题：“求拿快递”，地点：“某栋 101”，赏金：0</td>
+<td>发布按钮变灰或拦截请求，提示“赏金必须大于 0 元”。</td>
+</tr>
+<tr>
+<td><strong>TC-03</strong></td>
+<td>赏金设置为负数</td>
+<td><strong>异常流程</strong></td>
+<td>负向等价类</td>
+<td>标题：“求拿快递”，地点：“某栋 101”，赏金：-5</td>
+<td>拦截请求，提示“金额输入非法”。</td>
+</tr>
+<tr>
+<td><strong>TC-04</strong></td>
+<td>赏金超出账户当前余额</td>
+<td><strong>异常流程</strong></td>
+<td>边界值分析</td>
+<td>标题：“求拿快递”，地点：“某栋 101”，赏金：50（账户余额 20）</td>
+<td>拦截请求，提示“账户余额不足，请先充值”。</td>
+</tr>
+<tr>
+<td><strong>TC-05</strong></td>
+<td>漏填必填项（地点）</td>
+<td><strong>异常流程</strong></td>
+<td>负向等价类</td>
+<td>标题：“求拿快递”，地点：空，赏金：5</td>
+<td>拦截请求，输入框标红，提示“送达地点不能为空”。</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>名词解释：软件设计</div><p>软件设计就是由工程师创造的一份包含描述和原型的设计规格说明，它勾勒出了一个将部署在特定物理环境中、受制于各项限制条件，并最终旨在满足需求规格与达成业务目标的软件蓝图</p>
+</div><h2 id="软件设计的核心思想是什么">软件设计的核心思想是什么？</h2>
+<h3 id="分解和抽象">分解和抽象</h3>
+<ul>
+<li>分解：将大问题分而治之，每个子系统独立可理解</li>
+<li>抽象：隐藏内部细节，暴露必要接口</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-8.webp" alt="alt text" loading="lazy"></p>
+<blockquote>
+<p>每一层都同时使用分解（拆成子系统）和抽象（每个子系统有接口和实现）</p>
+</blockquote>
+<h2 id="软件工程设计有哪三个层次-各层的主要思想是什么">软件工程设计有哪三个层次？各层的主要思想是什么？</h2>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>关注点</th>
+<th>产出物</th>
+<th>案例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>低层设计</td>
+<td>单个类的属性、方法、算法</td>
+<td>设计类图</td>
+<td><code>Order.calculateTotal()</code></td>
+</tr>
+<tr>
+<td>中层设计</td>
+<td>包/模块的划分、类的协作</td>
+<td>包图、交互图</td>
+<td><code>com.bookstore.service.order</code></td>
+</tr>
+<tr>
+<td>高层设计（体系结构）</td>
+<td>系统整体结构、层次、部署</td>
+<td>组件图、部署图</td>
+<td>三层架构：展示层/业务层/数据层</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="体系结构的概念">体系结构的概念</h2>
+<p>一个软件系统的体系结构规定了系统的计算部件和部件之间的交互</p>
+<h2 id="体系结构风格">体系结构风格</h2>
+<h3 id="1-主程序-子程序风格">1 主程序-子程序风格</h3>
+<ul>
+<li>自顶向下的调用层次</li>
+<li>数据通过参数传递</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>结构清晰</td>
+<td>耦合度高</td>
+</tr>
+<tr>
+<td>易于理解</td>
+<td>难以复用</td>
+</tr>
+<tr>
+<td>控制流明确</td>
+<td>不支持并发</td>
+</tr>
+<tr>
+<td>调试方便</td>
+<td>扩展性差</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>适合小规模、逻辑简单的系统</p>
+</blockquote>
+<h3 id="2-面向对象风格">2 面向对象风格</h3>
+<p>面向对象风格以<strong>对象</strong>为基本组件，通过<strong>方法调用</strong>进行交互。</p>
+<ul>
+<li>三大特性对架构的影响</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>架构影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>封装</td>
+<td>信息隐藏，降低耦合</td>
+</tr>
+<tr>
+<td>继承</td>
+<td>代码复用，建立层次</td>
+</tr>
+<tr>
+<td>多态</td>
+<td>灵活替换，开闭原则</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-分层风格">3 分层风格</h3>
+<blockquote>
+<p>核心原则：上层依赖下层，下层不依赖上层；每层通过接口暴露服务。</p>
+</blockquote>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-9.webp" alt="alt text" loading="lazy"></p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>英文名</th>
+<th>核心职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>展示层</td>
+<td>Presentation</td>
+<td>接收请求、渲染视图、用户交互</td>
+</tr>
+<tr>
+<td>业务逻辑层</td>
+<td>Business Logic</td>
+<td>实现业务规则、协调工作流</td>
+</tr>
+<tr>
+<td>数据访问层</td>
+<td>Data Access</td>
+<td>CRUD 操作、数据映射、事务管理</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>展示层不直接访问数据库</li>
+<li>业务逻辑层不包含 UI 代码</li>
+<li>数据访问层不包含业务规则</li>
+<li>各层通过<strong>接口</strong>解耦</li>
+</ul>
+<h3 id="4-mvc-风格">4 MVC 风格</h3>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>职责</th>
+<th>要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model</td>
+<td>管理数据与业务逻辑</td>
+<td>不依赖 View/Controller</td>
+</tr>
+<tr>
+<td>View</td>
+<td>展示数据给用户</td>
+<td><mark>从 Model 获取数据</mark></td>
+</tr>
+<tr>
+<td>Controller</td>
+<td>处理用户输入</td>
+<td><mark>更新 Model，选择 View</mark></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Model 独立于表现形式</li>
+<li>View 只负责展示，不含业务逻辑</li>
+<li>Controller 是 View 与 Model 的协调者</li>
+</ul>
+<pre class="mermaid">graph TD
+    %% 定义节点
+    Model[模型 Model]
+    View[视图 View]
+    Controller[控制器 Controller]
+
+    %% 定义连接线和文字
+    Model -->|更改通知| View
+    View -->|状态查询| Model
+    View -->|用户交互| Controller
+    Controller -->|视图选择| View
+    Controller -->|状态改变| Model
+
+    %% 简单的样式调整（可选，让它看起来更像原图的布局）
+    classDef default fill:#fff,stroke:#333,stroke-width:2px;
+</pre>
+<p><strong>观察者模式在 MVC 中的角色</strong>（View 观察 Model）</p>
+<ul>
+<li>Model 是被观察者</li>
+<li>View 是观察者</li>
+<li>Model 数据变化时通知所有注册的 View</li>
+<li>View 收到通知后自动刷新</li>
+</ul>
+<p><strong>好处</strong></p>
+<ul>
+<li>Model 与 View 松耦合</li>
+<li>支持多视图同步更新</li>
+<li>新增 View 无需修改 Model</li>
+</ul>
+<p><strong>MVC 与分层风格的关系</strong></p>
+<blockquote>
+<p>分层关注纵向职责划分，MVC 关注交互逻辑分离，两者可以结合使用</p>
+</blockquote>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-10.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-11.webp" alt="alt text" loading="lazy"></p>
+<h2 id="体系结构风格优缺点">体系结构风格优缺点</h2>
+<table>
+<thead>
+<tr>
+<th>体系结构风格</th>
+<th>核心优点</th>
+<th>核心缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>主程序-子程序</strong></td>
+<td>结构清晰，易于理解，调试方便</td>
+<td>耦合度高，难以复用和扩展</td>
+</tr>
+<tr>
+<td><strong>面向对象</strong></td>
+<td><mark>封装性好，贴合现实，易于复用</mark></td>
+<td>对象间存在调用耦合，修改易引发级联</td>
+</tr>
+<tr>
+<td><strong>分层</strong></td>
+<td><mark>关注点分离，封装性，可替换性，可测试性</mark></td>
+<td>层间性能开销，级联修改，过度分层</td>
+</tr>
+<tr>
+<td><strong>MVC</strong></td>
+<td><mark>界面与业务分离，利于团队并行开发</mark></td>
+<td>对于小项目属过度设计，增加系统复杂度</td>
+</tr>
+<tr>
+<td><strong>管道-过滤器</strong></td>
+<td>模块高度独立，支持并发处理</td>
+<td>数据转换开销大，不擅长交互式应用</td>
+</tr>
+<tr>
+<td><strong>客户端-服务器</strong></td>
+<td>数据集中安全，客户端交互体验好</td>
+<td>强依赖网络，服务器易成为单点瓶颈</td>
+</tr>
+<tr>
+<td><strong>事件驱动</strong></td>
+<td>极度解耦，高并发与异步处理能力强</td>
+<td>控制流不确定，测试、调试及查错困难</td>
+</tr>
+<tr>
+<td><strong>微服务</strong></td>
+<td>独立部署与扩展，技术栈灵活，故障隔离</td>
+<td>分布式运维极复杂，数据一致性难以保证</td>
+</tr>
+</tbody>
+</table>
+<h2 id="体系结构设计的过程">体系结构设计的过程</h2>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>名称</th>
+<th>核心任务</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>分析关键需求和项目约束</strong></td>
+<td>识别功能需求、质量属性、项目约束</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>选择体系结构风格</strong></td>
+<td>根据需求特征选择合适风格</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>逻辑设计</strong></td>
+<td>将需求分配到子系统和模块</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>接口设计</strong></td>
+<td>定义模块间的交互接口</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>物理设计</strong></td>
+<td>决定部署方案（硬件/网络拓扑）</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>验证设计方案</strong></td>
+<td>检查是否满足需求和约束</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>评审与改进</strong></td>
+<td>团队评审，迭代优化</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>步骤 3 (逻辑设计) 是最核心的步骤，需要反复迭代直到模块划分合理</p>
+</blockquote>
+<h2 id="体系结构构建之间接口的定义">体系结构构建之间接口的定义</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>全称</th>
+<th>用途</th>
+<th>所在层</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PO</td>
+<td>Persistent Object</td>
+<td>与数据库表一一对应</td>
+<td>entity / dao</td>
+</tr>
+<tr>
+<td>VO</td>
+<td>Value Object</td>
+<td>面向展示层的数据传输对象</td>
+<td>controller / service</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-15.webp" alt="alt text" loading="lazy"></p>
+<p><strong>依赖倒置原则（DIP）详解</strong></p>
+<ul>
+<li>传统依赖：高层直接依赖低层具体实现，耦合度高</li>
+<li>依赖倒置后：高层和低层都依赖抽象接口，依赖方向&quot;倒置&quot;</li>
+</ul>
+<p>DIP 两条规则：</p>
+<ol>
+<li>高层模块不应依赖低层模块，两者都应依赖抽象</li>
+<li>抽象不应依赖细节，细节应依赖抽象</li>
+</ol>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">BookDao</span> {
+  Book <span class="hljs-title function_">findById</span><span class="hljs-params">(Long id)</span>;
+  Book <span class="hljs-title function_">findByIsbn</span><span class="hljs-params">(String isbn)</span>;
+  List&lt;Book&gt; <span class="hljs-title function_">search</span><span class="hljs-params">(String keyword, <span class="hljs-type">int</span> page, <span class="hljs-type">int</span> size)</span>;
+  <span class="hljs-keyword">void</span> <span class="hljs-title function_">save</span><span class="hljs-params">(Book book)</span>;
+  <span class="hljs-keyword">void</span> <span class="hljs-title function_">update</span><span class="hljs-params">(Book book)</span>;
+  <span class="hljs-keyword">void</span> <span class="hljs-title function_">deleteById</span><span class="hljs-params">(Long id)</span>;
+  List&lt;Book&gt; <span class="hljs-title function_">findByCategory</span><span class="hljs-params">(String category)</span>;
+}
+</code></pre>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">BookService</span> {
+  BookVO <span class="hljs-title function_">findById</span><span class="hljs-params">(Long id)</span>;
+  List&lt;BookVO&gt; <span class="hljs-title function_">search</span><span class="hljs-params">(String keyword, <span class="hljs-type">int</span> page, <span class="hljs-type">int</span> size)</span>;
+  <span class="hljs-type">boolean</span> <span class="hljs-title function_">checkStock</span><span class="hljs-params">(Long bookId, <span class="hljs-type">int</span> quantity)</span>;
+  <span class="hljs-keyword">void</span> <span class="hljs-title function_">addBook</span><span class="hljs-params">(BookVO bookVO)</span>;
+  <span class="hljs-keyword">void</span> <span class="hljs-title function_">updateBook</span><span class="hljs-params">(BookVO bookVO)</span>;
+}
+</code></pre>
+<ul>
+<li><mark>入参和返回值使用 VO（面向上层），内部再转换为 PO</mark></li>
+<li>方法粒度对应用例步骤，而非数据库 CRUD</li>
+</ul>
+<blockquote>
+<p>实现接口的时候，<strong>无状态设计</strong>：Service 不持有请求级别的状态，确保线程安全</p>
+</blockquote>
+<h2 id="体系结构开发集成测试用例">体系结构开发集成测试用例</h2>
+<ul>
+<li>Stub（桩）
+<ul>
+<li>替代<strong>被调用</strong>的下层模块</li>
+<li>模拟下层返回固定数据</li>
+<li>用于自顶向下集成</li>
+</ul>
+</li>
+<li>Driver（驱动）
+<ul>
+<li>替代<strong>调用者</strong>的上层模块</li>
+<li>模拟上层发起请求</li>
+<li>用于自底向上集成</li>
+</ul>
+</li>
+</ul>
+<p>集成测试验证的架构属性</p>
+<ul>
+<li>层间连通性：请求能否正确穿透所有层</li>
+<li>事务管理：跨层操作的事务是否正确传播</li>
+</ul>
+<h2 id="体系结构例题">体系结构例题</h2>
+<ul>
+<li>如果这个薪酬管理系统是Web框架实现的，按照分层体系结构风格设计，画出能体现系统体系结构的具体的物理包图（包括所用分层，注意要体现系统所有功能模块，体现实现跨网络，浏览器（包含前端html，css，js）位于客户端，逻辑层和数据层（后端）位于服务器端，网络通信采用HTTP，基于REST风格API的接口）。（4分）</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-19.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>请设计 “社会保险录入” 这个页面对应的展示层和逻辑层交互的接口，以及其涉及的逻辑层与数据层交互的接口（写出接口声明的代码，不用实现）。每个接口都要写出其所属的包名。请考虑接口在包中的分布。（6分）</li>
+</ul>
+<p>① 展示层与逻辑层交互的接口 (API 接口)</p>
+<pre><code class="language-java"><span class="hljs-comment">// 所属包名：逻辑层 API 接口包</span>
+<span class="hljs-keyword">package</span> com.payroll.logic.api;
+
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="hljs-comment">/**
+ * 逻辑层向展示层提供的 RESTful 接口声明
+ */</span>
+<span class="hljs-meta">@RequestMapping(&quot;/api/social-security&quot;)</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">SocialSecurityApi</span> {
+
+    <span class="hljs-comment">/**
+     * 社会保险录入接口
+     * 接收前端发来的 HTTP POST 请求
+     * * <span class="hljs-doctag">@param</span> recordDTO 包含社保各项基数的前端传输对象
+     * <span class="hljs-doctag">@return</span> 统一的 REST 响应对象
+     */</span>
+    <span class="hljs-meta">@PostMapping(&quot;/record&quot;)</span>
+    ResponseEntity&lt;Result&gt; <span class="hljs-title function_">addSocialSecurityRecord</span><span class="hljs-params">(<span class="hljs-meta">@RequestBody</span> SocialSecurityDTO recordDTO)</span>;
+    
+}
+</code></pre>
+<p>② 逻辑层与数据层交互的接口 (DAO/Mapper 接口)</p>
+<pre><code class="language-java"><span class="hljs-comment">// 所属包名：数据层数据访问包</span>
+<span class="hljs-keyword">package</span> com.payroll.data.mapper;
+
+<span class="hljs-keyword">import</span> org.apache.ibatis.annotations.Mapper;
+
+<span class="hljs-comment">/**
+ * 数据层对逻辑层提供的数据访问接口
+ */</span>
+<span class="hljs-meta">@Mapper</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">SocialSecurityMapper</span> {
+
+    <span class="hljs-comment">/**
+     * 将社保数据插入数据库
+     * * <span class="hljs-doctag">@param</span> entity 逻辑层处理完毕的社保实体对象
+     * <span class="hljs-doctag">@return</span> 数据库受影响的行数（用于判断是否录入成功）
+     */</span>
+    <span class="hljs-type">int</span> <span class="hljs-title function_">insertSocialSecurity</span><span class="hljs-params">(SocialSecurityEntity entity)</span>;
+    
+}
+</code></pre>
+<hr>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>名词解释：可用性</div><table>
+<thead>
+<tr>
+<th>属性</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>易学性</strong></td>
+<td>用户能在短时间内掌握操作</td>
+</tr>
+<tr>
+<td><strong>效率</strong></td>
+<td>熟练用户能高效完成任务</td>
+</tr>
+<tr>
+<td><strong>易记性</strong></td>
+<td>中断后无需从头学习</td>
+</tr>
+<tr>
+<td><strong>容错性</strong></td>
+<td>错误少，能快速从错误中恢复</td>
+</tr>
+<tr>
+<td><strong>满意度</strong></td>
+<td>用户使用时感到愉悦</td>
+</tr>
+</tbody>
+</table>
+</div><h2 id="能够列出至少-5-个界面设计的注意事项-并加以解释">能够列出至少 5 个界面设计的注意事项，并加以解释</h2>
+<blockquote>
+<p>问例子违反了哪些条界面设计原则</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>规则</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>系统状态的可见度</strong></td>
+<td>长于3-5秒的操作需显式反馈（<mark>进度条</mark>等）</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>系统和现实世界的吻合</strong></td>
+<td>使用<mark>用户熟悉的词汇和概念</mark></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>用户享有控制权和自主权</strong></td>
+<td>提供<mark>撤销/重做/返回</mark>方法</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>一致性和标准化</strong></td>
+<td><mark>术语一致</mark>、无歧义图标、颜色/布局/字体一致</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>避免出错</strong></td>
+<td>从设计层面预防用户出错</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>依赖识别而非记忆</strong></td>
+<td>减少用户记忆负担</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>使用的灵活性和高效性</strong></td>
+<td>新手、专家、老年人</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>帮助用户识别、诊断和恢复错误</strong></td>
+<td><mark>错误信息用通俗语言</mark>，精确指出问题并建议解决方案</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>帮助和文档</strong></td>
+<td>提供帮助/手册，使用简单标准化术语</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>审美感和最小化设计</strong></td>
+<td>不过多不相关信息；标准控件；适合屏幕显示的字体</td>
+</tr>
+</tbody>
+</table>
+<h2 id="精神模型-差异性">精神模型、差异性</h2>
+<ul>
+<li><strong>精神模型</strong>（心智模型）：
+<ul>
+<li>用户基于过往经验、知识和对系统的理解，在头脑中构建的关于 “系统是如何工作的” 内部认知结构</li>
+</ul>
+</li>
+<li><strong>差异性</strong>（心智模型与设计模型之间的错位）：
+<ul>
+<li><strong>预期违背</strong>：用户基于经验（如：红色通常代表危险/停止）进行操作，但系统给出了相反反馈（如：红色代表“热门”或“点赞”）。</li>
+<li><strong>概念断层</strong>：设计师使用了技术术语（如“缓存清除”、“正则匹配”），而用户的心智模型是生活化概念（如“清理垃圾”、“搜索规则”）。</li>
+<li><strong>反馈缺失</strong>：用户执行了操作，但系统表象没有给出确认，导致用户怀疑 “我是不是没点上？” 或 “系统是不是卡了？”。</li>
+<li><strong>隐喻失效</strong>：早期智能手机的 “拟物化设计” 利用了物理世界的心智模型，但现在的 “扁平化” 如果缺乏引导，用户可能不知道图标代表什么功能。</li>
+</ul>
+</li>
+</ul>
+<h2 id="导航-反馈-协作式设计">导航、反馈、协作式设计</h2>
+<ul>
+<li>导航：提供完成任务的入口。</li>
+<li>反馈：视觉、声音上的反馈，让用户能意识到行为的结果，提示用户交互行为的后果。</li>
+<li>协作式设计：调整计算机以适应并帮助用户
+<ul>
+<li>低出错率：避免用户犯错、灰色屏蔽不适当选项、错误时给予建设性指导</li>
+<li>易记性：减少短期记忆负担、逐层递进展示信息、设置有意义的缺省值</li>
+<li>视觉风格：色彩、字体、图标、插画、布局</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="详细设计的出发点">详细设计的出发点</h2>
+<blockquote>
+<p>“<strong>从体系结构到代码</strong>”</p>
+</blockquote>
+<ul>
+<li>软件体系结构定义了模块的规格（部件、连接件、配置）</li>
+<li>详细设计 = 中层设计（过程、调用；类、协作） + 低层设计（数据结构、算法、类型、语句、控制结构）</li>
+</ul>
+<h2 id="职责与协作">职责与协作</h2>
+<blockquote>
+<p>面向对象详细设计的两大核心概念</p>
+</blockquote>
+<h3 id="职责-相关核心知识点">“职责” 相关核心知识点</h3>
+<p><strong>本质与分类：</strong></p>
+<ul>
+<li>职责是一个类执行某项任务（操作职责）或维护某些数据（数据职责）的义务</li>
+<li>操作职责通常由类的<strong>方法</strong>来实现，而数据职责通常由类的<strong>属性</strong>来实现</li>
+</ul>
+<p><strong>职责分配与委托：</strong></p>
+<ul>
+<li>详细设计的核心本质就是将 “系统的总体职责” 逐步分配到具体的类与方法上</li>
+<li>分配良好的职责应当具备 “高内聚、低耦合” 的特征，且模块间的职责不应重叠</li>
+<li><strong>委托：</strong> 一个对象可以保留高层职责，而将具体的执行委托给更专门的对象，这有助于解耦和关注点分离</li>
+</ul>
+<p><mark><strong>GRASP 模式（职责分配指导原则）：</strong></mark></p>
+<ul>
+<li><strong>低耦合</strong>
+<ul>
+<li>若 B 已耦合于 A，则把新职责也给 A，不引入额外依赖</li>
+<li><mark>优先依赖接口而非具体类</mark></li>
+<li><mark>某类的变更对其他类影响极小</mark>；<mark>类更易独立理解与复用</mark></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><strong>高内聚</strong>
+<ul>
+<li>一个类只承担紧密相关的一组职责</li>
+<li>不要为了复用而拼凑不相关的操作</li>
+<li>类的职责清晰，维护时改动范围小，自然导向低耦合</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>低耦合和高内聚是 GRASP 的两个元原则，是职责分配的评判标准</p>
+</blockquote>
+<ul>
+<li><strong>信息专家：</strong> 将职责分配给<mark>拥有执行该职责所需信息的类</mark>（即 “<strong>谁有数据，谁负责</strong>”）</li>
+<li><strong>创建者：</strong> 决定由哪个类负责创建新对象</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>高</td>
+<td>唯一属于某个整体的密不可分的一部分（<strong>组合关系</strong>）</td>
+</tr>
+<tr>
+<td>↑</td>
+<td>被某一对象记录和管理（<strong>单向被关联</strong>）</td>
+</tr>
+<tr>
+<td>↓</td>
+<td>创建所需的数据被某个对象所持有</td>
+</tr>
+<tr>
+<td>低</td>
+<td>被某个整体包含（<strong>聚合关系</strong>）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>控制器：</strong> <mark>决定由谁负责处理系统事件</mark>
+<ul>
+<li>加一个控制器类，将表现层（UI）与实际处理事件的领域层对象解耦。表现层绝不能直接调用领域对象</li>
+</ul>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">控制器类型</th>
+<th style="text-align:left">分配对象</th>
+<th style="text-align:left">典型示例</th>
+<th style="text-align:left">优点</th>
+<th style="text-align:left">缺点 / 风险</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">业务或整体组织<br></td>
+<td style="text-align:left">代表整个业务实体或顶层组织的类</td>
+<td style="text-align:left"><code>Store</code> (商店)<br><code>Company</code> (公司)</td>
+<td style="text-align:left">概念直观，非常符合业务人员的认知。</td>
+<td style="text-align:left">极易随着用例增多而膨胀，沦为&quot;上帝类&quot;（God Class）。</td>
+</tr>
+<tr>
+<td style="text-align:left">整体系统<br></td>
+<td style="text-align:left">代表整个计算机系统的根对象</td>
+<td style="text-align:left"><code>System</code> (系统)<br><code>POSTApp</code> (POS应用)</td>
+<td style="text-align:left">避免了业务类承担过多控制职责，职责划分清晰。</td>
+<td style="text-align:left">同样面临单点膨胀的风险，随着系统变大极难维护。</td>
+</tr>
+<tr>
+<td style="text-align:left">角色控制器<br></td>
+<td style="text-align:left">现实世界中真实存在、负责执行该操作的角色或实体</td>
+<td style="text-align:left"><code>Cashier</code> (收银员)<br><code>Customer</code> (客户)</td>
+<td style="text-align:left">高度契合现实世界的直觉和领域模型，易于沟通。</td>
+<td style="text-align:left">若该角色在系统中状态较少，单独建类显得冗余；若操作过多，会导致职责不清。</td>
+</tr>
+<tr>
+<td style="text-align:left">用例控制器<br></td>
+<td style="text-align:left">现实中不存在，专为处理特定用例而创建的纯虚构类</td>
+<td style="text-align:left"><code>ProcessSaleHandler</code><br><code>RegisterUserService</code></td>
+<td style="text-align:left">现代架构最推荐。完美遵循单一职责原则（SRP），高内聚、低耦合，极易测试与维护。</td>
+<td style="text-align:left">类的数量会随着系统用例的增加而显著增多。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="协作-相关核心知识点">“协作” 相关核心知识点</h3>
+<p><strong>本质与表现形式：</strong></p>
+<ul>
+<li>协作是指类之间如何通过消息的传递来共同完成大职责</li>
+<li>系统的一个行为由一组对象之间的协作实现；协作分布在对象网络中，不存在于单一位置</li>
+</ul>
+<p><mark><strong>控制风格</strong></mark>：描述了系统行为在对象网络中分布的方式</p>
+<ul>
+<li><strong>集中式：</strong> 控制器极为复杂，统一发起所有调用（呈星形），其他对象复杂度低，但易导致控制器臃肿和高耦合</li>
+<li><strong>委托式：</strong> 控制器保留主要决策，将次要子任务委托给专门对象执行。平衡了清晰性与灵活性，是大多数实际系统的折中方案</li>
+<li><strong>分散式：</strong> 控制流广泛分散，对象交互密集且难以追踪，通常应尽量避免</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐风格</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用例步骤清晰、状态机驱动</td>
+<td>集中式</td>
+<td>一个 Controller / FSM 容易调试</td>
+</tr>
+<tr>
+<td>业务复杂、多个子领域协作</td>
+<td>委托式</td>
+<td>主控保留决策，子领域专精</td>
+</tr>
+<tr>
+<td>简单 CRUD、消息频繁</td>
+<td>委托式</td>
+<td>避免集中式臃肿</td>
+</tr>
+<tr>
+<td>完全 P2P 的对象交互</td>
+<td>❌ 分散式</td>
+<td>控制流难追踪，慎用</td>
+</tr>
+</tbody>
+</table>
+<h2 id="信息隐藏">信息隐藏</h2>
+<p>基本思想：<mark>每个模块隐藏一个重要的设计决策（决策改变时，只改这个模块），抽象出类的关键细节（职责）</mark>。即抽象出接口，隐藏实现。</p>
+<blockquote>
+<p>面向对象方法下的信息隐藏</p>
+<ul>
+<li>封装类的职责，隐藏职责的实现</li>
+<li>预计将会发生的变更，抽象它的接口，隐藏它的内部机制</li>
+</ul>
+</blockquote>
+<ul>
+<li>信息隐藏基础原则</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>原则</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1</td>
+<td><strong>全局变量有害</strong></td>
+<td>全局变量穿透所有模块，是隐藏的反词</td>
+</tr>
+<tr>
+<td>P2</td>
+<td><strong>优先显示表达</strong></td>
+<td>用清晰的接口、命名、文档<strong>显式</strong>表达约束，而不是依赖隐式约定</td>
+</tr>
+<tr>
+<td>P3</td>
+<td><strong>不要重复</strong>（DRY）</td>
+<td>同一个决策不应在多处编码；重复 = 多处都需修改</td>
+</tr>
+<tr>
+<td>P4</td>
+<td><strong>面向接口编程</strong></td>
+<td>客户端依赖<strong>接口</strong>（抽象），而非具体实现；便于替换</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>共同目标：让 “会变的部分” 集中在一个模块里，并对外只暴露稳定的接口。</p>
+</blockquote>
+<h2 id="面向对象的耦合类型">面向对象的耦合类型</h2>
+<ul>
+<li><mark><strong>访问耦合</strong></mark>：类 A 使用类 B 的服务时产生
+<ul>
+<li>调用方法</li>
+<li>访问字段</li>
+<li>作为参数传递</li>
+<li>通过消息链跨越多跳</li>
+</ul>
+</li>
+<li><mark><strong>继承耦合</strong></mark>：类 A 继承类 B 时产生
+<ul>
+<li>子类依赖父类的实现细节</li>
+<li>父类修改可能破坏子类</li>
+<li>比访问耦合更深、更隐蔽</li>
+</ul>
+</li>
+</ul>
+<h3 id="访问耦合">访问耦合</h3>
+<p>访问耦合的五个级别</p>
+<table>
+<thead>
+<tr>
+<th>级别</th>
+<th>名称</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5（高）</td>
+<td>隐式访问耦合</td>
+<td>依赖<strong>全局变量或单例</strong></td>
+<td><code>GlobalConfig.instance.value</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>实现中访问耦合</td>
+<td>访问另一类的<strong>私有</strong>实现细节</td>
+<td>反射访问 <code>private</code> 字段</td>
+</tr>
+<tr>
+<td>3</td>
+<td>成员变量访问耦合</td>
+<td>直接读写另一类的 <strong>public</strong> 字段</td>
+<td><code>order.price = 100</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>参数变量访问耦合</td>
+<td>通过<strong>方法</strong>参数传递，依赖具体类型</td>
+<td><code>void process(ConcreteOrder o)</code></td>
+</tr>
+<tr>
+<td>1（低）</td>
+<td>无访问耦合</td>
+<td>无直接依赖</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>级别 3–5 打破封装，应重构为通过方法（消息）访问。级别 1–2 是可接受范围。</p>
+</blockquote>
+<h4 id="消息链问题">消息链问题</h4>
+<pre><code class="language-java"><span class="hljs-type">String</span> <span class="hljs-variable">city</span> <span class="hljs-operator">=</span> customer
+    .getAddress()
+    .getCity()
+    .toUpperCase();
+</code></pre>
+<p>问题： <code>Customer</code> 的调用方知道了：</p>
+<ul>
+<li><code>Customer</code> 有 <code>Address</code></li>
+<li><code>Address</code> 有 <code>City</code></li>
+<li><code>City</code> 是 <code>String</code></li>
+</ul>
+<p>三层实现细节全部暴露！</p>
+<h5 id="方案-a-引入局部变量">方案 A：引入局部变量</h5>
+<pre><code class="language-java"><span class="hljs-type">Address</span> <span class="hljs-variable">addr</span> <span class="hljs-operator">=</span> customer.getAddress();
+<span class="hljs-type">City</span> <span class="hljs-variable">city</span> <span class="hljs-operator">=</span> addr.getCity();
+<span class="hljs-type">String</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span> city.toUpperCase();
+</code></pre>
+<p>可读性提升，但耦合依然存在。</p>
+<h5 id="方案-b-委托-推荐"><mark>方案 B：委托（推荐）</mark></h5>
+<pre><code class="language-java"><span class="hljs-comment">// 在 Customer 中封装</span>
+<span class="hljs-type">String</span> <span class="hljs-variable">city</span> <span class="hljs-operator">=</span> customer.getCityName();
+</code></pre>
+<p>调用方只需知道 <code>Customer</code>。</p>
+<h4 id="p5-迪米特法则-law-of-demeter">P5 · 迪米特法则（Law of Demeter）</h4>
+<blockquote>
+<p>只与你的直接朋友交谈</p>
+</blockquote>
+<p><strong>合法的调用对象</strong>：</p>
+<ol>
+<li>this （自身）</li>
+<li>方法的参数对象</li>
+<li>方法内新创建的对象</li>
+<li>类的成员变量（直接持有）</li>
+</ol>
+<pre><code class="language-java"><span class="hljs-comment">// 违反：通过 getB() 拿到中间对象再调用</span>
+a.getB().doSomething();
+<span class="hljs-comment">// 合规：委托给 B 的操作封装在 A 中</span>
+a.delegateToB();
+</code></pre>
+<h4 id="p4-面向接口编程">P4 · 面向接口编程</h4>
+<blockquote>
+<p>面向接口编程，而不是实现</p>
+</blockquote>
+<pre><code class="language-java"><span class="hljs-comment">// 不好：依赖具体类</span>
+ArrayList&lt;String&gt; list = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();
+<span class="hljs-comment">// 好：依赖接口</span>
+List&lt;String&gt; list = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();
+</code></pre>
+<p><strong>好处</strong>：</p>
+<ul>
+<li>调用方只依赖接口契约，不依赖实现</li>
+<li>切换实现类无需修改调用方</li>
+<li>支持多态、Mock 测试</li>
+</ul>
+<h4 id="p6-接口隔离原则-isp">P6 · 接口隔离原则（ISP）</h4>
+<blockquote>
+<p>不应该强迫客户端依赖于它们不使用的接口</p>
+</blockquote>
+<pre><code class="language-java"><span class="hljs-comment">// 肥接口问题</span>
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Worker</span> {
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">work</span><span class="hljs-params">()</span>;
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">eat</span><span class="hljs-params">()</span>; <span class="hljs-comment">// Robot 不需要！</span>
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">sleep</span><span class="hljs-params">()</span>; <span class="hljs-comment">// Robot 不需要！</span>
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Robot</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Worker</span> {
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">work</span><span class="hljs-params">()</span> { ... }
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">eat</span><span class="hljs-params">()</span> { <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">UnsupportedOperationException</span>(); }
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">sleep</span><span class="hljs-params">()</span>{ <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">UnsupportedOperationException</span>(); }
+}
+</code></pre>
+<pre><code class="language-java"><span class="hljs-comment">// ISP 重构</span>
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Workable</span> {
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">work</span><span class="hljs-params">()</span>;
+}
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Feedable</span> {
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">eat</span><span class="hljs-params">()</span>;
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">sleep</span><span class="hljs-params">()</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Robot</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Workable</span> { ... }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Human</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Workable</span>, Feedable { ... }
+</code></pre>
+<h3 id="继承耦合">继承耦合</h3>
+<p>继承耦合的四种类型</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>说明</th>
+<th>耦合强度</th>
+<th>推荐度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>修改</strong></td>
+<td><strong>子类覆盖父类</strong>方法并改变行为语义</td>
+<td>最高</td>
+<td>✖ 避免</td>
+</tr>
+<tr>
+<td><strong>精化</strong></td>
+<td>子类调用 <code>super</code>并在前后添加行为，不改变语义</td>
+<td>中</td>
+<td>△ 谨慎</td>
+</tr>
+<tr>
+<td><strong>扩展</strong></td>
+<td><mark>子类只新增方法，不覆盖父类任何方法</mark></td>
+<td>低</td>
+<td>✓ 安全</td>
+</tr>
+<tr>
+<td><strong>无实现</strong></td>
+<td><mark>父类是纯抽象接口，子类提供实现</mark></td>
+<td>最低</td>
+<td>✓✓ 最佳</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p7-里氏替换原则-lsp">P7 · 里氏替换原则（LSP）</h4>
+<blockquote>
+<p>子类型必须能够替换其父类型而不改变程序的正确性</p>
+</blockquote>
+<p>经典反例：正方形 ≠ 长方形</p>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Rectangle</span> {
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">setWidth</span><span class="hljs-params">(<span class="hljs-type">int</span> w)</span> { ... }
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">setHeight</span><span class="hljs-params">(<span class="hljs-type">int</span> h)</span> { ... }
+    <span class="hljs-comment">// 不变式：w 与 h 独立</span>
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Square</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Rectangle</span> {
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">setWidth</span><span class="hljs-params">(<span class="hljs-type">int</span> w)</span> {
+        <span class="hljs-built_in">super</span>.setWidth(w);
+        <span class="hljs-built_in">super</span>.setHeight(w); <span class="hljs-comment">// 破坏不变式！</span>
+    }
+}
+
+<span class="hljs-keyword">void</span> <span class="hljs-title function_">resize</span><span class="hljs-params">(Rectangle r)</span> {
+    r.setWidth(<span class="hljs-number">5</span>);
+    r.setHeight(<span class="hljs-number">3</span>);
+    <span class="hljs-comment">// 期望面积 = 15</span>
+    <span class="hljs-keyword">assert</span> r.area() == <span class="hljs-number">15</span>; <span class="hljs-comment">// Square 中失败！</span>
+}
+</code></pre>
+<blockquote>
+<p>Square 在几何上是 Rectangle 的子集，但在行为契约上不能替换。<strong>“IS-A” 关系应由行为定义</strong>，而非数学定义。</p>
+</blockquote>
+<p>LSP 反例：企鹅与鸟</p>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Bird</span> {
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">fly</span><span class="hljs-params">()</span> { ... }  <span class="hljs-comment">// 所有鸟都会飞?</span>
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Penguin</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Bird</span> {
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">fly</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">UnsupportedOperationException</span>(<span class="hljs-string">&quot;企鹅不会飞!&quot;</span>);
+    }
+}
+
+<span class="hljs-comment">// 调用方：</span>
+<span class="hljs-keyword">void</span> <span class="hljs-title function_">makeBirdFly</span><span class="hljs-params">(Bird b)</span> {
+    b.fly(); <span class="hljs-comment">// Penguin 会抛异常!</span>
+}
+</code></pre>
+<ul>
+<li>修复方案</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Flyable</span> {
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">fly</span><span class="hljs-params">()</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Sparrow</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Bird</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Flyable</span> {
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">fly</span><span class="hljs-params">()</span> { ... }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Penguin</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Bird</span> {
+    <span class="hljs-comment">// 不实现 Flyable</span>
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">swim</span><span class="hljs-params">()</span> { ... }
+}
+</code></pre>
+<blockquote>
+<p>用接口分离代替强制继承层次</p>
+</blockquote>
+<p>LSP 要求子类遵守父类的行为契约</p>
+<table>
+<thead>
+<tr>
+<th>架约要素</th>
+<th>LSP 要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>前置条件</td>
+<td><mark>子类前置条件 ≤ 父类（放宽）</mark></td>
+</tr>
+<tr>
+<td>后置条件</td>
+<td><mark>子类后置条件 ≥ 父类（加强）</mark></td>
+</tr>
+<tr>
+<td>不变式</td>
+<td><mark>子类必须维护父类的所有不变式（替换）</mark></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>违反示例（前置条件更严格）</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-comment">// 父类：接受任意正整数</span>
+<span class="hljs-keyword">void</span> <span class="hljs-title function_">setAge</span><span class="hljs-params">(<span class="hljs-type">int</span> age)</span> { <span class="hljs-keyword">assert</span> age &gt; <span class="hljs-number">0</span>; }
+
+<span class="hljs-comment">// 子类：要求年龄 &lt; 150（更严格）</span>
+<span class="hljs-keyword">void</span> <span class="hljs-title function_">setAge</span><span class="hljs-params">(<span class="hljs-type">int</span> age)</span> {
+    <span class="hljs-keyword">assert</span> age &gt; <span class="hljs-number">0</span> &amp;&amp; age &lt; <span class="hljs-number">150</span>; <span class="hljs-comment">// 违反!</span>
+}
+</code></pre>
+<h4 id="p8-组合优于继承">P8 · 组合优于继承</h4>
+<table>
+<thead>
+<tr>
+<th>继承的问题</th>
+<th>组合的优势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>白盒复用：子类依赖父类实现细节</td>
+<td>黑盒复用：只依赖接口</td>
+</tr>
+<tr>
+<td><mark>父类修改可能破坏所有子类</mark></td>
+<td><mark>运行时可动态切换组合对象</mark></td>
+</tr>
+<tr>
+<td>继承层次难以扩展（多个维度变化时）</td>
+<td>职责分离更清晰</td>
+</tr>
+<tr>
+<td>强迫遵守 IS-A 语义</td>
+<td>无需父类 IS-A 约束</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-java"><span class="hljs-comment">// 继承：Stack extends Vector（历史错误）</span>
+<span class="hljs-comment">// 组合：Stack 内部持有 Vector</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Stack</span>&lt;T&gt; {
+    <span class="hljs-keyword">private</span> Vector&lt;T&gt; storage = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Vector</span>&lt;&gt;(); <span class="hljs-comment">// &lt;--</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">push</span><span class="hljs-params">(T item)</span> { storage.add(item); }
+    <span class="hljs-keyword">public</span> T <span class="hljs-title function_">pop</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> storage.remove(...); }
+}
+</code></pre>
+<h2 id="面向对象的信息隐藏">面向对象的信息隐藏</h2>
+<ul>
+<li>主要秘密
+<ul>
+<li>职责变更的可能性</li>
+<li>这个类应该做什么会变化吗？</li>
+</ul>
+</li>
+<li>次要秘密
+<ul>
+<li>实现变更的可能性</li>
+<li>这个类如何做会变化吗？</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>变化是软件的常态。将变化的可能性封装在模块内部，使得修改只影响该模块，而不波及其他模块</p>
+</blockquote>
+<ul>
+<li>类的接口 = 对外承诺的行为能力</li>
+<li>类的实现 = 内部状态与算法细节</li>
+</ul>
+<p><mark><strong>封装 = 接口 + 实现</strong></mark></p>
+<ul>
+<li>封装的五种类型（A–E）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>隐藏内容</th>
+<th>核心手段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A — 数据类型（ADT）</td>
+<td>内部数据表示</td>
+<td><mark>访问器/修改器替代 <code>public</code> 字段</mark></td>
+</tr>
+<tr>
+<td>B — 内部结构</td>
+<td>数据的组织结构</td>
+<td><mark>不暴露内部容器/数组</mark></td>
+</tr>
+<tr>
+<td>C — 其他对象引用</td>
+<td>内部持有哪些对象</td>
+<td><mark>不直接返回内部对象引用</mark></td>
+</tr>
+<tr>
+<td>D — 类型信息（LSP）</td>
+<td>对象的具体运行时类型</td>
+<td><mark>面向接口，多态调度</mark></td>
+</tr>
+<tr>
+<td>E — 潜在变更</td>
+<td>可能变化的实现策略</td>
+<td><mark>策略模式、依赖注入</mark></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>类型 A–C 处理当前实现细节的封装；类型 D–E 处理未来变化的封装</p>
+</blockquote>
+<h3 id="类型-a-adt-抽象数据类型">类型 A：ADT — 抽象数据类型</h3>
+<blockquote>
+<p>ADT 定义的是概念，不是实现</p>
+</blockquote>
+<ul>
+<li>公开字段（违反封装 A）</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Point</span> {
+    <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> x; <span class="hljs-comment">// 暴露实现：直角坐标</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> y;
+}
+<span class="hljs-comment">// 调用方直接依赖坐标系！</span>
+<span class="hljs-comment">// 若改为极坐标实现，所有调用方都要修改</span>
+</code></pre>
+<ul>
+<li>ADT 封装（推荐）</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Point</span> {
+    <span class="hljs-keyword">private</span> <span class="hljs-type">double</span> x, y;
+    <span class="hljs-comment">// 直角坐标接口</span>
+    <span class="hljs-type">double</span> <span class="hljs-title function_">getX</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> x; }
+    <span class="hljs-type">double</span> <span class="hljs-title function_">getY</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> y; }
+    <span class="hljs-comment">// 极坐标接口（同一 ADT）</span>
+    <span class="hljs-type">double</span> <span class="hljs-title function_">getR</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">return</span> Math.sqrt(x*x + y*y);
+    }
+    <span class="hljs-type">double</span> <span class="hljs-title function_">getTheta</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">return</span> Math.atan2(y, x);
+    }
+}
+</code></pre>
+<p>访问器与修改器：用方法替代直接的 public 字段访问</p>
+<ul>
+<li>反模式：直接字段访问</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span> {
+    <span class="hljs-keyword">public</span> String name;
+    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> age;
+}
+
+<span class="hljs-comment">// 调用方：</span>
+person.age = -<span class="hljs-number">5</span>;  <span class="hljs-comment">// 无法验证！</span>
+</code></pre>
+<ul>
+<li>正确做法：访问器 + 修改器</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span> {
+    <span class="hljs-keyword">private</span> String name;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> age;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">getAge</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> age; }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setAge</span><span class="hljs-params">(<span class="hljs-type">int</span> age)</span> {
+        <span class="hljs-keyword">if</span> (age &lt; <span class="hljs-number">0</span> || age &gt; <span class="hljs-number">150</span>)
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">IllegalArgumentException</span>();
+        <span class="hljs-built_in">this</span>.age = age;
+    }
+}
+</code></pre>
+<h3 id="类型-b-c-隐藏内部结构与对象引用">类型 B/C：隐藏内部结构与对象引用</h3>
+<ul>
+<li>问题：暴露内部集合（违反 B+C）</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Route</span> {
+    <span class="hljs-keyword">public</span> List&lt;Stop&gt; stops; <span class="hljs-comment">// 直接暴露！</span>
+}
+
+<span class="hljs-comment">// 调用方可以任意修改内部状态：</span>
+route.stops.add(newStop); <span class="hljs-comment">// 绕过业务规则</span>
+route.stops.clear();      <span class="hljs-comment">// 危险！</span>
+</code></pre>
+<p>修复：使用 Iterator 或受控接口</p>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Route</span> {
+    <span class="hljs-keyword">private</span> List&lt;Stop&gt; stops = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();
+
+    <span class="hljs-comment">// 只暴露迭代能力</span>
+    <span class="hljs-keyword">public</span> Iterator&lt;Stop&gt; <span class="hljs-title function_">getStops</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">return</span> Collections
+                .unmodifiableList(stops)
+                .iterator();
+    }
+
+    <span class="hljs-comment">// 受控的修改接口</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">addStop</span><span class="hljs-params">(Stop s)</span> {
+        <span class="hljs-comment">// 可以在这里加业务验证</span>
+        stops.add(s);
+    }
+}
+</code></pre>
+<blockquote>
+<p>Iterator 模式是封装集合内部结构的标准手段——调用方只知道可以遍历，不知道内部是 List 、 Set 还是数组</p>
+</blockquote>
+<h3 id="类型-d-隐藏类型信息-lsp">类型 D：隐藏类型信息（LSP）</h3>
+<blockquote>
+<p>调用方应该依赖接口，而不需要知道对象的具体类型</p>
+</blockquote>
+<ul>
+<li>违反封装 D：<code>instanceof</code> 判断</li>
+<li>问题：每增加一种 <code>Shape</code>，就要修改这段代码</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">void</span> <span class="hljs-title function_">process</span><span class="hljs-params">(Shape shape)</span> {
+    <span class="hljs-keyword">if</span> (shape <span class="hljs-keyword">instanceof</span> Circle) {
+        ((Circle) shape).drawCircle();
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (shape <span class="hljs-keyword">instanceof</span> Square) {
+        ((Square) shape).drawSquare();
+    }
+}
+</code></pre>
+<ul>
+<li>正确：多态调度</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Shape</span> {
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">draw</span><span class="hljs-params">()</span>; <span class="hljs-comment">// 统一接口</span>
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Circle</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Shape</span> {
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">draw</span><span class="hljs-params">()</span> { <span class="hljs-comment">/* 画圆 */</span> }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Square</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Shape</span> {
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">draw</span><span class="hljs-params">()</span> { <span class="hljs-comment">/* 画方 */</span> }
+}
+
+<span class="hljs-keyword">void</span> <span class="hljs-title function_">process</span><span class="hljs-params">(Shape shape)</span> {
+    shape.draw(); <span class="hljs-comment">// 不知道也不需要知道类型</span>
+}
+</code></pre>
+<h3 id="类型-e-封装潜在变更">类型 E：封装潜在变更</h3>
+<blockquote>
+<p>将可能变化的部分隔离为独立模块，其余部分依赖稳定的接口</p>
+</blockquote>
+<ul>
+<li>问题：变化硬编码在类内部</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Sorter</span> {
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">sort</span><span class="hljs-params">(<span class="hljs-type">int</span>[] arr)</span> {
+        <span class="hljs-comment">// 直接写死冒泡排序</span>
+        <span class="hljs-comment">// 若要换快速排序，必须修改本类</span>
+        bubbleSort(arr);
+    }
+}
+</code></pre>
+<ul>
+<li>策略模式封装变更</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">SortStrategy</span> {
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">sort</span><span class="hljs-params">(<span class="hljs-type">int</span>[] arr)</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Sorter</span> {
+    <span class="hljs-keyword">private</span> SortStrategy strategy; <span class="hljs-comment">// &lt;--</span>
+
+    Sorter(SortStrategy s) {
+        <span class="hljs-built_in">this</span>.strategy = s;
+    }
+
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">sort</span><span class="hljs-params">(<span class="hljs-type">int</span>[] arr)</span> {
+        strategy.sort(arr); <span class="hljs-comment">// 委托给策略</span>
+    }
+}
+</code></pre>
+<blockquote>
+<p>封装类型 E 与 <strong>开闭原则（OCP）</strong> 直接对应：对扩展开放，对修改关闭</p>
+</blockquote>
+<h2 id="为变更而设计">为变更而设计</h2>
+<h3 id="p10-权限最小化">P10 · 权限最小化</h3>
+<p>Java 的四个访问级别</p>
+<table>
+<thead>
+<tr>
+<th>修饰符</th>
+<th>可访问范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>private</code></td>
+<td>仅本类内部</td>
+</tr>
+<tr>
+<td>（package-private，无修饰符）</td>
+<td>同一包内</td>
+</tr>
+<tr>
+<td><code>protected</code></td>
+<td>同一包 + 子类</td>
+</tr>
+<tr>
+<td><code>public</code></td>
+<td>任何地方</td>
+</tr>
+</tbody>
+</table>
+<h3 id="p11-开闭原则-ocp">P11 · 开闭原则（OCP）</h3>
+<blockquote>
+<p>软件实体应该对扩展开放，但对修改关闭</p>
+</blockquote>
+<ul>
+<li>违反 OCP 的典型模式</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-comment">// 每次增加新类型都要修改</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DiscountCalculator</span> {
+    <span class="hljs-type">double</span> <span class="hljs-title function_">calculate</span><span class="hljs-params">(Order order)</span> {
+        <span class="hljs-keyword">if</span> (order.type == VIPORDER)
+            <span class="hljs-keyword">return</span> order.total * <span class="hljs-number">0.8</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (order.type == NEWUSER)
+            <span class="hljs-keyword">return</span> order.total * <span class="hljs-number">0.9</span>;
+        <span class="hljs-comment">// 增加新类型需改本类...</span>
+    }
+}
+</code></pre>
+<ul>
+<li>符合 OCP 的重构</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">DiscountPolicy</span> {
+    <span class="hljs-type">double</span> <span class="hljs-title function_">apply</span><span class="hljs-params">(<span class="hljs-type">double</span> total)</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">VipDiscount</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">DiscountPolicy</span> {
+    <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> <span class="hljs-title function_">apply</span><span class="hljs-params">(<span class="hljs-type">double</span> t)</span> {
+        <span class="hljs-keyword">return</span> t * <span class="hljs-number">0.8</span>;
+    }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DiscountCalculator</span> {
+    <span class="hljs-keyword">private</span> DiscountPolicy policy;
+    <span class="hljs-comment">// 新增类型只需新增实现类！</span>
+    <span class="hljs-type">double</span> <span class="hljs-title function_">calculate</span><span class="hljs-params">(Order o)</span> {
+        <span class="hljs-keyword">return</span> policy.apply(o.getTotal());
+    }
+}
+</code></pre>
+<h3 id="p12-依赖倒置原则-dip">P12 · 依赖倒置原则（DIP）</h3>
+<blockquote>
+<p>高层模块不应依赖低层模块；两者都应依赖抽象。
+抽象不应依赖细节；细节应依赖抽象。</p>
+</blockquote>
+<ul>
+<li>违反 DIP</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-29.webp" alt="alt text" loading="lazy"></p>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">BusinessLogic</span> {
+    <span class="hljs-keyword">private</span> MySQLDatabase db; <span class="hljs-comment">// 依赖具体类！</span>
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">process</span><span class="hljs-params">()</span> {
+        db.query(...);
+    }
+}
+</code></pre>
+<ul>
+<li>符合 DIP</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-67/image-30.webp" alt="alt text" loading="lazy"></p>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">BusinessLogic</span> {
+    <span class="hljs-keyword">private</span> Database db; <span class="hljs-comment">// 依赖接口</span>
+    BusinessLogic(Database db) {
+        <span class="hljs-built_in">this</span>.db = db; <span class="hljs-comment">// 依赖注入</span>
+    }
+}
+</code></pre>
+<h3 id="p13-单一职责原则-srp">P13 · 单一职责原则（SRP）</h3>
+<blockquote>
+<p>一个类应该只有一个改变的理由</p>
+</blockquote>
+<ul>
+<li>违反 SRP</li>
+<li>三个不同的 “变化原因” 混在一个类中</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Employee</span> {
+    String name;
+    <span class="hljs-type">double</span> salary;
+    <span class="hljs-comment">// 职责1：薪资计算（HR 规则）</span>
+    <span class="hljs-type">double</span> <span class="hljs-title function_">calculatePay</span><span class="hljs-params">()</span> { ... }
+    <span class="hljs-comment">// 职责2：数据库持久化（IT 基础设施）</span>
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">saveToDatabase</span><span class="hljs-params">()</span> { ... }
+    <span class="hljs-comment">// 职责3：报表生成（财务需求）</span>
+    String <span class="hljs-title function_">generateReport</span><span class="hljs-params">()</span> { ... }
+}
+</code></pre>
+<ul>
+<li>SRP 重构</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Employee</span> {
+    <span class="hljs-comment">// 只管员工数据</span>
+    String name;
+    <span class="hljs-type">double</span> salary;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">PayCalculator</span> {
+    <span class="hljs-comment">// 只管薪资计算</span>
+    <span class="hljs-type">double</span> <span class="hljs-title function_">calculate</span><span class="hljs-params">(Employee e)</span> { ... }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">EmployeeRepository</span> { <span class="hljs-comment">// 只管持久化</span>
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">save</span><span class="hljs-params">(Employee e)</span> { ... }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">EmployeeReport</span> { <span class="hljs-comment">// 只管报表</span>
+    String <span class="hljs-title function_">generate</span><span class="hljs-params">(Employee e)</span> { ... }
+}
+</code></pre>
+<blockquote>
+<p>SRP 与信息隐藏直接关联：每个类只隐藏一个 “变化原因”。SRP 违反的症状是 “God Class” —— 一个类知道太多、做太多。</p>
+</blockquote>
+<h3 id="p14-sofa-方法级设计原则">P14 · SOFA：方法级设计原则</h3>
+<blockquote>
+<p>SOFA = Short · One thing · Few arguments · Abstraction level consistency
+面向<strong>方法粒度</strong>的设计原则（与 <strong>SOLID 的类粒度</strong>原则互补）</p>
+</blockquote>
+<ul>
+<li>S — Short（方法要短）
+<ul>
+<li>方法体通常 ≤ 20–30 行</li>
+<li>过长 → 分解为命名清晰的辅助方法</li>
+</ul>
+</li>
+<li>O — One thing（只做一件事）
+<ul>
+<li>方法名能用一个短句完整描述其行为</li>
+<li>若需要 “and” 才能描述 → 考虑拆分</li>
+</ul>
+</li>
+<li>F — Few arguments（参数要少）
+<ul>
+<li>参数越多，调用方知道的细节越多 → 耦合越高</li>
+<li>超过 3 个参数时考虑引入参数对象</li>
+</ul>
+</li>
+<li>A — Abstraction level consistency（抽象层次一致）</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-comment">// 违反 A：高层业务逻辑混入低层实现</span>
+<span class="hljs-keyword">void</span> <span class="hljs-title function_">processOrder</span><span class="hljs-params">(Order o)</span> {
+    validateOrder(o); <span class="hljs-comment">// 高层</span>
+    db.execute(<span class="hljs-string">&quot;INSERT ...&quot;</span>); <span class="hljs-comment">// 低层！</span>
+}
+<span class="hljs-comment">// 修复：把低层细节封装为方法</span>
+<span class="hljs-keyword">void</span> <span class="hljs-title function_">processOrder</span><span class="hljs-params">(Order o)</span> {
+    validateOrder(o);
+    persistOrder(o); <span class="hljs-comment">// 统一在高层</span>
+}
+</code></pre>
+<h2 id="原则汇总">原则汇总</h2>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>缩写</th>
+<th>原则</th>
+<th>核心思想</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1</td>
+<td>—</td>
+<td><strong>全局变量有害</strong></td>
+<td>全局变量穿透所有模块，是隐藏的反义词</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>—</td>
+<td><strong>优先显示表达</strong></td>
+<td>用接口/文档显式表达约束，不靠隐式约定</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>DRY</td>
+<td><strong>不要重复</strong></td>
+<td>同一决策不在多处编码；重复 = 多处修改</td>
+</tr>
+<tr>
+<td>P4</td>
+<td>—</td>
+<td><strong>面向接口编程</strong></td>
+<td>依赖接口而非实现，降低访问耦合</td>
+</tr>
+<tr>
+<td>P5</td>
+<td>LoD</td>
+<td><strong>迪米特法则</strong></td>
+<td>只与直接朋友交谈，避免消息链</td>
+</tr>
+<tr>
+<td>P6</td>
+<td>ISP</td>
+<td><strong>接口隔离</strong></td>
+<td>接口细化，客户端只依赖需要的方法</td>
+</tr>
+<tr>
+<td>P7</td>
+<td>LSP</td>
+<td><strong>里氏替换</strong></td>
+<td>子类前置放宽、后置加强、不变式维持</td>
+</tr>
+<tr>
+<td>P8</td>
+<td>—</td>
+<td><strong>组合优于继承</strong></td>
+<td>黑盒复用，避免继承耦合</td>
+</tr>
+<tr>
+<td>P9</td>
+<td>—</td>
+<td><strong>为变而封装</strong></td>
+<td>隔离可变部分，稳定不变部分</td>
+</tr>
+<tr>
+<td>P10</td>
+<td>—</td>
+<td><strong>权限最小化</strong></td>
+<td>从 <code>private</code> 开始，按需放宽</td>
+</tr>
+<tr>
+<td>P11</td>
+<td>OCP</td>
+<td><strong>开闭原则</strong></td>
+<td>对扩展开放，对修改关闭</td>
+</tr>
+<tr>
+<td>P12</td>
+<td>DIP</td>
+<td><strong>依赖倒置</strong></td>
+<td>高层依赖抽象，不依赖具体实现</td>
+</tr>
+<tr>
+<td>P13</td>
+<td>SRP</td>
+<td><strong>单一职责</strong></td>
+<td>一个类只有一个变化原因</td>
+</tr>
+<tr>
+<td>P14</td>
+<td>SOFA</td>
+<td><strong>方法设计</strong></td>
+<td>Short · One thing · Few args · Abstraction</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>P1–P4 防止&quot;隐式依赖&quot;；P5–P8 控制&quot;耦合来源&quot;；P9–P13 管理&quot;变化封装&quot;；P14 约束&quot;方法粒度&quot;。</p>
+</blockquote>
+<blockquote>
+<p>SOLID 原则</p>
+<ul>
+<li>SRP（单一职责）</li>
+<li>OCP（开闭）</li>
+<li>LSP（里氏替换）</li>
+<li>ISP（接口隔离）</li>
+<li>DIP（依赖倒置）</li>
+</ul>
+</blockquote>
+<ul>
+<li>封装的五种类型 (A-E)</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>封装类型</th>
+<th>隐藏内容</th>
+<th>核心手段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A — 数据类型（ADT）</td>
+<td>内部数据表示</td>
+<td>访问器/修改器替代 <code>public</code> 字段</td>
+</tr>
+<tr>
+<td>B — 内部结构</td>
+<td>数据的组织结构</td>
+<td>不暴露内部容器/数组</td>
+</tr>
+<tr>
+<td>C — 其他对象引用</td>
+<td>内部持有哪些对象</td>
+<td>不直接返回内部对象引用</td>
+</tr>
+<tr>
+<td>D — 类型信息（LSP）</td>
+<td>对象的具体运行时类型</td>
+<td>面向接口，多态调度</td>
+</tr>
+<tr>
+<td>E — 潜在变更</td>
+<td>可能变化的实现策略</td>
+<td>策略模式、依赖注入</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="编程练习-1">编程练习 1</h2>
+<p>给定如下代码，识别所有封装问题并重构：</p>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Library</span> {
+    <span class="hljs-keyword">public</span> List&lt;Book&gt; books = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();
+    <span class="hljs-keyword">public</span> String name;
+
+    <span class="hljs-keyword">public</span> Book <span class="hljs-title function_">findBook</span><span class="hljs-params">(String isbn)</span> {
+        <span class="hljs-keyword">for</span> (Book b : books) {
+            <span class="hljs-keyword">if</span> (b.isbn.equals(isbn))
+                <span class="hljs-keyword">return</span> b;
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Book</span> {
+    <span class="hljs-keyword">public</span> String isbn;
+    <span class="hljs-keyword">public</span> String title;
+    <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> price;
+}
+</code></pre>
+<ol>
+<li>列出所有违反封装的地方（对应 A–E 哪种类型？）</li>
+<li>该设计违反了哪些原则（LSP/ISP/权限最小化/迪米特法则）？</li>
+<li>重构后的代码需满足：</li>
+</ol>
+<ul>
+<li><code>books</code> 集合不可从外部直接修改</li>
+<li><code>isbn</code>、<code>title</code>、<code>price</code> 通过访问器访问</li>
+<li><code>findBook</code> 在无结果时返回 <code>Optional&lt;Book&gt;</code></li>
+</ul>
+<h3 id="1-识别所有违反封装的地方-对应-a-e-哪种类型">1. 识别所有违反封装的地方（对应 A—E 哪种类型？）</h3>
+<ul>
+<li>
+<p><strong><code>Book</code> 类中的 <code>public String isbn;</code>、<code>public String title;</code>、<code>public double price;</code></strong></p>
+<ul>
+<li><strong>违反类型：A 类（数据类型 ADT）</strong>。</li>
+<li><strong>原因：</strong> 暴露了内部数据表示，没有使用访问器（getter）和修改器（setter）来替代 <code>public</code> 字段。</li>
+</ul>
+</li>
+<li>
+<p><strong><code>Library</code> 类中的 <code>public String name;</code></strong></p>
+<ul>
+<li><strong>违反类型：A 类（数据类型 ADT）</strong>。</li>
+<li><strong>原因：</strong> 同样直接暴露了内部属性，未使用访问器。</li>
+</ul>
+</li>
+<li>
+<p><strong><code>Library</code> 类中的 <code>public List&lt;Book&gt; books = new ArrayList&lt;&gt;();</code></strong></p>
+<ul>
+<li><strong>违反类型：A 类（数据类型 ADT） 和 B 类（内部结构）</strong>。</li>
+<li><strong>原因：</strong> 字段被声明为 <code>public</code> 违反了 A 类封装；同时，直接暴露了 <code>ArrayList</code> 这个内部容器/数组，外部可以直接调用 <code>library.books.add()</code> 或 <code>library.books.clear()</code>，破坏了数据的组织结构，违反了 B 类封装。</li>
+</ul>
+</li>
+<li>
+<p><strong><code>Library.findBook</code> 方法中直接使用 <code>b.isbn.equals(isbn)</code></strong></p>
+<ul>
+<li><strong>违反类型：A 类（数据类型 ADT）</strong>。</li>
+<li><strong>原因：</strong> <code>Library</code> 直接访问了 <code>Book</code> 对象的公开数据字段，打破了 <code>Book</code> 的抽象边界。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-该设计违反了哪些原则">2. 该设计违反了哪些原则？</h3>
+<p>根据大纲中的面向对象设计原则，该代码主要违反了以下两项：</p>
+<ul>
+<li>
+<p><strong>权限最小化原则（P10）</strong></p>
+<ul>
+<li><strong>分析：</strong> 大纲指出，属性和方法的访问级别应“从 <code>private</code> 开始，按需放宽”。原代码中所有的成员变量（<code>books</code>, <code>name</code>, <code>isbn</code>, <code>title</code>, <code>price</code>）全部使用了 <code>public</code> 修饰符，向全局暴露了读写权限，完全丧失了访问控制。</li>
+</ul>
+</li>
+<li>
+<p><strong>迪米特法则（Law of Demeter, P5）</strong></p>
+<ul>
+<li><strong>分析：</strong> 迪米特法则要求“只与你的直接朋友交谈，避免消息链”。因为 <code>books</code> 集合是 <code>public</code> 的，外部客户端可以通过 <code>library.books.get(0).isbn</code> 这种“消息链”跨越 <code>Library</code> 直接操作底层的 <code>Book</code> 对象，导致严重的访问耦合（级别 3：成员变量访问耦合）。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-重构后的代码与原则对照说明">3. 重构后的代码与原则对照说明</h3>
+<p>以下是满足题目要求（隐藏集合修改权限、使用访问器、使用 <code>Optional</code> 返回）的重构代码。</p>
+<h4 id="重构后的-java-代码">重构后的 Java 代码</h4>
+<pre><code class="language-java"><span class="hljs-comment">// 1. Book 类重构</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Book</span> {
+    <span class="hljs-comment">// 权限最小化：字段私有化</span>
+    <span class="hljs-keyword">private</span> String isbn;
+    <span class="hljs-keyword">private</span> String title;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">double</span> price;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Book</span><span class="hljs-params">(String isbn, String title, <span class="hljs-type">double</span> price)</span> {
+        <span class="hljs-built_in">this</span>.isbn = isbn;
+        <span class="hljs-built_in">this</span>.title = title;
+        <span class="hljs-built_in">this</span>.price = price;
+    }
+
+    <span class="hljs-comment">// A类封装：通过访问器提供只读权限</span>
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getIsbn</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> isbn; }
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getTitle</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> title; }
+    <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> <span class="hljs-title function_">getPrice</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> price; }
+}
+
+<span class="hljs-comment">// 2. Library 类重构</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Library</span> {
+    <span class="hljs-comment">// B类封装：隐藏内部集合结构，防止外部直接修改</span>
+    <span class="hljs-keyword">private</span> List&lt;Book&gt; books = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();
+    
+    <span class="hljs-comment">// 权限最小化</span>
+    <span class="hljs-keyword">private</span> String name;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Library</span><span class="hljs-params">(String name)</span> {
+        <span class="hljs-built_in">this</span>.name = name;
+    }
+
+    <span class="hljs-comment">// 提供受控的添加方法，而不是直接暴露 List</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">addBook</span><span class="hljs-params">(Book book)</span> {
+        <span class="hljs-keyword">if</span> (book != <span class="hljs-literal">null</span>) {
+            <span class="hljs-built_in">this</span>.books.add(book);
+        }
+    }
+
+    <span class="hljs-comment">// 如果外部需要遍历图书，返回不可变集合以保护内部结构</span>
+    <span class="hljs-keyword">public</span> List&lt;Book&gt; <span class="hljs-title function_">getBooks</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">return</span> Collections.unmodifiableList(books);
+    }
+
+    <span class="hljs-comment">// 遵循要求：无结果时返回 Optional&lt;Book&gt;，避免返回 null 引发异常</span>
+    <span class="hljs-keyword">public</span> Optional&lt;Book&gt; <span class="hljs-title function_">findBook</span><span class="hljs-params">(String isbn)</span> {
+        <span class="hljs-keyword">if</span> (isbn == <span class="hljs-literal">null</span>) <span class="hljs-keyword">return</span> Optional.empty();
+        
+        <span class="hljs-comment">// 面向对象风格：通过调用 b.getIsbn() 获取数据，消除直接字段访问耦合</span>
+        <span class="hljs-keyword">return</span> books.stream()
+                .filter(b -&gt; b.getIsbn().equals(isbn))
+                .findFirst();
+    }
+}
+
+</code></pre>
+<h4 id="原则对照与重构说明">原则对照与重构说明</h4>
+<ol>
+<li><strong>满足“<code>books</code> 集合不可从外部直接修改”：</strong> 将 <code>books</code> 声明为 <code>private</code>。如果外部需要获取图书列表，提供 <code>Collections.unmodifiableList(books)</code>，这符合<strong>封装类型 B（隐藏内部结构）</strong>。同时遵循了<strong>权限最小化原则</strong>。</li>
+<li><strong>满足“<code>isbn</code>、<code>title</code>、<code>price</code> 通过访问器访问”：</strong> 将 <code>Book</code> 类的字段改为 <code>private</code>，并提供 <code>getIsbn()</code> 等方法。这修复了封装类型 A（数据类型 ADT 暴露）的问题，消除了外部对 <code>Book</code> 内部状态的直接读写耦合。</li>
+<li><strong>满足“<code>findBook</code> 返回 <code>Optional&lt;Book&gt;</code>”：</strong> 移除了容易导致空指针异常的 <code>return null;</code>，使用 Java 8+ 的 <code>Optional</code> 和 Stream API。这使得接口的契约更加清晰（显式表达了“可能找不到结果”的设计约束），符合大纲中“<strong>优先显式表达（P2）</strong>”的思想。</li>
+</ol>
+<hr>
+<h2 id="编程练习-2">编程练习 2</h2>
+<p>数据结构栈有四个功能：压栈、弹栈、得到栈的大小、得到栈是否为空。Akagi同学使用继承如下设计了栈。</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MyStack</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Vector</span> {
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">push</span><span class="hljs-params">(Object element)</span> {
+        insertElementAt(element, <span class="hljs-number">0</span>);
+    }
+    <span class="hljs-keyword">public</span> Object <span class="hljs-title function_">pop</span><span class="hljs-params">()</span> {
+        <span class="hljs-type">Object</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> firstElement();
+        removeElementAt(<span class="hljs-number">0</span>);
+        <span class="hljs-keyword">return</span> result;
+    }
+}
+</code></pre>
+<p>Kogure同学在设计雇员类的时候，如下设计：</p>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> Person {
+    <span class="hljs-keyword">private</span> string name;
+    <span class="hljs-keyword">public</span> string <span class="hljs-title function_">getName</span><span class="hljs-params">()</span>{
+        <span class="hljs-keyword">return</span> name;
+    }
+}
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Employee</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Person</span> {
+}
+</code></pre>
+<p>1）指出两个关于继承的设计是否合理？是否违反设计原则？<br>
+2）对两段代码，如果合理，请解释其合理性。如果违反，请解释该原则，并修改</p>
+<h3 id="一-akagi-同学的栈设计-mystack">一、 Akagi 同学的栈设计（MyStack）</h3>
+<ul>
+<li>
+<p><strong>是否合理：</strong> 不合理。</p>
+</li>
+<li>
+<p><strong>违反原则：</strong> 违反了 <mark><strong>P8 · 组合优于继承</strong> 与 <strong>P7 · 里氏替换原则（LSP）</strong></mark>。</p>
+</li>
+<li>
+<p><strong>原则解释：</strong></p>
+<ul>
+<li><strong>里氏替换原则（LSP）：</strong> 大纲指出，“IS-A”关系应由行为定义，而非数学或底层数据定义。子类必须能够替换父类而不改变程序的正确性。栈（Stack）的核心行为契约是“后进先出（LIFO）”，而 Vector 是允许任意位置随机读写的动态数组。两者在行为上并不构成“IS-A”关系。</li>
+<li><strong>组合优于继承：</strong> 继承是一种“白盒复用”，子类会无条件继承父类所有的公开方法。如果 <code>MyStack</code> 继承 <code>Vector</code>，外部调用者就可以直接通过 <code>myStack.removeElementAt(2)</code> 等方法操作栈中间的元素。这属于“强迫遵守 IS-A 语义”，彻底破坏了栈的数据封装（破坏了内部结构封装）。</li>
+</ul>
+</li>
+<li>
+<p><strong>代码修改：</strong> 应当将继承（白盒复用）改为组合（黑盒复用），并补全题目要求的四个功能（压栈、弹栈、获取大小、判断为空）。</p>
+</li>
+</ul>
+<pre><code class="language-java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MyStack</span> {
+    <span class="hljs-comment">// 使用组合，隐藏内部容器结构（符合封装类型 B）</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-type">Vector</span> <span class="hljs-variable">vector</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Vector</span>();
+
+    <span class="hljs-comment">// 1. 压栈</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">push</span><span class="hljs-params">(Object element)</span> {
+        vector.insertElementAt(element, <span class="hljs-number">0</span>);
+    }
+
+    <span class="hljs-comment">// 2. 弹栈</span>
+    <span class="hljs-keyword">public</span> Object <span class="hljs-title function_">pop</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">if</span> (isEmpty()) {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>; <span class="hljs-comment">// 或抛出异常</span>
+        }
+        <span class="hljs-type">Object</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> vector.firstElement();
+        vector.removeElementAt(<span class="hljs-number">0</span>);
+        <span class="hljs-keyword">return</span> result;
+    }
+
+    <span class="hljs-comment">// 3. 得到栈的大小</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">getSize</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">return</span> vector.size();
+    }
+
+    <span class="hljs-comment">// 4. 得到栈是否为空</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">isEmpty</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">return</span> vector.isEmpty();
+    }
+}
+</code></pre>
+<hr>
+<h3 id="二-kogure-同学的雇员设计-employee">二、 Kogure 同学的雇员设计（Employee）</h3>
+<ul>
+<li><strong>是否合理：</strong> 合理。</li>
+<li><strong>遵循原则：</strong> 完美符合 <strong>P7 · 里氏替换原则（LSP）</strong>，且体现了合理的信息隐藏。</li>
+<li><strong>合理性解释：</strong>
+<ul>
+<li>在面向对象建模中，雇员（Employee）在概念和行为上完全是一个人（Person）。子类不仅继承了父类的属性，也完全兼容父类的行为契约，符合严格的“IS-A”语义规范。</li>
+<li>根据大纲中关于“继承耦合的四种类型”分类，这里的继承属于“扩展”类型。子类仅仅是基于父类新增特性（或作为一个空的占位准备后续扩展），且没有覆盖父类的任何方法。这种设计的耦合强度极低，是大纲中明确标注为“✓ 安全”的最佳实践。</li>
+<li>父类 <code>Person</code> 中的 <code>name</code> 字段被声明为 <code>private</code> 并提供了 <code>getName()</code> 访问器，这符合 <strong>封装类型 A（数据类型 ADT）</strong> 和 <strong>权限最小化原则</strong>，有效控制了访问耦合。</li>
+</ul>
+</li>
+</ul>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：软件工程 II 复习笔记(一)</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-08 06:37:44</p>
+      <p><strong>更新于</strong>：2026-08-07 22:43:32</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/软件工程 II 复习笔记(一).html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">软件工程 II 复习笔记(一)</div>
+      <ul><li class="toc-l2"><a href="#软件质量保障有哪些措施">软件质量保障有哪些措施？</a></li><li class="toc-l2"><a href="#软件配置管理有哪些活动">软件配置管理有哪些活动？</a></li><li class="toc-l2"><a href="#区分需求的三个层次">区分需求的三个层次</a></li><li class="toc-l3"><a href="#需求的层次性-业务-用户与系统级需求">需求的层次性：业务、用户与系统级需求</a></li><li class="toc-l3"><a href="#转化关系与规格化表达">转化关系与规格化表达</a></li><li class="toc-l2"><a href="#掌握需求的类型">掌握需求的类型</a></li><li class="toc-l3"><a href="#需求的分类-功能性需求-vs-非功能性需求">需求的分类：功能性需求 vs 非功能性需求</a></li><li class="toc-l2"><a href="#用例图">用例图</a></li><li class="toc-l2"><a href="#概念类图">概念类图</a></li><li class="toc-l2"><a href="#顺序图">顺序图</a></li><li class="toc-l2"><a href="#状态图">状态图</a></li><li class="toc-l2"><a href="#例题-1">例题 1</a></li><li class="toc-l2"><a href="#例题-2">例题 2</a></li><li class="toc-l2"><a href="#为什么需要需求规格说明">为什么需要需求规格说明？</a></li><li class="toc-l2"><a href="#对给定的需求示例-判定并修正其错误">对给定的需求示例，判定并修正其错误</a></li><li class="toc-l2"><a href="#对给定的需求示例-设计功能测试用例">对给定的需求示例，设计功能测试用例</a></li><li class="toc-l2"><a href="#软件设计的核心思想是什么">软件设计的核心思想是什么？</a></li><li class="toc-l3"><a href="#分解和抽象">分解和抽象</a></li><li class="toc-l2"><a href="#软件工程设计有哪三个层次-各层的主要思想是什么">软件工程设计有哪三个层次？各层的主要思想是什么？</a></li><li class="toc-l2"><a href="#体系结构的概念">体系结构的概念</a></li><li class="toc-l2"><a href="#体系结构风格">体系结构风格</a></li><li class="toc-l3"><a href="#1-主程序-子程序风格">1 主程序-子程序风格</a></li><li class="toc-l3"><a href="#2-面向对象风格">2 面向对象风格</a></li><li class="toc-l3"><a href="#3-分层风格">3 分层风格</a></li><li class="toc-l3"><a href="#4-mvc-风格">4 MVC 风格</a></li><li class="toc-l2"><a href="#体系结构风格优缺点">体系结构风格优缺点</a></li><li class="toc-l2"><a href="#体系结构设计的过程">体系结构设计的过程</a></li><li class="toc-l2"><a href="#体系结构构建之间接口的定义">体系结构构建之间接口的定义</a></li><li class="toc-l2"><a href="#体系结构开发集成测试用例">体系结构开发集成测试用例</a></li><li class="toc-l2"><a href="#体系结构例题">体系结构例题</a></li><li class="toc-l2"><a href="#能够列出至少-5-个界面设计的注意事项-并加以解释">能够列出至少 5 个界面设计的注意事项，并加以解释</a></li><li class="toc-l2"><a href="#精神模型-差异性">精神模型、差异性</a></li><li class="toc-l2"><a href="#导航-反馈-协作式设计">导航、反馈、协作式设计</a></li><li class="toc-l2"><a href="#详细设计的出发点">详细设计的出发点</a></li><li class="toc-l2"><a href="#职责与协作">职责与协作</a></li><li class="toc-l3"><a href="#职责-相关核心知识点">“职责” 相关核心知识点</a></li><li class="toc-l3"><a href="#协作-相关核心知识点">“协作” 相关核心知识点</a></li><li class="toc-l2"><a href="#信息隐藏">信息隐藏</a></li><li class="toc-l2"><a href="#面向对象的耦合类型">面向对象的耦合类型</a></li><li class="toc-l3"><a href="#访问耦合">访问耦合</a></li><li class="toc-l3"><a href="#继承耦合">继承耦合</a></li><li class="toc-l2"><a href="#面向对象的信息隐藏">面向对象的信息隐藏</a></li><li class="toc-l3"><a href="#类型-a-adt-抽象数据类型">类型 A：ADT — 抽象数据类型</a></li><li class="toc-l3"><a href="#类型-b-c-隐藏内部结构与对象引用">类型 B/C：隐藏内部结构与对象引用</a></li><li class="toc-l3"><a href="#类型-d-隐藏类型信息-lsp">类型 D：隐藏类型信息（LSP）</a></li><li class="toc-l3"><a href="#类型-e-封装潜在变更">类型 E：封装潜在变更</a></li><li class="toc-l2"><a href="#为变更而设计">为变更而设计</a></li><li class="toc-l3"><a href="#p10-权限最小化">P10 · 权限最小化</a></li><li class="toc-l3"><a href="#p11-开闭原则-ocp">P11 · 开闭原则（OCP）</a></li><li class="toc-l3"><a href="#p12-依赖倒置原则-dip">P12 · 依赖倒置原则（DIP）</a></li><li class="toc-l3"><a href="#p13-单一职责原则-srp">P13 · 单一职责原则（SRP）</a></li><li class="toc-l3"><a href="#p14-sofa-方法级设计原则">P14 · SOFA：方法级设计原则</a></li><li class="toc-l2"><a href="#原则汇总">原则汇总</a></li><li class="toc-l2"><a href="#编程练习-1">编程练习 1</a></li><li class="toc-l3"><a href="#1-识别所有违反封装的地方-对应-a-e-哪种类型">1. 识别所有违反封装的地方（对应 A—E 哪种类型？）</a></li><li class="toc-l3"><a href="#2-该设计违反了哪些原则">2. 该设计违反了哪些原则？</a></li><li class="toc-l3"><a href="#3-重构后的代码与原则对照说明">3. 重构后的代码与原则对照说明</a></li><li class="toc-l2"><a href="#编程练习-2">编程练习 2</a></li><li class="toc-l3"><a href="#一-akagi-同学的栈设计-mystack">一、 Akagi 同学的栈设计（MyStack）</a></li><li class="toc-l3"><a href="#二-kogure-同学的雇员设计-employee">二、 Kogure 同学的雇员设计（Employee）</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/9 计算机网络例题.html">&lt; 9 计算机网络例题</a>
+      <a class="pager-next" href="/posts/软件工程 II 复习笔记(二).html">软件工程 II 复习笔记(二) &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
+<script src="/assets/js/main.js?v=1786162127971" defer></script>
+<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+</body>
+</html>

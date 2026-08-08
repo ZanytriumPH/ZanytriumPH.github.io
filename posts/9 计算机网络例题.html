@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9 计算机网络例题 · Zwing&#39;s blog</title>
+<meta name="description" content="计算机网络例题">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">9 计算机网络例题</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-07T22:43:13.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-08 06:43:13</time>
+            <time class="meta-item" datetime="2026-08-07T23:07:52+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-07 23:07:52</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 18969 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 64 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#计算机网络"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>计算机网络</a>
+              <a class="tag-chip" href="/tags.html#计算机网络"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>计算机网络</a> <a class="tag-chip" href="/tags.html#作业/例题"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>作业/例题</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><p><strong>P1. 假设客户 A 向服务器 S 发起一个 Telnet 会话。与此同时，客户 B 也向服务器 S 发起一个 Telnet 会话。给出下面报文段的源端口号和目的端口号：</strong></p>
+<p><strong>a. 从 A 向 S 发送的报文段。</strong></p>
+<ul>
+<li>源端口号：A 的临时端口号；目的端口号：S 的 Telnet 端口号 23</li>
+</ul>
+<p><strong>b. 从 B 向 S 发送的报文段。</strong></p>
+<ul>
+<li>源端口号：B 的临时端口号；目的端口号：S 的 Telnet 端口号 23</li>
+</ul>
+<p><strong>c. 从 S 向 A 发送的报文段。</strong></p>
+<ul>
+<li>源端口号：S 的 Telnet 端口号 23；目的端口号：A 的临时端口号</li>
+</ul>
+<p><strong>d. 从 S 向 B 发送的报文段。</strong></p>
+<ul>
+<li>源端口号：S 的 Telnet 端口号 23；目的端口号：B 的临时端口号</li>
+</ul>
+<p><strong>e. 如果 A 和 B 是不同的主机，那么从 A 向 S 发送的报文段的源端口号是否可能与从 B 向 S 发送的报文段的源端口号相同？</strong></p>
+<ul>
+<li>可能，因为不同主机上的临时端口号可以相同</li>
+</ul>
+<p><strong>f. 如果它们是同一台主机，情况会怎么样？</strong></p>
+<ul>
+<li>如果它们是同一台主机，那么从 A 向 S 发送的报文段的源端口号和从 B 向 S 发送的报文段的源端口号必须不同，以便服务器能够区分来自 A 和 B 的连接</li>
+</ul>
+<hr>
+<p><strong>P5. 假定某 UDP 接收方对接收到的 UDP 报文段计算因特网检验和，并发现它与承载在检验和字段中的值相匹配。该接收方能够绝对确信没有出现过比特差错吗？试解释之。</strong></p>
+<ul>
+<li>不能确信没有出现过比特差错</li>
+<li>如果在传输过程中，报文中有两个或多个不同的位置同时发生了比特翻转，并且这些改变的量刚好正负相互抵消，那么最终计算出的检验和将保持不变</li>
+<li>因此，虽然检验和匹配，但实际上可能存在比特差错</li>
+</ul>
+<hr>
+<p><strong>P32. 考虑 TCP 估计 RTT 的过程。假设 \(\alpha = 0.1\)，令 \(\text{SampleRTT}_{1}\) 设置为最新样本 RTT，令 \(\text{SampleRTT}_{2}\) 设置为下一个最新样本 RTT，等等。</strong></p>
+<p><strong>a. 对于一个给定的 TCP 连接，假定 4 个确认报文相继到达，带有 4 个对应的 RTT 值：\(\text{SampleRTT}_4\)、\(\text{SampleRTT}_3\)、\(\text{SampleRTT}_2\) 和 \(\text{SampleRTT}_1\)。根据这 4 个样本 RTT 表示 \(\text{EstimatedRTT}\)。</strong></p>
+<ul>
+<li>这里假设 \(\mathrm{EstimatedRTT}_1 =  \mathrm{SampleRTT}_4\)，则</li>
+</ul>
+<div class="math-block">\[\mathrm{EstimatedRTT}_2 =  \alpha \cdot \mathrm{SampleRTT}_3+(1-\alpha) \cdot \mathrm{EstimatedRTT}_1\]</div>
+<div class="math-block">\[\mathrm{EstimatedRTT}_3 =  \alpha \cdot \mathrm{SampleRTT}_2+(1-\alpha) \cdot \mathrm{EstimatedRTT}_2\]</div>
+<div class="math-block">\[\mathrm{EstimatedRTT}_4 =  \alpha \cdot \mathrm{SampleRTT}_1+(1-\alpha) \cdot \mathrm{EstimatedRTT}_3\]</div>
+<ul>
+<li>代入 \(\alpha = 0.1\)，得</li>
+</ul>
+<p>\(\mathrm{EstimatedRTT} = 0.1 \cdot \mathrm{SampleRTT}_1 + 0.09 \cdot \mathrm{SampleRTT}_2 + 0.081 \cdot \mathrm{SampleRTT}_3 + 0.729 \cdot \mathrm{SampleRTT}_4\)</p>
+<blockquote>
+<p><mark><strong>\(\alpha\) 乘的是新样本！</strong></mark></p>
+</blockquote>
+<p><strong>b. 将你得到的公式一般化到 \(n\) 个 RTT 样本的情况。</strong></p>
+<div class="math-block">\[
+\begin{aligned}
+\mathrm{EstimatedRTT} =\alpha \sum_{i=1}^{n-1}(1-\alpha)^{i-1} \cdot \mathrm{SampleRTT}_i + (1 - \alpha)^n \cdot \mathrm{SampleRTT}_n
+\end{aligned}
+\]</div>
+<p><strong>c. 对于在 (b) 中得到的公式，令 \(n\) 趋于无穷。试说明为什么这个平均过程被称为指数移动平均。</strong></p>
+<ul>
+<li>当 \(n \to \infty\) 时，由 \(0 < (1 - \alpha) < 1\)，故 \((1 - \alpha)^n \to 0\)，即初始值 \(\mathrm{SampleRTT}\) 的影响完全衰减为 0。此时：</li>
+</ul>
+<div class="math-block">\[
+\begin{aligned}
+\text{EstimatedRTT} &= \alpha \sum_{i=1}^{\infin} (1 - \alpha)^{i-1} \cdot \text{SampleRTT}_i \\
+&= (0.1) \times \sum_{i=1}^{\infin} (0.9)^{i-1} \cdot \text{SampleRTT}_i \\
+&= \frac{1}{9} \times \sum_{i=1}^{\infin} (0.9)^{i} \cdot \text{SampleRTT}_i
+\end{aligned}
+\]</div>
+<ul>
+<li>被称为指数移动平均的原因如下：
+<ul>
+<li>移动平均：<mark>对历史上所有可用数据点</mark>进行加权求和来计算当前的平均值，随着新样本的加入，平均值在动态移动</li>
+<li>指数加权：第 \(i\) 个最新样本 \(\text{SampleRTT}_i\) 的权重是 \(\alpha(1-\alpha)^{i-1}\)，随着样本不断变老，该样本的权重 \((1-\alpha)^{i-1}\) 呈现<mark>指数级衰减</mark></li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>P40. 考虑图 3-58 假设 TCP Reno 是一个经历如上所示行为的协议，回答下列问题。在各种情况中，简要地论证你的回答。</strong></p>
+<p><img src="/assets/img/posts/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E4%BE%8B%E9%A2%98/image-243.webp" alt="alt text" loading="lazy"></p>
+<p><strong>a. 指出 TCP 慢启动运行时的时间间隔。</strong></p>
+<ul>
+<li>[1,6] 和 [23,26]，此时拥塞窗口长度呈指数级增长</li>
+</ul>
+<p><strong>b. 指出 TCP 拥塞避免运行时的时间间隔。</strong></p>
+<ul>
+<li>[6,16] 和 [17,22]，此时拥塞窗口长度呈线性增长</li>
+</ul>
+<p><strong>c. 在第 16 个传输轮回之后，报文段的丢失是根据 3 个冗余 ACK 还是根据超时检测出来的？</strong></p>
+<ul>
+<li>3 个冗余 ACK。因为接着拥塞窗口长度变为原来的一半再加快速恢复的 3，继续保持拥塞避免</li>
+</ul>
+<p><strong>d. 在第 22 个传输轮回之后，报文段的丢失是根据 3 个冗余 ACK 还是根据超时检测出来的？</strong></p>
+<ul>
+<li>检测出超时。因为接着拥塞窗口长度归 1，重新进入慢启动状态</li>
+</ul>
+<p><strong>e. 在第 1 个传输轮回里，ssthresh 的初始值设置为多少？</strong></p>
+<ul>
+<li>32。因为刚开始慢启动至拥塞窗口长度为 32 时转为拥塞避免</li>
+</ul>
+<p><strong>f. 第 18 个传输轮回里，ssthresh 的值设置为多少?</strong></p>
+<ul>
+<li>21。因为第 16 个传输轮回时出现 3 个冗余 ACK 的报文段丢失，ssthresh 被设置为此时的拥塞窗口长度的一半，到第 18 个传输轮回仍保持不变</li>
+</ul>
+<p><strong>g. 在第 24 个传输轮回里，ssthresh 的值设置为多少？</strong></p>
+<ul>
+<li>14。第 22 个传输轮回时出现超时的报文段丢失，ssthresh 被设置为此时的拥塞窗口长度的一半，到第 24 个传输轮回仍保持不变</li>
+<li>第 17 个传输轮回的拥塞窗口长度为第 16 个传输轮回的一半再加 3，即 21 + 3 = 24，每个传输轮回增加 1，到第 22 个传输轮回时增长为 29，此时收到 3 个冗余 ACK，ssthress 应设置为其一半为 14</li>
+</ul>
+<p><strong>h. 在哪个传输轮回内发送第 70 个报文段？</strong></p>
+<ul>
+<li>第 7 个传输轮回。前六个轮回共发送报文段 1 + 2 + 4 + 8 + 16 + 32 = 63 个，第 7 个轮回发送第 64 至第 96 个报文段。</li>
+</ul>
+<p><strong>i. 假定在第 26 个传输轮回后，通过收到 3 个冗余 ACK 检测出有分组丢失，拥塞的窗口长度和 ssthresh 的值应当是多少?</strong></p>
+<ul>
+<li>ssthresh 为当前拥塞窗口长度的一半，即 4</li>
+<li>拥塞窗口长度为 ssthresh + 3 = 4 + 3 = 7，进入快速恢复阶段</li>
+</ul>
+<p><strong>j. 假定使用 TCP Tahoe（而不是 TCP Reno），并假定在第 16 个传输轮回收到 3 个冗余 ACK。在第 19 个传输轮回，ssthresh 和拥塞窗口长度是什么？</strong></p>
+<ul>
+<li>在第 19 个传输轮回，ssthresh 仍为第 16 个传输轮回时的拥塞窗口长度的一半，即 21</li>
+<li>由于使用 TCP Tahoe，在第 17 个传输轮回拥塞窗口长度被设置为 1，并进入慢启动</li>
+<li>接着第 18 个传输轮回拥塞窗口长度为 2，第 19 个传输轮回拥塞窗口长度为 4</li>
+</ul>
+<p><strong>k. 再次假设使用 TCP Tahoe，在第 22 个传输轮回有一个超时事件。从第 17 个传输轮回到第 22 个传输轮回（包括这两个传输轮回），一共发送了多少分组？</strong></p>
+<ul>
+<li>第 17 个传输轮回发送 1 个分组</li>
+<li>第 18 个传输轮回发送 2 个分组</li>
+<li>第 19 个传输轮回发送 4 个分组</li>
+<li>第 20 个传输轮回发送 8 个分组</li>
+<li>第 21 个传输轮回发送 16 个分组</li>
+<li>第 22 个传输轮回发送 21 个分组，受限于此时的 ssthresh 为 21</li>
+<li>故一共发送了 1 + 2 + 4 + 8 + 16 + 21 = 52 个分组</li>
+</ul>
+<hr>
+<p><strong>P46. <mark>考虑仅有一条单一的 TCP（Reno）连接使用一条 10Mbps 链路，且该链路没有缓存任何数据。假设这条链路是发送主机和接收主机之间的唯一拥塞链路。假定某 TCP 发送方向接收方有一个大文件要发送，而接收方的接收缓存比拥塞窗口要大得多。我们也做下列假设：每个 TCP 报文段长度为 1500 字节：该连接的双向传播时延是 150ms；并且该 TCP 连接总是处于拥塞避免阶段，即忽略了慢启动。</mark></strong></p>
+<p><strong>a. 这条 TCP 连接能够取得的最大窗口长度（以报文段计）是多少？</strong></p>
+<ul>
+<li>TCP 的发送速率计算公式为</li>
+</ul>
+<div class="math-block">\[Rate = \frac{W \times \text{MSS}}{RTT}\]</div>
+<ul>
+<li>代入 TCP 报文段长度、双向传播时延、链路带宽作为速度得</li>
+</ul>
+<div class="math-block">\[W_{max} = \frac{R \times RTT}{\text{MSS}}= \frac{10 \times 10^6 \text{ bps} \times 0.15 \text{ s}}{1500 \times 8 \text{ bits}} = 125\]</div>
+<ul>
+<li>即这条 TCP 连接能够取得的最大窗口长度为 \(125\) 个报文段</li>
+</ul>
+<p><strong>b. 这条 TCP 连接的平均窗口长度（以报文段计）和平均吞吐量（以 bps 计）是多少？</strong></p>
+<ul>
+<li>当窗口大小达到 \(W_{max}\) 时发生丢包，TCP Reno 将窗口减半至 \(0.5 W_{max}\)，然后每个 \(RTT\) 线性增加 \(1\) 个 MSS，直到再次达到 \(W_{max}\)，窗口大小始终在 \(0.5 W_{max}\) 到 \(W_{max}\) 之间均匀变化</li>
+</ul>
+<div class="math-block">\[W_{avg} = \frac{0.5 W_{max} + W_{max}}{2} = 93.75\]</div>
+<ul>
+<li>吞吐量与窗口大小成正比，发送速率也在 \(0.5 R\) 到 \(R\) 之间线性变化</li>
+</ul>
+<div class="math-block">\[\text{平均吞吐量} = 0.75 \times R = 0.75 \times 10 \text{ Mbps} = 7.5 \times 10^6 \text{ bps}\]</div>
+<ul>
+<li>即这条 TCP 连接的平均窗口长度为 \(93.75\)， 和平均吞吐量为 \(7.5 \times 10^6 \text{ bps}\)</li>
+</ul>
+<p><strong>c. 这条 TCP 连接在从丢包恢复后，再次到达其最大窗口要经历多长时间？</strong></p>
+<ul>
+<li>发生丢包后，TCP Reno 的窗口会立刻减半为 \(W_{max}/2 = \lfloor 125/2 \rfloor = 62\)</li>
+<li>由于总是处于拥塞避免阶段，TCP 窗口每经过一个 \(RTT\) 增加 1 个报文段，为了重新达到最大窗口 \(125\)，需要增加的窗口数量为 \(\Delta W = 125 - 62 = 63\)</li>
+<li>因为每个 \(RTT\) 增加 1 个报文段，所以需要经历 \(63\) 个 \(RTT\) 的时间</li>
+</ul>
+<div class="math-block">\[\text{恢复时间} = 63 \times RTT = 63 \times 0.15 \text{ s} = 9.45 \text{ s}\]</div>
+<ul>
+<li>故再次到达最大窗口需要经历 \(9.45\) 秒</li>
+</ul>
+<hr>
+<p><strong>P50. 考虑一种简化的 TCP 的 AIMD 算法，其中拥塞窗口长度用报文段的数量来度量，而不是用字节度量。在加性增中，每个 RTT 拥塞窗口长度增加一个报文段。在乘性减中，拥塞窗口长度减小一半（如果结果不是一个整数，向下取整到最近的整数）。假设两条 TCP 连接 C1 和 C2，它们共享一条速率为每秒 30 个报文段的单一拥塞链路。假设 C1 和 C2 均处于拥塞避免阶段。连接 C1 的 RTT 是 50ms，连接 C2 的 RTT 是 100ms。假设当链路中的数据速率超过了链路的速率时，所有 TCP 连接经受数据报文段丢失。</strong></p>
+<p><strong>a. 如果在时刻 \(t_0\)，C1 和 C2 具有 10 个报文段的拥塞窗口，在 1000ms 后它们的拥塞窗口为多长？</strong></p>
+<ul>
+<li>记 C1 的拥塞窗口为 \(W1\)，C2 的拥塞窗口为 \(W2\)，由公式 \(R = \frac{W}{RTT}\)，丢包触发的条件为</li>
+</ul>
+<div class="math-block">\[R_{total} = \frac{W_1}{0.05} + \frac{W_2}{0.1} = 20 W_1 + 10 W_2 > 30\]</div>
+<table>
+<thead>
+<tr>
+<th>时间 (ms)</th>
+<th>触发事件与动作</th>
+<th>\(W_1\)</th>
+<th>\(W_2\)</th>
+<th>当前总速率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td>初始状态</td>
+<td>10</td>
+<td>10</td>
+<td>\(20(10) + 10(10) = 300 > 30\)</td>
+</tr>
+<tr>
+<td><strong>50</strong></td>
+<td>C1 完成 1 个 RTT，检测到丢包，窗口减半</td>
+<td>5</td>
+<td>10</td>
+<td>\(20(5) + 10(10) = 200 > 30\)</td>
+</tr>
+<tr>
+<td><strong>100</strong></td>
+<td>C1 完成 RTT 窗口减半 <br>C2 完成 1 个 RTT，检测到 \(t=0\) 的丢包，窗口减半</td>
+<td>2</td>
+<td>5</td>
+<td>\(20(2) + 10(5) = 90 > 30\)</td>
+</tr>
+<tr>
+<td><strong>150</strong></td>
+<td>C1 完成 RTT 窗口减半</td>
+<td>1</td>
+<td>5</td>
+<td>\(20(1) + 10(5) = 70 > 30\)</td>
+</tr>
+<tr>
+<td><strong>200</strong></td>
+<td>C1 保持最小窗口 1<br>C2 完成 RTT，窗口减半</td>
+<td>1</td>
+<td>2</td>
+<td>\(20(1) + 10(2) = 40 > 30\)</td>
+</tr>
+<tr>
+<td><strong>250</strong></td>
+<td>C1 保持最小窗口 1</td>
+<td>1</td>
+<td>2</td>
+<td>\(20(1) + 10(2) = 40 > 30\)</td>
+</tr>
+<tr>
+<td><strong>300</strong></td>
+<td>C1 保持最小窗口 1<br>C2 完成 RTT，窗口减半</td>
+<td>1</td>
+<td>1</td>
+<td>\(20(1) + 10(1) = 30 \le 30\)</td>
+</tr>
+<tr>
+<td><strong>350</strong></td>
+<td>C1 经历无丢包的一个 RTT，窗口加 1</td>
+<td>2</td>
+<td>1</td>
+<td>\(20(2) + 10(1) = 50 > 30\)</td>
+</tr>
+<tr>
+<td><strong>400</strong></td>
+<td>C1 检测到丢包，窗口减半 <br>C2 完成 RTT，检测到丢包，窗口减半</td>
+<td>1</td>
+<td>1</td>
+<td>\(20(1) + 10(1) = 30 \le 30\)</td>
+</tr>
+</tbody>
+</table>
+<p>可以发现，在 \(300\text{ ms}\) 后，系统每 100ms 就会发生一次循环：</p>
+<ul>
+<li>在整百毫秒时，状态被重置为 \(W_1 = 1, W_2 = 1\)</li>
+<li>在中位毫秒时，C1 增长导致拥塞，状态为 \(W_1 = 2, W_2 = 1\)</li>
+</ul>
+<p>故如果在时刻 \(t_0\)，C1 和 C2 的拥塞窗口为 10，在 1000ms 后，此时属于整百毫秒
+故 C1 的拥塞窗口为 1 个报文段，C2 的拥塞窗口为 1 个报文段</p>
+<p><strong>b. 经长时间运行，这两条连接将取得共享该拥塞链路的相同的带宽吗？</strong></p>
+<ul>
+<li>决定 TCP 连接吞吐量带宽的公式为：</li>
+</ul>
+<div class="math-block">\[\text{带宽} = \frac{W_{avg}}{RTT}\]</div>
+<ul>
+<li>经长时间运行后，\(300\text{ ms}\) 前的状态影响可以忽略，\(300\text{ ms}\) 后：
+<ul>
+<li>\(W_1\) 始终在 \(1\) 和 \(2\) 之间波动，平均为 \(1.5\)，故 C1 带宽为 \(30\) 报文段/秒</li>
+<li>\(W_2\) 一直被压制在最小值 1，故 C2 带宽为 \(10\) 报文段/秒</li>
+</ul>
+</li>
+<li>C1 占据了 75% 的带宽，C2 仅占据 25% 的带宽</li>
+</ul>
+<p>故经长时间运行，这两条连接不会取得共享该拥塞链路的相同的带宽</p>
+<blockquote>
+<p>根本原因：TCP 的 AIMD 算法对 RTT 较短的连接存在偏好。C1 的 RTT 较短，其窗口增长（AI）和反馈循环比 C2 更快，能够更迅速地抢占空闲带宽；而一旦引发网络拥塞，两者同时减小窗口，导致 RTT 较长的 C2 总是被压制在极小的窗口值上，无法获得公平的带宽份额。</p>
+</blockquote>
+<hr>
+<p><strong>P8. <mark>考虑互联 3 个子网（子网 1、子网 2 和子网 3）的一台路由器。假定这 3 个子网的所有接口要求具有前缀 223.1.17/24。还假定子网 1 要求支持多达 60 个接口，子网 2 要求支持多达 90 个接口，子网 3 要求支持多达 12 个接口。提供 3 个满足这些限制的网络地址（形式为 a.b.c.d/x）。</mark></strong></p>
+<p>为了最大限度地避免地址浪费并防止地址段重叠，在划分子网时，这里按需求从大到小分配</p>
+<blockquote>
+<p>已知基础网络前缀为 <code>223.1.17.0/24</code>，这意味着我们有 8 个主机位可供分配，总共有 \(2^8 = 256\) 个 IP 地址（范围从 0 到 255）。注意，<mark><strong>每个子网都需要保留 2 个地址：1 个用于网络地址（全 0），1 个用于广播地址（全 1）</strong></mark>。</p>
+</blockquote>
+<ul>
+<li>分配子网 2
+<ul>
+<li>需求 90 个接口，加上 2 个保留地址，共需要 92 个地址</li>
+<li>最小满足的主机位为 \(7\)，前缀长度为 \(32 - 7 = 25\)</li>
+<li>从基础网络的开头进行分配，子网 2 起始地址为 223.1.17.0/25（<strong>从 0 开始</strong>）</li>
+</ul>
+</li>
+<li>分配子网 1
+<ul>
+<li>需求 60 个接口，加上 2 个保留地址，共需要 62 个地址</li>
+<li>最小满足的主机位为 \(6\)，前缀长度为 \(32 - 6 = 26\)</li>
+<li>接着子网 2 的结束地址继续分配，子网 2 使用到了 .127，子网 1 起始地址为 223.1.17.128/26</li>
+</ul>
+</li>
+<li>分配子网 3
+<ul>
+<li>需求 12 个接口，加上 2 个保留地址，共需要 14 个地址</li>
+<li>最小满足的主机位为 \(4\)，前缀长度为 \(32 - 4 = 28\)</li>
+<li>接着子网 1 的结束地址继续分配，子网 1 使用到了 .191，子网 3 起始地址为 223.1.17.192/28</li>
+</ul>
+</li>
+</ul>
+<p>故满足这些限制的 3 个网络地址分别为</p>
+<ul>
+<li>子网 1： 223.1.17.128/26</li>
+<li>子网 2： 223.1.17.0/25</li>
+<li>子网 3： 223.1.17.192/28</li>
+</ul>
+<blockquote>
+<p>只看后 8 位：
+子网 2：0xxxxxxx
+子网 1：10xxxxxx
+子网 3：1100xxxx</p>
+</blockquote>
+<hr>
+<p><strong>P5. 考虑下图所示的网络，假设每个节点初始时知道到它的每个邻居的开销。考虑距离向量算法，并显示在节点 \(z\) 中的距离表项。</strong></p>
+<p><img src="/assets/img/posts/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E4%BE%8B%E9%A2%98/image-244.webp" alt="alt text" loading="lazy"></p>
+<p>设每个时间间隔为 \(T\)，当前时间为 \(t\)</p>
+<ul>
+<li>当 \(t=0\) 时</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>u</th>
+<th>v</th>
+<th>x</th>
+<th>y</th>
+<th>z</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v</td>
+<td>\(\infin\)</td>
+<td>\(\infin\)</td>
+<td>\(\infin\)</td>
+<td>\(\infin\)</td>
+<td>\(\infin\)</td>
+</tr>
+<tr>
+<td>x</td>
+<td>\(\infin\)</td>
+<td>\(\infin\)</td>
+<td>\(\infin\)</td>
+<td>\(\infin\)</td>
+<td>\(\infin\)</td>
+</tr>
+<tr>
+<td>z</td>
+<td>\(\infin\)</td>
+<td>6</td>
+<td>2</td>
+<td>\(\infin\)</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>当 \(t=1T\) 时</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>u</th>
+<th>v</th>
+<th>x</th>
+<th>y</th>
+<th>z</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v</td>
+<td>1</td>
+<td>0</td>
+<td>3</td>
+<td>\(\infin\)</td>
+<td>6</td>
+</tr>
+<tr>
+<td>x</td>
+<td>\(\infin\)</td>
+<td>3</td>
+<td>0</td>
+<td>3</td>
+<td>2</td>
+</tr>
+<tr>
+<td>z</td>
+<td>7</td>
+<td>5</td>
+<td>2</td>
+<td>5</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>当 \(t=2T\) 时，且此后距离表不再改变</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>u</th>
+<th>v</th>
+<th>x</th>
+<th>y</th>
+<th>z</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v</td>
+<td>1</td>
+<td>0</td>
+<td>3</td>
+<td>3</td>
+<td>5</td>
+</tr>
+<tr>
+<td>x</td>
+<td>4</td>
+<td>3</td>
+<td>0</td>
+<td>3</td>
+<td>2</td>
+</tr>
+<tr>
+<td>z</td>
+<td>6</td>
+<td>5</td>
+<td>2</td>
+<td>5</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>DV 表中，源只需考虑当前节点及其邻居</strong></p>
+</blockquote>
+<hr>
+<p><strong>P7. 考虑下图所示的网络段。\(x\) 只有两个相连邻居 \(w\) 与 \(y\)。\(w\) 有一条通向目的 地 \(u\)（没有显示）的最低开销路径，其值为 5，\(y\) 有一条通向目的地 \(u\) 的最低开销路径，其值为 6。从 \(w\) 与 \(y\) 到 \(u\)（以及 \(w\) 与 \(y\) 之间）的完整路径未显示出来。网络中所有链路开销皆为正整数值。</strong></p>
+<p><img src="/assets/img/posts/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E4%BE%8B%E9%A2%98/image-245.webp" alt="alt text" loading="lazy"></p>
+<p><strong>a. 给出 \(x\) 对目的地 \(w\)、\(y\) 和 \(u\) 的距离向量。</strong></p>
+<ul>
+<li>\(D_x(w)=2\)</li>
+<li>\(D_x(y)=4\)</li>
+<li>\(D_x(u)=7\)</li>
+</ul>
+<blockquote>
+<p><mark><strong>注意距离矢量的规范表达 \(D_x(w)=2\)</strong></mark></p>
+</blockquote>
+<p><strong>b. 给出对于 \(c(x, w)\) 或 \(c(x, y)\) 的链路开销的变化，使得执行了距离向量算法后，\(x\) 将通知其邻居有一条通向 \(u\) 的新最低开销路径。</strong></p>
+<ul>
+<li>假设 \(c(x,w)\) 发生改变，由 \(D_x(u)=min\{c(x,w)+5,11\}\)，则
+<ul>
+<li>当 \(c(x,w) < 6\) 时，\(x\) 将通知邻居通向 \(u\) 的最低开销路径为 \(c(x,w)+5\)</li>
+<li>当 \(c(x,w) \geq 6\) 时，\(x\) 将通知邻居通向 \(u\) 的新最低开销路径为 \(11\)</li>
+</ul>
+</li>
+<li>假设 \(c(x,y)\) 发生改变，由 \(D_x(u)=min\{7,c(x,y)+6\}\)
+<ul>
+<li>又 \(c(x,y) \geq 1\)，故 \(D_x(u)=7\) 不变</li>
+<li>即 \(c(x,y)\) 的变化不会使得 \(x\) 通知邻居有通向 \(u\) 的新最低开销路径</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><mark><strong>注意运用上 Bellman-Ford 算法 \(D_x(u)=min\{c(x,w)+5,11\}\)</strong></mark></p>
+</blockquote>
+<p><strong>c. 给出对 \(c(x, w)\) 或 \(c(x, y)\) 的链路开销的变化，使得执行了距离向量算法后，\(x\) 将不通知其邻居有一条通向 \(x\) 的新最低开销路径。</strong></p>
+<ul>
+<li>如果题目无误 —— “通向 \(x\)”，由于 \(D_x(x)=0\) 已固定最低，无论 \(c(x, w)\) 或 \(c(x, y)\) 怎么变化，\(x\) 都将不通知其邻居有一条通向 \(x\) 的新最低开销路径</li>
+<li>如果题目有误 —— 实则为 “通向 \(u\)”，则由 <strong>b</strong> 可知，当 \(c(x,y)\) 变化时，\(x\) 将不通知其邻居有一条通向 \(u\) 的新最低开销路径</li>
+</ul>
+<hr>
+<p><strong>P14. 考虑下图所示的网络。假定 AS3 和 AS2 正在运行 OSPF 作为其 AS 内部路由选择协议。假定 AS1 和 AS4 正在运行 RIP 作为其 AS 内部路由选择协议。假定 AS 间路由选择协议使用的是 eBGP 和 iBGP。假定最初在 AS2 和 AS4 之间不存在物理链路。</strong></p>
+<p><img src="/assets/img/posts/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E4%BE%8B%E9%A2%98/image-246.webp" alt="alt text" loading="lazy"></p>
+<p><strong>a. 路由器 3c 从下列哪个路由选择协议学习到了前缀 \(x\)：OSPF、RIP、eBGP 或 iBGP？</strong></p>
+<ul>
+<li>eBGP</li>
+</ul>
+<p><strong>b. 路由器 3a 从哪个路由选择协议学习到了前缀 \(x\)</strong></p>
+<ul>
+<li>iBGP</li>
+</ul>
+<p><strong>c. 路由器 1c 从哪个路由选择协议学习到了前缀 \(x\)？</strong></p>
+<ul>
+<li>eBGP</li>
+</ul>
+<p><strong>d. 路由器 1d 从哪个路由选择协议学习到了前缀 \(x\)？</strong></p>
+<ul>
+<li>iBGP</li>
+</ul>
+<blockquote>
+<ul>
+<li><strong>eBGP（外部 BGP）</strong>：用于在<strong>不同的自治系统（AS）之间</strong>传递路由信息（例如从 AS4 传到 AS3）。</li>
+<li><strong>iBGP（内部 BGP）</strong>：用于在<strong>同一个自治系统（AS）内部</strong>，<mark>向其他路由器分发通过 eBGP 学习到的外部路由前缀</mark>。</li>
+<li><strong>OSPF / RIP（IGP - 内部网关协议）</strong>：用于在 AS 内部计算到达内部各个节点（包括到达边界路由器）的最短路径。<strong>注意：IGP 通常不负责承载外部网络的特定前缀（如前缀 x），外部前缀的传递是 BGP 的工作。</strong></li>
+</ul>
+<p>一条外部路由前缀在网络中的传播规律总是交替进行的：<strong>eBGP（跨 AS 传递） \(\rightarrow\) iBGP（AS 内部分发） \(\rightarrow\) eBGP（跨 AS 传递） \(\rightarrow\) iBGP（AS 内部分发）</strong>。<mark>内部的 OSPF 和 RIP 只是帮助数据包在 AS 内部找到去往边界路由器的具体物理路径，并不直接宣告前缀 \(x\)</mark>。</p>
+</blockquote>
+<hr>
+<p><strong>P5. 考虑 5 比特生成多项式，\(G = 10011\)，并且假设 \(D\) 的值为 \(1010101010\)。\(R\) 的值是什么？</strong></p>
+<p><img src="/assets/img/posts/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E4%BE%8B%E9%A2%98/image-248.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>得到的余数即为 \(R = 0100\)</li>
+</ul>
+<hr>
+<p><strong>P8. 在 6.3 节中，我们提供了时隙 ALOHA 效率推导的概要。在本习题中，我们将完成这个推导。</strong></p>
+<p><strong>a. 前面讲过，当有 \(N\) 个活跃节点时，时隙 ALOHA 的效率是 \(Np(1 - p)^{N-1}\)。求出使这个表达式最大化的 \(p\) 值。</strong></p>
+<ul>
+<li>令 \(f(p)=Np(1 - p)^{N-1}\)，则</li>
+</ul>
+<div class="math-block">\[f'(p)= N(1 - p)^{N-1} - Np(1-p)^{N-2}(N-1)=N(1 - p)^{N-2}(1-Np)\]</div>
+<ul>
+<li>故当 \(p = \frac{1}{N}\) 时，时隙 ALOHA 的效率表达式最大</li>
+</ul>
+<p><strong>b. 使用在 (a) 中求出的 \(p\) 值，令 \(N\) 接近于无穷，求出时隙 ALOHA 的效率。（提示：当 \(N\) 接近于无穷时，\((1 - 1/N)^N\) 接近于 \(1/e\)。）</strong></p>
+<div class="math-block">\[\lim\limits_{N \rightarrow \infty} f\left(\frac{1}{N}\right) = \lim\limits_{N \rightarrow \infty} N \frac{1}{N} (1 - \frac{1}{N})^{N-1} = \frac{1}{e}\]</div>
+<hr>
+<p><strong>P19. <mark>假设节点 A 和节点 B 在相同的 \(10\text{Mbps}\) 广播信道上，并且这两个节点的传播时延为 245 特时间。假设 A 和 B 同时发送以太网帧，帧发生了碰撞，然后 A 和 B 在 CSMA/CD 算法中选择不同的 \(K\) 值。假设没有其他节点处于活跃状态，来自 A 和 B 的重传会碰撞吗？为此，完成下面的例子就足以说明问题了。假设 A 和 B 在 \(t = 0\) 比特时间开始传输。它们在 \(t = 245\) 比特时间都检测到了碰撞。假设 \(K_A = 0\)，\(K_B = 1\)。B 会将它的重传调整到什么时间？A 在什么时间开始发送？（注意：这些节点在返回第 2 步之后，必须等待一个空闲信道，参见协议。）A 的信号在什么时间到达 B 呢？B 在它预定的时刻抑制传输吗？</mark></strong></p>
+<p><strong>1. B 调整重传的时间</strong>：</p>
+<ul>
+<li><strong>\(t = 0\)</strong> 时
+<ul>
+<li>节点 A 和 B 同时开始发送数据帧</li>
+</ul>
+</li>
+<li><strong>\(t = 245\)</strong> 时
+<ul>
+<li>A 的第一个比特到达 B，B 的第一个比特到达 A，此时 A 和 B 同时检测到碰撞</li>
+<li>A 和 B 立即中止帧的发送，并<mark>向信道中发送强化碰撞信号，持续 48 个比特时间</mark></li>
+</ul>
+</li>
+<li><strong>\(t = 245 \sim 293\)</strong>
+<ul>
+<li>A 和 B 都完成了强化信号的发送，并开始执行二进制指数退避算法
+<ul>
+<li>节点 A 退避时间为 \(0 \times 512 = 0\) 个比特时间，将在 \(t = 293\) 开始侦听信道</li>
+<li>节点 B 退避时间为 \(1 \times 512 = 512\) 个比特时间，将在 \(t = 293 + 512 = 805\) 开始侦听信道</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><mark>若信道空闲，B 还需等待 96 个比特时间的帧间距 IFG</mark>，将它的重传调整到 \(t = 805 + 95 = 901\) 比特时间</p>
+<p><strong>2. A 实际开始发送的时间</strong>：</p>
+<ul>
+<li>在 \(t = 293\) 时，节点 B 刚发送完强化碰撞信号，<mark>最后一位需要传播 245 个比特时间才能到达 A</mark></li>
+<li>故 B 的信号完全通过节点 A，A 侦听到信道变为空闲的时间为 \(t = 293 + 245 = 538\)</li>
+<li>A 还需等待 96 个比特时间的帧间距 IFG，在 \(t = 538+96=634\) 开始发送</li>
+</ul>
+<p>即 A 实际开始发送的时间为 \(t = 634\) 比特时间</p>
+<p><strong>3. A 的信号到达 B 的时间</strong>：</p>
+<ul>
+<li>\(t = 634 + 245 = 879\)</li>
+</ul>
+<p><strong>4. B 在它预定的时刻是否需要抑制传输</strong>：</p>
+<ul>
+<li>B 的预定重传时间为 \(t=805+96=901\)，A 的信号于 \(t = 879 \in [805,901]\) 到达 B</li>
+</ul>
+<p>故 B 在它预定的时刻需要抑制传输</p>
+<blockquote>
+<ol>
+<li><strong>发送冲突要发送持续 <mark>48 比特时间的强化碰撞信号</mark></strong></li>
+<li><strong>发出后，要考虑最后一位到达目标的时间（48 + 一个传播时延）</strong></li>
+<li><strong>侦听到信道空闲，还需等待 <mark>96 比特时间的帧间距</mark>。且此期间侦听到信道占用仍需抑制传输</strong></li>
+</ol>
+</blockquote>
+<hr>
+<p><strong>P26. 在某网络中标识为 A 到 F 的 6 个节点以星形与一台交换机连接，考虑在该网络环境中某个正 在学习的交换机的运行情况。假定：(i) B 向 E 发送一个帧；(ii) E 向 B 回答一个帧；(iii) A 向 B 发送一个帧；(iv) B 向 A 回答一个帧。该交换机表初始为空。显示在这些事件的前后该交换机表的状态。对于每个事件，指出在其上面转发传输的帧的链路，并简要地评价你的答案。</strong></p>
+<ol>
+<li>B 向 E 发送一个帧：
+<ul>
+<li>交换机记录 B 的 MAC 地址与到达的端口</li>
+<li>由于交换机表为空，交换机向 A、C、D、E、F 广播此帧</li>
+</ul>
+</li>
+<li>E 向 B 回答一个帧：
+<ul>
+<li>交换机记录 E 的 MAC 地址与到达的端口</li>
+<li>交换机查表有 B 的 MAC 地址，故只向 B 转发</li>
+</ul>
+</li>
+<li>A 向 B 发送一个帧：
+<ul>
+<li>交换机记录 A 的 MAC 地址与到达的端口</li>
+<li>交换机查表有 B 的 MAC 地址，故只向 B 转发</li>
+</ul>
+</li>
+<li>B 向 A 回答一个帧：
+<ul>
+<li>交换机查表有 A 的 MAC 地址，故只向 A 转发</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p><mark>注意交换机记录的是 <strong>MAC 地址与到达的端口</strong></mark></p>
+</blockquote>
+<hr>
+<blockquote>
+<p>其他例题</p>
+</blockquote>
+<h2 id="1-计算机网络和因特网">1 计算机网络和因特网</h2>
+<hr>
+<p><strong>R12. 与分组交换网络相比，电路交换网络有哪些优点？在电路交换网络中，TDM 比 FDM 有哪些优点？</strong></p>
+<p><strong>电路交换</strong>：由于电路交换在通信之前要在通信双方之间建立一条被双方独占的物理通路（由通信双方之间的交换设备和链路逐段连接而成）。因而有以下优点：</p>
+<p>（1）由于通信线路为通信双方用户专用，数据直达，所以传输数据的<strong>时延非常小</strong><br>
+（2）通信双方之间的物理通路一旦建立，双方可以<strong>随时通信，实时性强</strong>。<br>
+（3）双方通信时按发送顺序传送数据，<strong>不存在失序问题</strong>。<br>
+（4）电路交换设备<strong>控制均较简单</strong>。</p>
+<p>TDM 比 FDM 的优点如下：</p>
+<ol>
+<li>
+<p>当发生拥堵等网络问题时，<strong>TDM 中的数据丢失可能只会是一部分，而 FDM 中就可能是大部分或全部</strong>。</p>
+</li>
+<li>
+<p><strong>TDM 适合数字信号传输</strong>，而 FDM 适合模拟信号传输，因为现在通信网络多是传输数字信号，所以 TDM 比 FDM 好。</p>
+</li>
+<li>
+<p>因为频分复用连接建立后，当中途没有数据传输时，他所占有的频段带宽不能被其他连接使用，故可能存在空置，而在时分复用的统计时分模式下，连接建立后，当某个连接暂时不用传输数据时可以少分时间片或者不分，即其<strong>时隙的分配时 “按需分配”</strong>，这样就让出了相应的传输时间给其他连接。</p>
+</li>
+</ol>
+<hr>
+<p><strong>R23. 因特网协议栈中的 5 个层次有哪些？在这些层次中，每层的主要任务是什么？</strong></p>
+<p>5 个层次从低到高分别是：物理层，链路层，网络层，运输层，应用层</p>
+<p>每一层的主要任务如下：</p>
+<ol>
+<li>物理层：定义了网络的电气、机械、功能和过程特性；负责在 <mark><strong>实际媒体上传输原始比特数据流</strong></mark>。</li>
+<li>链路层：<strong>在相邻节点之间提供可靠的数据传输服务</strong>；处理物理层上发生的数据传输错误；进行帧编号、检查和重传等操作。</li>
+<li>网络层：负责在网络上传递数据包；进行逻辑寻址（IP地址）、路由选择等操作；实现网络设备之间的互连。</li>
+<li>运输层：建立端到端的通信链接；保证数据传输的可靠性和顺序；实现流量控制、拥塞控制等功能。</li>
+<li>应用层：向用户提供各种网络服务和接口；处理应用程序间的通信工作；常见的应用层协议有 HTTP、FTP、SMTP 等。</li>
+</ol>
+<p>每一层都在下面一层的基础上构建，向上层提供服务。通过分层的设计，可以简化复杂系统的构建，提高灵活性和可维护性。各层之间通过定义好的接口进行交互，实现数据在整个网络中的传输。</p>
+<hr>
+<p><strong>R24. 什么是应用层报文？什么是运输层报文段？什么是网络层数据报？什么是链路层帧？</strong></p>
+<ol>
+<li>
+<p>应用层报文是<strong>应用层协议用于交换数据的基本单位</strong>，例如HTTP请求/响应报文、FTP命令等。应用层报文包含了应用程序需要发送或接收的数据。</p>
+</li>
+<li>
+<p>运输层报文段是 <strong><code>TCP</code> 或 <code>UDP</code></strong> 在传输数据时所使用的数据单位。TCP报文段或UDP数据报中包含了应用层报文以及一些控制信息，如序列号、确认号、检验和等，用于实现<strong>可靠传输和流量控制</strong>等功能。</p>
+</li>
+<li>
+<p>网络层数据报是 <strong><code>IP</code> 协议</strong> 在进行路由转发时所使用的数据单位。IP数据报由首部和数据区组成，首部包含源IP地址、目标IP地址等路由信息，数据区则是运输层报文段。</p>
+</li>
+<li>
+<p>链路层帧是链路层协议在实际传输介质上传输数据时所使用的单位。帧由数据链路层首部、数据区（网络层数据报）和尾部组成。首部和尾部包含了MAC地址、校验序列等控制信息，用于实现<strong>可靠传输和寻址</strong>等功能。</p>
+</li>
+</ol>
+<hr>
+<p><strong>R25. 路由器处理因特网协议栈中的哪些层次？链路层交换机处理的是哪些层次？主机处理的是哪些层次？</strong></p>
+<p>路由器处理网络层、链路层、物理层协议。</p>
+<p>链路层交换机处理链路层、物理层协议。</p>
+<p>主机处理应用层、运输层、网络层、链路层、物理层协议。</p>
+<hr>
+<h2 id="2-应用层">2 应用层</h2>
+<hr>
+<p><strong>R3. 对两进程之间的通信会话而言，哪个进程是客户，哪个进程是服务器？</strong></p>
+<p><mark>发起通信的进程标识为客户，在会话开始时等待接受的进程是服务器</mark>。</p>
+<hr>
+<p><strong>R5. 运行在一台主机上的一个进程，使用什么信息来标识运行在另一台主机上的进程？</strong></p>
+<p><mark>目标主机的IP地址和目标进程中套接字的端口号</mark>。</p>
+<hr>
+<p><strong>R16. 假定 Alice 使用一个基于 Web 的电子邮件账户（例如 Hotmail 或 Gmail）向 Bob 发报文，而 Bob 使用 IMAP 从他的邮件服务器访问自己的邮件。讨论该报文是如何从 Alice 主机到 Bob 主机的。要列出在两台主机间移动该报文时所使用的各种应用层协议。</strong></p>
+<p><mark>Alice主机 - ( HTTP协议 ) - Alice服务器 - ( SMTP协议 ) - Bob服务器 - ( IMAP协议 ) - Bob主机</mark></p>
+<hr>
+<p><strong>R24. CDN 通常采用两种不同的服务器放置方法之一。列举并简单描述它们。</strong></p>
+<p><strong>深入</strong>：通过在遍及全球的接入ISP中部署服务器集群来<mark>深入到ISP的接入网中</mark>。好处是<mark>靠近端用户</mark>，减少端用户和CDN集群之间链路和路由器数量，改善了用户感受到的时延和吞吐量。缺点是由于高度分布式设计，维护和管理集群成本高。</p>
+<p><strong>邀请做客</strong>：通过<mark>在少量关键位置建造大集群</mark>来邀请到ISP做客。这些CDN集群通常放在因特网交换结点（IXP）。好处是产生较低的维护和管理开销。缺点是以对端用户的较高时延和较低吞吐量为代价。</p>
+<hr>
+<p><strong>P9. <mark>考虑图 2-12，其中有一个机构的网络和因特网相连。假定对象的平均长度为 850 000 比特，从这个机构网的浏览器到初始服务器的平均请求率是每秒 16 个请求。还假定从接入链路的因特网一侧的路由器转发一个 HTTP 请求开始，到接收到其响应的平均时间是 3 秒（参见 2.2.5 节）。将总的平均响应时间建模为平均接入时延（即从因特网路由器到机构路由器的时延）和平均因特网时延之和。对于平均接入时延，使用 \(\Delta / (1 - \Delta \beta)\)，式中 \(\Delta\) 是跨越接入链路发送一个对象的平均时间，\(\beta\) 是对象对该接入链路的平均到达率。</mark></strong></p>
+<p><img src="/assets/img/posts/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E4%BE%8B%E9%A2%98/image-256.webp" alt="alt text" loading="lazy"></p>
+<p>a. 求出总的平均响应时间。<br>
+b. 现在假定在这个机构 LAN 中安装了一个缓存器。假定命中率为 0.4，求出总的响应时间。</p>
+<h6 id="核心变量定义">核心变量定义</h6>
+<p>在开始计算前，先提取题目中的所有关键变量：</p>
+<ul>
+<li>\(L\) = 对象的平均长度（如 \(850,000\text{ bits}\)）</li>
+<li>\(R\) = 接入链路的带宽（如 \(15,000,000\text{ bps}\)）</li>
+<li>\(\beta\) = 平均请求到达率（如 \(16\text{ 次/秒}\)）</li>
+<li>\(D_{internet}\) = 因特网往返时延（如 \(3\text{ 秒}\)）</li>
+<li>\(h\) = 缓存命中率（如 \(0.4\)）</li>
+</ul>
+<h6 id="场景-a-无缓存时的计算步骤">场景 A：无缓存时的计算步骤</h6>
+<p><strong>技巧：</strong> 按部就班地从微观（单个对象的传输）算到宏观（整体系统的排队与响应）。</p>
+<ol>
+<li><strong>计算单个对象的传输时延 (\(\Delta\))：</strong>
+这是跨越接入链路发送一个对象所需的时间。</li>
+</ol>
+<div class="math-block">\[\Delta = \frac{L}{R}\]</div>
+<p><em>(对应答案中的 \(0.0567\text{ 秒}\))</em>
+2. <strong>计算接入链路的流量强度 (\(I\))：</strong>
+流量强度决定了排队拥堵的程度。如果 \(I \ge 1\)，时延将趋于无穷大。</p>
+<div class="math-block">\[I = \Delta \times \beta\]</div>
+<blockquote>
+<p><strong>流量强度：分组传输时延 × 请求到达率</strong></p>
+</blockquote>
+<p><em>(对应答案中的 \(0.907\)。这意味着链路 90.7% 的时间都在被占用，非常拥堵)</em>
+3. <strong>计算平均接入时延 (\(D_{access}\))：</strong>
+使用题目给定的排队论模型公式（通常基于 M/M/1 队列）。</p>
+<div class="math-block">\[D_{access} = \frac{\Delta}{1 - I}\]</div>
+<p><em>(对应答案中的 \(0.0567 / (1 - 0.907) \approx 0.6\text{ 秒}\))</em>
+4. <strong>计算总平均响应时间 (\(D_{total}\))：</strong></p>
+<div class="math-block">\[D_{total} = D_{access} + D_{internet}\]</div>
+<p><em>(对应答案中的 \(0.6 + 3 = 3.6\text{ 秒}\))</em></p>
+<h6 id="场景-b-有缓存时的计算步骤">场景 B：有缓存时的计算步骤</h6>
+<p><strong>技巧：</strong> 这是最容易出错的地方。很多人以为只要算个加权平均数就好，实际上<strong>引入缓存会改变未命中请求的接入时延</strong>。因此必须先重新计算链路的拥堵情况。</p>
+<ol>
+<li><strong>更新到达接入链路的请求率：</strong>
+由于命中率为 \(h\)，只有 \((1 - h)\) 的请求会真正被发送到接入链路上。</li>
+</ol>
+<div class="math-block">\[\beta' = \beta \times (1 - h)\]</div>
+<ol start="2">
+<li><strong>计算新的流量强度 (\(I'\))：</strong>
+由于请求少了，链路的拥堵程度大幅下降。</li>
+</ol>
+<div class="math-block">\[I' = I \times (1 - h)\]</div>
+<p><em>(对应答案中的 \(0.907 \times 0.6 = 0.5442\)。链路占用率从 90.7% 降到了 54.4%，排队情况将极大改善)</em>
+3. <strong>计算新的平均接入时延 (\(D'_{access}\))：</strong>
+使用新的流量强度重新代入公式。</p>
+<div class="math-block">\[D'_{access} = \frac{\Delta}{1 - I'}\]</div>
+<p><em>(对应答案中的 \(0.124\text{ 秒}\)。你看，时延从 0.6秒暴降到了 0.124秒！)</em>
+4. <strong>计算未命中时的响应时间 (\(D_{miss}\))：</strong>
+即使没命中，去因特网取数据也会因为链路不堵了而变快。</p>
+<div class="math-block">\[D_{miss} = D'_{access} + D_{internet}\]</div>
+<p><em>(对应答案中的 \(0.124 + 3 = 3.124\text{ 秒}\))</em>
+5. <strong>计算最终的总平均响应时间 (\(D_{final}\))：</strong>
+最后使用加权平均公式：命中的请求瞬间完成（时延为0），未命中的请求经历 \(D_{miss}\) 的时延。</p>
+<div class="math-block">\[D_{final} = h \times 0 + (1 - h) \times D_{miss}\]</div>
+<p><em>(对应答案中的 \(0.4 \times 0 + 0.6 \times 3.124 = 1.874\text{ 秒}\))</em></p>
+<h6 id="核心总结与易错点检查">💡 核心总结与易错点检查</h6>
+<p>做这种题时，只要记住“缓存效应有两层”：</p>
+<ol>
+<li><strong>直接收益：</strong> 拦截了部分请求，时延变为 \(0\)。</li>
+<li><strong>间接收益（最易错）：</strong> 为剩余必须外出的请求清理了道路，<mark>显著降低了原有的排队时延（要重新计算）</mark>。如果你在算有缓存的总时延时，还在使用无缓存时的 \(D_{access}\)（比如直接算 \(0.4 \times 0 + 0.6 \times 3.6\)），那就是掉进陷阱了。</li>
+</ol>
+<hr>
+<p><strong>P22. <mark>考虑向 \(N\) 个对等方分发 \(F = 20\text{Gb}\) 的一个文件。该服务器具有 \(u_s = 30\text{Mbps}\) 的上载速率，每个对等方具有 \(d_i = 2\text{Mbps}\) 的下载速率和上载速率 \(u\)。对于 \(N = 10\)、\(100\) 和 \(1000\) 并且 \(u = 300\text{kbps}\)、\(700\text{kbps}\) 和 \(2\text{Mbps}\)，对于 \(N\) 和 \(u\) 的每种组合绘制出确定最小分发时间的图表。需要分别针对客户–服务器分发和 P2P 分发两种情况制作。</mark></strong></p>
+<p>（1）客户-服务器分发情况：<br>
+服务器的上载速率是固定的（30 Mbps），而每个对等方的下载速率和上载速率（\(u\)）是可变的。我们可以使用公式计算最小分发时间：</p>
+<div class="math-block">\[
+T_{\min} = \max\left(\frac{NF}{u_s}, \frac{F}{d_i}\right)
+\]</div>
+<p>（2）P2P分发情况：<br>
+每个对等方既是下载者也是上传者。因此，我们需要考虑每个对等方的下载和上传速率（\(u\)）。最小分发时间的计算方式类似于客户-服务器分发，但我们需要考虑每个对等方的最小下载和上传速率：</p>
+<div class="math-block">\[
+T_{\min} = \max\left[\frac{F}{u_s}, \frac{F}{d_i}, \frac{NF}{(u_s + \sum_{n=1}^{N} u_i)}\right]
+\]</div>
+<blockquote>
+<p>先列出公式，再代入数据</p>
+</blockquote>
+<p>其中：</p>
+<ul>
+<li>\(F = 20\text{Gb} = 20 \times 1024\ \text{Mb}\) 或者近似 \(F = 20\text{Gb} = 20 \times 1000\ \text{Mb}\)</li>
+<li>\(u_s = 30\text{Mbps}\)</li>
+<li>\(d_i = 2\text{Mbps}\)（对于每个对等方）</li>
+</ul>
+<p>当 \(F = 20\,\text{Gb} = 20 \times 1024\ \text{Mb}\)，最小分发时间(s)</p>
+<table>
+<thead>
+<tr><th>N</th><th>C-S</th><th>P2P (u=300kbps)</th><th>P2P (u=700kbps)</th><th>P2P (u=2Mbps)</th></tr>
+</thead>
+<tbody>
+<tr><td>10</td><td>10240</td><td>10240</td><td>10240</td><td>10240</td></tr>
+<tr><td>100</td><td>68266.7</td><td>34538.1</td><td>20821.6</td><td>10240</td></tr>
+<tr><td>1000</td><td>682666.7</td><td>63411.7</td><td>28699.8</td><td>10240</td></tr>
+</tbody>
+</table>
+<p>当 \(F = 20\,\text{Gb} = 20 \times 1000\ \text{Mb}\)，最小分发时间(s)</p>
+<table>
+<thead>
+<tr><th>N</th><th>C-S</th><th>P2P (u=300kbps)</th><th>P2P (u=700kbps)</th><th>P2P (u=2Mbps)</th></tr>
+</thead>
+<tbody>
+<tr><td>10</td><td>10000</td><td>10000</td><td>10000</td><td>10000</td></tr>
+<tr><td>100</td><td>66666.7</td><td>33333.3</td><td>20000</td><td>10000</td></tr>
+<tr><td>1000</td><td>666666.6</td><td>60606.1</td><td>27397.3</td><td>10000</td></tr>
+</tbody>
+</table>
+<hr>
+<h2 id="3-传输层">3 传输层</h2>
+<hr>
+<p><strong>R5. 在今天的因特网中，为什么语音和图像流量常常是经过 TCP 而不是经 UDP 发送。（提示：我们寻找的答案与 TCP 的拥塞控制机制没有关系。）</strong></p>
+<ol>
+<li>
+<p><strong>可靠性</strong>:<br>
+TCP提供可靠的数据传输，能够检测和处理数据包丢失、重复和错误。而语音和图像数据对丢失和错误通常是不可容忍的，需要准确无误地传输。UDP虽然速度更快，但不保证可靠传输。</p>
+</li>
+<li>
+<p><strong>有序性</strong>:<br>
+TCP保证数据包按序到达接收端，而语音和图像数据的顺序很重要，无序的数据包会导致语音或图像出现问题。UDP不保证有序性。</p>
+</li>
+<li>
+<p><strong>流量控制</strong>:<br>
+TCP提供流量控制机制，可以根据接收端的处理能力调节发送速率，避免接收端被淹没。对于连续的语音和图像流，这种流量控制机制很重要。</p>
+</li>
+<li>
+<p>由于大多数防火墙都配置为阻止 UDP 流量，因此使用 TCP 传输视频和语音流量可以<strong>允许流量通过防火墙</strong>。</p>
+</li>
+</ol>
+<hr>
+<p><strong>R8. 假定在主机 C 端口 80 上运行的一个 Web 服务器。假定这个 Web 服务器使用持续连接，并且正在接收来自两台不同主机 A 和 B 的请求。被发送的所有请求都通过位于主机 C 的相同套接字吗？如果它们通过不同的套接字传递，这两个套接字都具有端口 80 吗？讨论和解释之。</strong></p>
+<p>被发送的请求通过位于主机 C 的不同套接字，对于每个持久连接，Web 服务器都会创建一个单独的“连接套接字”。每个连接套接字由一个四元组标识：（源 IP 地址、源端口号、目标 IP 地址、目标端口号）。当主机 C 接收到 IP 数据报时，它会检查数据报中的这四个字段，以确定它应该将 TCP 报文段的有效负载传递到哪个套接字。</p>
+<p>这两个套接字都具有端口 80。</p>
+<hr>
+<p><strong>R14. 是非判断题：</strong></p>
+<p>a. 主机 A 经过一条 TCP 连接向主机 B 发送一个大文件。假设主机 B 没有数据发往主机 A。因为主机 B 不能随数据捎带确认，所以主机 A 将不向主机 B 发送确认。</p>
+<p>b. 在连接的整个过程中，TCP 的 <code>rwnd</code> 的长度决不会变化。</p>
+<p>c. 假设主机 A 通过一条 TCP 连接向主机 B 发送一个大文件。主机 A 发送但未被确认的字节数不会超过接收缓存的大小。</p>
+<p>d. 假设主机 A 通过一条 TCP 连接向主机 B 发送一个大文件。如果对于这条连接的一个报文段的序号为 \(m\)，则对于后续报文段的序号将必然是 \(m+1\)。</p>
+<blockquote>
+<p><strong>TCP 的序号（Sequence Number）是基于字节流的，而不是基于报文段数量的。如果当前报文段的序号是 \(m\)，且该报文段包含了 \(L\) 个字节的数据，那么下一个报文段的序号应该是 \(m + L\)。只有当该报文段只包含 \(1\) 个字节的数据时，后继序号才是 \(m+1\)</strong></p>
+</blockquote>
+<p>e. TCP 报文段在它的首部中有一个 <code>rwnd</code> 字段。</p>
+<p>f. 假定在一条 TCP 连接中最后的 <code>SampleRTT</code> 等于 1 秒，那么对于该连接的 <code>TimeoutInterval</code> 的当前值必定大于等于 1 秒。</p>
+<blockquote>
+<p>TCP 的超时时间计算公式为：TimeoutInterval = EstimatedRTT + 4 * DevRTT。其中 EstimatedRTT 是前面所有测量的平滑移动平均值。如果历史的 RTT 都非常小（比如只有几毫秒），哪怕最新的这一个 SampleRTT 突然飙升到了 1 秒，由于它的权重较小（通常 \(\alpha = 0.125\)），新的 EstimatedRTT 依然会被历史的低延迟数据拉低，导致计算出的 TimeoutInterval 完全可能小于 1 秒。</p>
+</blockquote>
+<p>g. 假设主机 A 通过一条 TCP 连接向主机 B 发送一个序号为 38 的 4 个字节的报文段。在这个相同的报文段中，确认号必定是 42。</p>
+<blockquote>
+<p>序号（Seq）和确认号（ACK）在 TCP 首部中代表的是全双工通信的两个相反方向的数据流。</p>
+<ul>
+<li>序号 (38) 是指主机 A 发送给主机 B 的这段 4 字节数据中第一个字节的编号。</li>
+<li><mark><strong>确认号是指主机 A 期望从主机 B 接收到的下一个字节的序号</strong></mark>。</li>
+<li>两者之间没有任何数学绑定关系，确认号是多少完全取决于主机 A 目前收到了主机 B 发来的多少数据。</li>
+</ul>
+</blockquote>
+<p>X X √ X √ X X</p>
+<hr>
+<p><strong>P3. UDP 和 TCP 使用反码来计算它们的检验和。假设你有下面 3 个 8 比特字节：<code>01010011</code>，<code>01100110</code>，<code>01110100</code>。这些 8 比特字节和的反码是多少？（注意到尽管 UDP 和 TCP 使用 16 比特的字来计算检验和，但对于这个问题，你应该考虑 8 比特和。）写出所有工作过程。UDP 为什么要用该和的反码，即为什么不肯直接使用该和呢？使用该反码方案，接收方如何检测出差错？1 比特的差错将可能检测不出来吗？2 比特的差错呢？</strong></p>
+<pre><code>  01010011 (83)
++ 01100110 (102)
+—————————————————
+  10111001 (185)
+
+  10111001 (185)
++ 01110100 (116)
+—————————————————
+ 100101101 (301) &lt;-- 回卷
+
+  00101101
++        1
+—————————————————
+  00101110 (46)
+</code></pre>
+<ol>
+<li>
+<p>这 3 个 8 位二进制的和的反码为：<code>11010001</code></p>
+</li>
+<li>
+<p>UDP 为什么要用该和的反码呢？<strong>使用反码可以简化接收方的硬件验证逻辑</strong>。接收方只需将接收到的数据加上检验和，然后检查结果是否全为 1。如果结果是全 1，说明传输是正确的；如果不是全 1，就说明传输过程中发生了错误。</p>
+</li>
+<li>
+<p>1 个 bit 出错一定可以检测出来，反码方案可以检测出来。因为即使只有一个比特错误，和的反码也会变得完全不同。</p>
+</li>
+<li>
+<p>如果两个 bit 同时出错，则可能检测不出来。</p>
+</li>
+</ol>
+<hr>
+<p><strong>P27. 主机 A 和 B 经一条 TCP 连接通信，并且主机 B 已经收到了来自 A 的最长为 126 字节的所有字节。假定主机 A 随后向主机 B 发送两个紧接着的报文段。第一个和第二个报文段分别包含了 80 字节和 40 字节的数据。在第一个报文段中，序号是 127，源端口号是 302，目的端口号是 80。无论何时主机 B 接收到来自主机 A 的报文段，它都会发送确认。</strong></p>
+<p>a. 在从主机 A 发往 B 的第二个报文段中，序号、源端口号和目的端口号各是什么？<br>
+b. 如果第一个报文段在第二个报文段之前到达，在第一个到达报文段的确认中，确认号、源端口号和目的端口号各是什么？<br>
+c. 如果第二个报文段在第一个报文段之前到达，在第一个到达报文段的确认中，确认号是什么？<br>
+d. 假定由 A 发送的两个报文段按序到达 B。第一个确认丢失了而第二个确认在第一个超时间隔之后到达。（假设没有其他分组丢失。）画出时序图，显示这些报文段和发送的所用其他报文段和确认。（假设没有其他分组丢失。）对于图上每个报文段，标出序号和数据的字节数量；对于你增加的每个应答，标出确认号。</p>
+<p>a. 序号为207，源端口号为302，目的端口号为80；
+b. 确认号为207，源端口号为80，目的端口号为302；
+c. 确认号为127；
+d. <img src="/assets/img/posts/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E4%BE%8B%E9%A2%98/imagea.webp" alt="alt text" loading="lazy"></p>
+<hr>
+<p><strong>P54 考虑修改 TCP 的拥塞控制算法。不使用加性增，使用乘性增。无论何时某 TCP 收到一个合法的 ACK，就将其窗口长度增加一个小正数 \(a\) (\(0 < a < 1\))。求出丢包率 \(L\) 和最大拥塞窗口 \(W\) 之间的函数关系。论证：对于这种修正的 TCP，无论 TCP 的平均吞吐量如何，一条 TCP 连接将其拥塞窗口长度从 \(W/2\) 增加到 \(W\)，总是需要相同的时间。</strong></p>
+<p>这道题的核心是在探讨一种<strong>非主流的 TCP 拥塞控制算法</strong>。</p>
+<ul>
+<li><strong>传统的 TCP (如 Reno)</strong> 使用的是“加性增” (AIMD)：每个 RTT（往返时间）窗口大小 \(+1\)，是<strong>线性增长</strong>。</li>
+<li><strong>这道题修改了规则</strong>，使用的是“乘性增” (MIMD)：每个 RTT 窗口大小会乘以一个倍数，是<strong>指数增长</strong>。</li>
+</ul>
+<p>为了让你彻底看懂，我们需要先补齐答案中隐藏的<strong>一个核心“潜规则”</strong>，然后再分步解析公式。</p>
+<h4 id="核心潜规则-为什么每个-ack-加-a-等于每个-rtt-乘以-1-a">核心潜规则：为什么每个 ACK 加 \(a\)，等于每个 RTT 乘以 \((1+a)\)？</h4>
+<p>题目说：“无论何时收到一个合法的 ACK，就将窗口增加一个小正数 \(a\)”。
+假设当前的发送窗口大小是 \(W\)。这意味着在一个 RTT（往返时间）内，发送方会发出 \(W\) 个报文段，如果不丢包，就会收到 \(W\) 个 ACK。</p>
+<ul>
+<li>收到 1 个 ACK，窗口增加 \(a\)。</li>
+<li>收到 \(W\) 个 ACK，窗口总共增加 \(a \cdot W\)。</li>
+<li>所以，经过一个 RTT 后，新的窗口大小 \(= \text{原窗口} + \text{增加量} = W + a \cdot W = W(1+a)\)。</li>
+</ul>
+<p><strong>这就是整个推导的基石：窗口大小在每个 RTT 是以 \((1+a)\) 的倍数在呈指数增长。</strong></p>
+<h4 id="详细步骤解析">详细步骤解析</h4>
+<p>题目设定了一次典型的 TCP 拥塞周期：发生丢包时，窗口减半至 \(W/2\)，然后慢慢增长，直到再次达到最大窗口 \(W\) 时再次丢包。</p>
+<h5 id="第一步-算出从-w-2-涨到-w-需要经过几个-rtt-即求-k">第一步：算出从 \(W/2\) 涨到 \(W\) 需要经过几个 RTT (即求 \(k\))</h5>
+<p>假设经过了 \(k\) 个 RTT，窗口从 \(W/2\) 增长到了 \(W\)。</p>
+<ul>
+<li>第 0 个 RTT：窗口是 \(W/2\)</li>
+<li>第 1 个 RTT：窗口是 \((W/2) \cdot (1+a)\)</li>
+<li>第 \(k\) 个 RTT：窗口是 \((W/2) \cdot (1+a)^k\)</li>
+</ul>
+<p>既然第 \(k\) 个 RTT 时窗口达到了 \(W\)，我们可以列出等式：</p>
+<div class="math-block">\[\frac{W}{2} \cdot (1+a)^k = W\]</div>
+<p>两边消去 \(W\) 并乘以 2，得到：</p>
+<div class="math-block">\[(1+a)^k = 2\]</div>
+<p>两边取对数，得出：</p>
+<div class="math-block">\[k = \log_{(1+a)} 2\]</div>
+<p><strong>结论：</strong> \(k\) 代表了窗口大小翻倍（从一半涨回满状态）所需要的 RTT 轮数。</p>
+<h5 id="第二步-算出在这个周期内-总共发送了多少个报文段-即求-s">第二步：算出在这个周期内，总共发送了多少个报文段 (即求 \(S\))</h5>
+<p>总报文段 \(S\)，就是把这 \(k+1\) 个 RTT 里的窗口大小全部加起来：</p>
+<div class="math-block">\[S = \frac{W}{2} + \frac{W}{2}(1+a) + \frac{W}{2}(1+a)^2 + \dots + \frac{W}{2}(1+a)^k\]</div>
+<p>这是一个标准的<strong>等比数列求和</strong>。这里是答案跳步最严重的地方，我们把它展开：
+等比数列求和公式是：\(S_n = A_1 \cdot \frac{1 - q^n}{1 - q}\)。在这里，首项 \(A_1 = W/2\)，公比 \(q = (1+a)\)，项数是 \(k+1\)。</p>
+<div class="math-block">\[S = \frac{W}{2} \cdot \frac{1 - (1+a)^{k+1}}{1 - (1+a)}\]</div>
+<p>化简分母：</p>
+<div class="math-block">\[S = \frac{W}{2} \cdot \frac{1 - (1+a)^{k+1}}{-a} = \frac{W}{2} \cdot \frac{(1+a)^{k+1} - 1}{a}\]</div>
+<p><strong>关键代入：</strong> 我们在第一步知道 \((1+a)^k = 2\)。
+那么 \((1+a)^{k+1} = (1+a)^k \cdot (1+a) = 2 \cdot (1+a) = 2 + 2a\)。
+把这个结果代入上面的式子：</p>
+<div class="math-block">\[S = \frac{W}{2} \cdot \frac{(2 + 2a) - 1}{a} = \frac{W}{2} \cdot \frac{2a + 1}{a} = W \cdot \frac{2a+1}{2a}\]</div>
+<p>这就完美得出了答案中的 \(S\) 公式！</p>
+<h5 id="第三步-求丢包率-l-和最大窗口-w-的关系">第三步：求丢包率 \(L\) 和最大窗口 \(W\) 的关系</h5>
+<p>在 TCP 的数学模型中有一个基本假设：<strong>一个完整的周期内（发送了 \(S\) 个包），只会发生一次丢包。</strong>
+所以<mark>丢包率 \(L\) 就等于 \(\frac{1}{S}\)</mark>。
+我们将上一步算出的 \(S\) 代入：</p>
+<div class="math-block">\[L = \frac{1}{S} = \frac{1}{W \cdot \frac{2a+1}{2a}} = \frac{2a}{W \cdot (2a+1)}\]</div>
+<h5 id="第四步-解答-论证-部分-为什么恢复时间与吞吐量无关">第四步：解答“论证”部分（为什么恢复时间与吞吐量无关）</h5>
+<p>题目要求论证：将窗口从 \(W/2\) 增加到 \(W\) 需要的时间总是相同的。</p>
+<ul>
+<li><strong>所需时间</strong> = 经过的 RTT 数量 \(\times\) 每个 RTT 的时长 = \(k \cdot RTT\)。</li>
+<li>根据第一步，我们知道 \(k = \log_{(1+a)} 2\)。</li>
+<li>所以，<strong>所需时间 = \((\log_{(1+a)} 2) \cdot RTT\)</strong>。</li>
+</ul>
+<p><strong>论点核心：</strong> 你看这个时间公式里，只有常数 \(a\) 和 \(RTT\)，<strong>根本没有 \(W\)</strong>！
+这意味着，无论你的最大窗口是从 10 涨到 20，还是从 10000 涨到 20000，只要 \(a\) 不变，花费的时间是完全一样的（因为是指数增长）。因此，这个恢复时间与 TCP 的平均吞吐量（和 \(W\) 相关）没有任何关系。</p>
+<h5 id="第五步-关于平均吞吐量-b-的补充说明">第五步：关于平均吞吐量 \(B\) 的补充说明</h5>
+<ul>
+<li><strong>吞吐量 = 总发送字节数 / 总花费时间</strong>。</li>
+<li><strong>总发送字节数</strong> = 报文总数 \(S\) \(\times\) 每个报文的大小 (MSS)。由于 \(S = 1/L\)，所以总字节数 = \(\frac{MSS}{L}\)。</li>
+<li><strong>总花费时间</strong> = \((k+1) \cdot RTT\)。（这里 \(k+1\) 是因为包含了从 0 到 \(k\) 一共 \(k+1\) 轮）。</li>
+<li>将两者相除得到答案最后的公式：\(B = \frac{MSS}{L \cdot (k+1) \cdot RTT}\)。</li>
+</ul>
+<p>最后答案提到它与正常的 TCP 不同。传统的 TCP 吞吐量公式是跟<strong>丢包率的平方根</strong>（\(1/\sqrt{L}\)）成反比的，而我们推导出的这种“乘性增” TCP，其吞吐量是跟<strong>丢包率本身</strong>（\(1/L\)）成反比的。</p>
+<hr>
+<h2 id="4-网络层-数据平面">4 网络层：数据平面</h2>
+<hr>
+<p><strong>R1. 我们回顾在本书中使用的某些术语。前面讲过运输层的分组名字是报文段，数据链路层的分组名字是帧。网络层的分组名字是什么？前面讲过路由器和链路层交换机都被称为分组交换机。路由器与链路层交换机间的根本区别是什么？</strong></p>
+<p>网络层的分组名字是 数据报。</p>
+<p>路由器和链路层交换机的根本区别是它们<strong>服务于不同的网络层协议</strong>。链路层交换机基于链路层帧中的字段值做出转发决定，服务于第二层链路层；路由器基于网络层数据报中的首部字段值做出转发决定，服务于第三层网络层。</p>
+<hr>
+<p><strong>R23. 考察使用 DHCP 的主机，获取它的 IP 地址、网络掩码、默认路由器及其本地 DNS 服务器的 IP 地址。列出这些值。</strong></p>
+<p>当主机使用 DHCP（动态主机配置协议）获取网络配置时，它可以获得以下值：</p>
+<ul>
+<li><strong>IP地址</strong>：DHCP 服务器分配给主机的 IP 地址。</li>
+<li><strong>网络掩码</strong>：指示主机所在网络的掩码，用于确定哪些 IP 地址属于同一网络。</li>
+<li><strong>默认路由器（网关）</strong>：主机用于发送数据到<strong>不在本地网络的目标地址</strong>时的下一跳路由器的 IP 地址。</li>
+<li><strong>本地 DNS 服务器的 IP 地址</strong>：用于解析域名到 IP 地址的 DNS 服务器的 IP 地址。</li>
+</ul>
+<p>这些值通常在 DHCP 协议的交互中从 DHCP 服务器获取。</p>
+<p>以下是主机使用 DHCP 获取到的示例值：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IP 地址</td>
+<td><code>192.168.1.100</code></td>
+</tr>
+<tr>
+<td>网络掩码</td>
+<td><code>255.255.255.0</code></td>
+</tr>
+<tr>
+<td>默认路由器（网关）</td>
+<td><code>192.168.1.1</code></td>
+</tr>
+<tr>
+<td>本地 DNS 服务器的 IP 地址</td>
+<td><code>192.168.1.1</code></td>
+</tr>
+</tbody>
+</table>
+<p>这些值可能因网络配置而异，但通常在 DHCP 协议中被动态分配。</p>
+<hr>
+<p><strong>R25. 假设某应用每 \(20\,\text{ms}\) 生成一个 \(40\) 字节的数据块，每块封装在一个 TCP 报文段中，TCP 报文段再封装在一个 IP 数据报中。每个数据报的开销有多大？应用数据所占百分比是多少？</strong></p>
+<p><mark>每个数据报的开销是 \(80\) 个字节：\(20\) 字节的 IP 首部（假设首部无选项，且数据包无分片） + \(20\) 字节的 TCP 首部 + 应用层报文 (\(40\) 字节)</mark>，所以应用数据所占的百分比是 \(50\%\)。</p>
+<hr>
+<p>P15 考虑图 4-20 中显示的拓扑。（在 12:00 以顺时针开始）标记具有主机的 3 个子网为网络 A、B 和 C，标记没有主机的子网为网络 D、E 和 F。</p>
+<p>a. <mark>为这 6 个子网分配网络地址，要满足下列限制：所有地址必须从 <code>214.97.254/23</code> 起分配；子网 A 应当具有足够地址以支持 250 个接口；子网 B 应当具有足够地址以支持 120 个接口；子网 C 应当具有足够地址以支持 120 个接口。当然，子网 D、E 和 F 应当支持两个接口。对于每个子网，分配采用的形式是 <code>a.b.c.d/x</code> 或 <code>a.b.c.d/x ~ e.f.g.h/y</code>。</mark></p>
+<p>这道题是一道非常经典的<strong>可变长子网掩码 (VLSM)</strong> 计算题。这道题最“坑”的地方，也是很多同学算不明白的难点在于：<strong>地址空间刚好被完全榨干了</strong>。</p>
+<p>为了满足所有子网的需求，特别是要给子网 C 凑够 120 个地址，路由器之间的点对点链路（D、E、F）必须使用 <code>/31</code> 掩码（而不是传统的 <code>/30</code>），并且要从子网 C 所在的地址块的末尾“抠”出来。</p>
+<blockquote>
+<p>子网 A: <code>214.97.254.0/24</code> 分配了 256 个地址<br>
+子网 B: <code>214.97.255.0/25</code> 分配了 128 个地址<br>
+子网 C: <code>214.97.255.128/25</code> ~ <code>214.97.255.247/29</code>（后 3 位保留）分配了 120 个地址<br>
+将 <code>214.97.255.248/31</code> 的两个地址（后 4 位为 <code>1000</code>~<code>1001</code>）分配给子网 D<br>
+将 <code>214.97.255.250/31</code> 的两个地址（后 4 位为 <code>1010</code>~<code>1011</code>）分配给子网 E<br>
+将 <code>214.97.255.252/31</code> 的两个地址（后 4 位为 <code>1100</code>~<code>1101</code>）分配给子网 F</p>
+</blockquote>
+<p><strong>初始条件：</strong></p>
+<ul>
+<li>总可用地址块：<code>214.97.254.0/23</code></li>
+<li><code>/23</code> 意味着有 \(32 - 23 = 9\) 位主机位，总共有 \(2^9 = 512\) 个 IP 地址。</li>
+<li>这个块包含了两个 <code>/24</code> 的网段：<code>214.97.254.0/24</code> 和 <code>214.97.255.0/24</code>。</li>
+</ul>
+<p><strong>第 1 步：分配最大块 —— 子网 A</strong></p>
+<ul>
+<li><strong>需求：</strong> 250 个接口。</li>
+<li><strong>计算：</strong> 需要找到一个能容纳 250 个主机的最小 \(2\) 的幂。\(2^8 = 256\)，所以需要 8 位主机位。</li>
+<li><strong>掩码：</strong> \(32 - 8 = 24\)。</li>
+<li><strong>分配结果：</strong> 将第一个可用的块分配给子网 A，即 <strong><code>214.97.254.0/24</code></strong>。</li>
+<li><strong>剩余地址：</strong> <code>214.97.255.0/24</code>（还有 256 个地址）。</li>
+</ul>
+<p><strong>第 2 步：分配次大块 —— 子网 B</strong></p>
+<ul>
+<li><strong>需求：</strong> 120 个接口。</li>
+<li><strong>计算：</strong> \(2^7 = 128 > 120\)，需要 7 位主机位。</li>
+<li><strong>掩码：</strong> \(32 - 7 = 25\)。</li>
+<li><strong>分配结果：</strong> 从剩余的地址里切出一半给 B，即 <strong><code>214.97.255.0/25</code></strong>（范围是 <code>.0</code> 到 <code>.127</code>）。</li>
+<li><strong>剩余地址：</strong> <code>214.97.255.128/25</code>（范围是 <code>.128</code> 到 <code>.255</code>，还有 128 个地址）。</li>
+</ul>
+<p><strong>第 3 步：极限操作 —— 分配 D、E、F 和 C</strong>
+这时候我们只剩下 128 个地址了，但是子网 C 还需要 120 个，D、E、F 分别需要 2 个（共 6 个）。
+如果按照老规矩给 D、E、F 分配 <code>/30</code>（每个网络 4 个 IP），那 D、E、F 就要吃掉 12 个地址，剩下给 C 的只有 \(128 - 12 = 116\) 个，就不够 120 个了！</p>
+<p>所以，<strong>破局的关键点</strong>在于：
+对于只有两个端点的路由器链路，现代网络允许使用 <strong><code>/31</code> 掩码</strong>（RFC 3021），这样每个子网刚好只占 2 个 IP 地址，不需要网络号和广播地址。</p>
+<ul>
+<li><strong>分配 D、E、F：</strong> 为了保证 C 能拿到连续的地址，我们把 D、E、F 安排在最后面。</li>
+<li>D 需要 2 个：分配最后的倒数第 3 对，即 <code>214.97.255.248/31</code>（包含 <code>.248</code> 和 <code>.249</code>）。</li>
+<li>E 需要 2 个：分配倒数第 2 对，即 <code>214.97.255.250/31</code>（包含 <code>.250</code> 和 <code>.251</code>）。</li>
+<li>F 需要 2 个：分配最后 1 对，即 <code>214.97.255.252/31</code>（包含 <code>.252</code> 和 <code>.253</code>）。</li>
+<li><em>(注：.254 和 .255 留作保留或未使用)</em>。</li>
+</ul>
+<blockquote>
+<p>但如果真的 D、E、F 放在最后，保留的不应该是 .254 和 .255
+这里其实还是原答案的正向思路，C 不能占全 214.97.255.128/25，从起始地址划分到足够大时切分</p>
+</blockquote>
+<ul>
+<li><strong>分配子网 C：</strong></li>
+<li>剩下的全给 C。起始是 <code>.128</code>，一直到 D 开始的前一个地址 <code>.247</code>。</li>
+<li>范围：<code>214.97.255.128</code> 到 <code>214.97.255.247</code>。</li>
+<li>地址数量：\(247 - 128 + 1 = 120\) 个。<strong>刚好满足！</strong></li>
+</ul>
+<p>b. 使用你对（a）部分的答案，为这 3 台路由器提供转发表（使用最长前缀匹配）。</p>
+<p><img src="/assets/img/posts/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E4%BE%8B%E9%A2%98/image-249.webp" alt="alt text" loading="lazy"></p>
+<blockquote>
+<p>子网 A: <code>214.97.254.0/24</code> 分配了 256 个地址<br>
+子网 B: <code>214.97.255.0/25</code> 分配了 128 个地址<br>
+子网 C: <code>214.97.255.128/25</code> ~ <code>214.97.255.247/29</code>（后 3 位保留）分配了 120 个地址<br>
+将 <code>214.97.255.248/31</code> 的两个地址（后 4 位为 <code>1000</code>~<code>1001</code>）分配给子网 D<br>
+将 <code>214.97.255.250/31</code> 的两个地址（后 4 位为 <code>1010</code>~<code>1011</code>）分配给子网 E<br>
+将 <code>214.97.255.252/31</code> 的两个地址（后 4 位为 <code>1100</code>~<code>1101</code>）分配给子网 F</p>
+</blockquote>
+<ul>
+<li>路由器 1</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>最长匹配</th>
+<th>输出链路接口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>11010110 01100001 11111110</code></td>
+<td>A</td>
+</tr>
+<tr>
+<td><code>11010110 01100001 11111111 1111100</code></td>
+<td>D</td>
+</tr>
+<tr>
+<td><code>11010110 01100001 11111111 1111110</code></td>
+<td>F</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>路由器 2</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>最长匹配</th>
+<th>输出链路接口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>11010110 01100001 11111111 1</code></td>
+<td>C</td>
+</tr>
+<tr>
+<td><code>11010110 01100001 11111111 1111101</code></td>
+<td>E</td>
+</tr>
+<tr>
+<td><code>11010110 01100001 11111111 1111110</code></td>
+<td>F</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>路由器 3</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>最长匹配</th>
+<th>输出链路接口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>11010110 01100001 11111111 0</code></td>
+<td>B</td>
+</tr>
+<tr>
+<td><code>11010110 01100001 11111111 1111101</code></td>
+<td>E</td>
+</tr>
+<tr>
+<td><code>11010110 01100001 11111111 1111100</code></td>
+<td>D</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><strong>P19 假设你有兴趣检测 NAT 后面的主机数量。你观察到在每个 IP 分组上 IP 层顺序地标出一个标识号。由一台主机生成的第一个 IP 分组的标识号是一个随机数，后继 IP 分组的标识号是顺序分配的。假设由 NAT 后面主机产生的所有 IP 分组都发往外网。</strong></p>
+<p>a. 基于这个观察，假定你能够俘获由 NAT 向外部发送的所有分组，你能概要给出一种简单的技术来检测 NAT 后面不同主机的数量吗？评估你的答案。</p>
+<p>b. 如果标识号不是顺序分配而是随机分配的，这种技术还能正常工作吗？评估你的答案。</p>
+<p><strong>参考答案：</strong></p>
+<p>(a) 由于所有 IP 数据包都是向外发送的，因此我们可以使用数据包嗅探器记录 NAT 后面的主机产生的所有 IP 数据包。由于每台主机生成的 IP 数据包都有一串连续的编号和一个独特的（很有可能是随机选择的）初始标识号（ID），因此我们可以将具有连续 ID 的 IP 数据包归为一个群集。簇的数量就是 NAT 后面的主机数量。</p>
+<p>(b) 不能，如果这些识别号码不是顺序分配的，而是随机分配的，则 (a) 部分建议的技术将不起作用，因为嗅探数据中不会出现聚类。</p>
+<hr>
+<h2 id="5-网络层-控制平面">5 网络层：控制平面</h2>
+<hr>
+<p><strong>R4. 比较和对照链路状态和距离矢量这两种路由选择算法。</strong></p>
+<p>在距离矢量算法中，每个节点仅与它的直接相邻的邻居交谈，但它为邻居提供了它自己到网络中所有其他节点的最低开销估计。而链路状态算法需要全局信息。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>链路状态路由选择算法</th>
+<th>距离矢量路由选择算法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>报文复杂性</td>
+<td>相对较高</td>
+<td>相对较低</td>
+</tr>
+<tr>
+<td>收敛速度</td>
+<td>相对较快</td>
+<td>相对较慢</td>
+</tr>
+<tr>
+<td>健壮性</td>
+<td>相对较强</td>
+<td>较弱</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>报文复杂性 (Message Complexity)</li>
+</ol>
+<ul>
+<li><strong>LS 相对较高</strong>：路由器必须向网络中的所有其他节点广播它的链路状态信息。网络越大，广播的报文数量成倍增加。</li>
+<li><strong>DV 相对较低</strong>：路由器只和直接相连的邻居交换信息，不进行全网广播。</li>
+</ul>
+<ol start="2">
+<li>收敛速度 (Convergence Speed)</li>
+</ol>
+<ul>
+<li><strong>LS 相对较快</strong>：一旦全局拓扑信息（地图）同步完毕，每个节点就在本地自己闷头算最短路径，算完就收敛了。</li>
+<li><strong>DV 相对较慢</strong>：它是一个迭代过程。A 告诉 B，B 更新后再告诉 C…… 信息传递依赖一跳一跳的更新。更致命的是，它容易遇到“路由选择环路”问题，导致收敛极其缓慢。</li>
+</ul>
+<ol start="3">
+<li>健壮性 / 容错性 (Robustness)</li>
+</ol>
+<ul>
+<li><strong>LS 相对较强</strong>：如果某个路由器发生故障或被恶意篡改，它最多只能谎报自己直接相连的链路开销。其他节点的计算是独立的，隔离了错误范围（局部影响）。</li>
+<li><strong>DV 较弱</strong>：如果一个路由器出错了，它可能会告诉邻居“去往全网的路径我这里开销最小”。邻居会信以为真并继续往外传播，导致整个网络的路由表全部乱套（全局影响）。</li>
+</ul>
+<hr>
+<p><strong>R6. 每个自治系统使用相同的 AS 内部路由选择算法是必要的吗？说明其原因。</strong></p>
+<p>参考答案：必要。由于链路开销增加的消息传播得很慢，如果某条链路上的开销突然有一个巨大的增幅，会造成路由选择环路，有时也被称为无穷计数。</p>
+<p>正确答案：完全不必要（不必要）。</p>
+<p>原因说明：</p>
+<p>1  <strong>自治的本质</strong>： “自治系统 (Autonomous System)” 顾名思义，最大的特点就是管理上的自治权。每个 ISP 或机构（比如某个大学、某个运营商）自己内部的网络，管理员有绝对的决定权。</p>
+<p>2  <strong>按需选择</strong>： 不同的 AS 规模、性能需求完全不同。一个非常庞大的 AS 可能会选择 OSPF 或 IS-IS（链路状态），而一个结构简单的老旧 AS 可能只跑 RIP（距离矢量）。强迫它们用一样的算法既不现实也不合理。</p>
+<p>3  <strong>网关路由器的隔离</strong>： 只要在 AS 的边界（网关路由器）上，大家能统一使用外部网关协议（如 BGP）来进行跨 AS 的通信就可以了。至于 AS 内部关起门来怎么玩（内部网关协议 IGP），外界根本不在乎，也不需要知道。</p>
+<hr>
+<p><strong>P3. 考虑下面的网络。对于标明的链路开销，用 Dijkstra 的最短路算法计算出从 x 到所有网络节点的最短路径。通过计算一个类似于表 5-1 的表，说明该算法是如何工作的。</strong></p>
+<p>参考答案：<em>高亮位置处可不写，表示搜索结束。</em>（红框往下的不写）</p>
+<p><img src="/assets/img/posts/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E4%BE%8B%E9%A2%98/image-250.webp" alt="alt text" loading="lazy"></p>
+<hr>
+<p><strong>P12. 描述在 BGP 中是如何检测路径中的环路的。</strong></p>
+<p><mark>若收到一条 <strong>AS 路径中包含自己 AS 编号</strong>的路由，可判断为环路</mark></p>
+<ul>
+<li><strong>AS：</strong> 都有一个全球唯一的编号，称为 <strong>ASN</strong>（例如 AS 100, AS 200）。</li>
+<li><strong>AS_PATH：</strong> 这是 BGP 路由更新报文中的一个极其重要的属性。当一条路由信息每离开一个 AS 去往下一个 AS 时，发送方都会把自己的 ASN 添加到这条路由的 <code>AS_PATH</code> 列表的最前面。</li>
+<li><em>就像一个旅行者，每经过一个国家，就会在护照上盖上那个国家的印章，记录他走过的完整路线。</em></li>
+</ul>
+<p>假设有三个自治系统：AS 1，AS 2，AS 3，它们形成了一个环形连接。</p>
+<ul>
+<li>AS 1 宣告了一条属于自己的网段路由给 AS 2。此时 <code>AS_PATH = [AS 1]</code>。</li>
+<li>AS 2 收到后，将其传递给 AS 3。此时 AS 2 会把自己的编号加进去，<code>AS_PATH = [AS 2, AS 1]</code>。</li>
+<li>AS 3 收到后，因为网络拓扑是环形的，它有可能又把这条路由发回给了 AS 1。此时 <code>AS_PATH = [AS 3, AS 2, AS 1]</code>。</li>
+</ul>
+<p>当 AS 1 接收到来自 AS 3 的这条路由更新时，它不会盲目收下，而是会先检查路由报文里的 <code>AS_PATH</code> 属性：</p>
+<ol>
+<li>AS 1  发现自己的编号在 <code>AS_PATH = [AS 3, AS 2, AS 1]</code> 中</li>
+<li><strong>最终动作：</strong> AS 1 果断丢弃这条路由更新，从而切断了路由环路的产生</li>
+</ol>
+<hr>
+<h2 id="6-链路层和局域网">6 链路层和局域网</h2>
+<hr>
+<p><strong>R4. 假设两个节点同时经一个速率为 \(R\) 的广播信道开始传输一个长度为 \(L\) 的分组。用 \(d_{\text{prop}}\) 表示这两个节点之间的传播时延。如果 \(d_{\text{prop}} < L/R\)，会出现碰撞吗？为什么？</strong></p>
+<p>由于两个节点间的传播时延小于传输分组所需的时间，这可能会导致在一个节点发送分组时，接收到另一个节点发送的分组，所以这种情况下<strong>会出现碰撞</strong>。</p>
+<p>考点： 区分 \(d_{prop}\)（信号跑过网线的时间）和 \(L/R\)（把数据推上信道的时间）。</p>
+<ul>
+<li>传输时延 (\(L/R\))： 节点把长度为 \(L\) 的分组全部推到链路上所需的时间（也就是网卡工作的时间）。</li>
+<li>传播时延 (\(d_{prop}\))： 电磁信号从节点 A 顺着网线跑到节点 B 所需的时间。</li>
+</ul>
+<p>深度解析：题目假设 A 和 B 同时开始发送。</p>
+<ul>
+<li>在 \(t=0\) 时刻，A 和 B 的网卡同时开始把数据往外推。</li>
+<li>经过了 \(d_{prop}\) 这么长的时间后，A 发出的第一个比特终于顺着网线爬到了 B 的家门口。
+<ul>
+<li>此时 B 在干嘛呢？因为题目条件给定了 \(d_{prop} < L/R\)，意思是信号跑过来的时间，比 B 发送自己整个数据包的时间要短。</li>
+</ul>
+</li>
+<li>所以当 A 的信号到达 B 时，B 自己的包还没发完（B 还在向信道上推数据）。</li>
+<li>此时，A 的电磁波和 B 正在发送的电磁波在物理介质上发生了叠加，导致电压异常——碰撞发生了。</li>
+</ul>
+<blockquote>
+<p>延伸思考（CSMA/CD 的核心）： 如果 \(d_{prop}\) 非常非常大，大到 \(d_{prop} > L/R\) 会怎样？A 和 B 依然会在中间某处碰撞，但当 A 的碰撞碎片弹回 A 时，A 早就发完收工了（因为发包时间 \(L/R\) 太短了）。A 就不会意识到自己的包被撞毁了！</p>
+<p>这就是为什么 <mark><strong>以太网规定了最短帧长，必须保证 \(L/R \ge 2d_{prop}\)</strong></mark>。</p>
+</blockquote>
+<hr>
+<p><strong>R6. 在 CSMA/CD 中，在第 5 次碰撞后，节点选择 \(K=4\) 的概率有多大？结果 \(K=4\) 在 \(10\,\text{Mbps}\) 以太网上对应多少秒的时延？</strong></p>
+<p><mark>在第 5 次碰撞后，一共有 \(2^5\) 个数可选择</mark>，选择 \(K=4\) 的概率为 \(1 / 2^5 = 0.03125\)（\(1/32\)）<br>
+需要等待 \(4 \times 51.2\,\mu\text{s} = 204.8\,\mu\text{s}\)</p>
+<blockquote>
+<ul>
+<li>公式：等待时间 \(= K \times 512\) 比特时间 (bit times)</li>
+<li><mark>在速率为 10 Mbps 的网络中，发送 1 个比特需要 \(0.1 \mu s\)</mark></li>
+<li>发送 512 个比特需要：\(512 \times 0.1 \mu s = 51.2 \mu s\)</li>
+</ul>
+</blockquote>
+<hr>
+<p><strong>R8. 如果局域网有很大的周长时，为什么令牌环协议将是低效的？</strong></p>
+<p>当节点发送帧时，这个节点必须等待帧在整个环中传播，然后节点才能释放令牌。因此，如果 \(L/R\) 与 \(t_{\text{prop}}\) 相比很小，则令牌环协议会很低效。</p>
+<blockquote>
+<p>令牌环的规则是：“拿到令牌 -&gt; 发送数据 -&gt; 数据绕环一圈回来 -&gt; 检查无误 -&gt; 释放令牌给下一个人”。</p>
+</blockquote>
+<hr>
+<p><strong>P2. 说明（举一个不同于图 6-5 的例子）二维奇偶校验能够纠正和检测单比特差错。说明（举一个例子）某些双比特差错能够被检测但不能纠正。</strong></p>
+<p>假设发送方初始的二维奇偶校验矩阵：</p>
+<pre><code>0 0 0 0
+1 1 1 1
+0 1 0 1
+1 0 1 0
+</code></pre>
+<p>假设第 2 行、第 3 列存在比特错误，则可以根据下面的矩阵中第 2 行和第 3 列的奇偶校验现在是错误的确定错误出现的位置并纠错：</p>
+<pre><code>0 0 0 0
+1 1 0 1
+0 1 0 1
+1 0 1 0
+</code></pre>
+<p>假设第 2 行、第 2 列和第 3 列存在位错误。但是由于第二行的 2 个位都发送错误，导致第 2 行的奇偶校验位仍然是正确的，虽然我们知道第 2 列和第 3 列的奇偶校验错误，但我们无法检测到错误发生在哪一行。</p>
+<pre><code>0 0 0 0
+1 0 0 1
+0 1 0 1
+1 0 1 0
+</code></pre>
+<hr>
+<p><strong>P3. 假设某分组的信息部分（图 6-3 中的 \(D\)）包含 10 字节，它由字符串 “ Internet ” 的 8 比特无符号二进制 ASCII 表示组成。对该数据计算因特网校验和。</strong></p>
+<p><strong>参考答案：</strong></p>
+<pre><code>  01001100 01101001
++ 01101110 01101011
+—————————————————————
+  10111010 11010100
++ 00100000 01001100
+—————————————————————
+  11011011 00100000
++ 01100001 01111001
+—————————————————————
+  00111100 10011010
++ 01100101 01110010
+—————————————————————
+  10100010 00001100
+</code></pre>
+<p>对最终求和结果取反码为: <code>01011101 11110011</code></p>
+<blockquote>
+<ul>
+<li><strong>分组</strong>：将数据每 16 个比特（2 字节）分为一组，这里是每两个字母（空格）的 ASCII</li>
+<li><strong>累加与回卷</strong>：将这些 16 位二进制数进行相加，如果最高位相加后产生了进位，必须将这个溢出的 1 加回到最低位上</li>
+<li><strong>取反</strong>：将最终的求和结果按位取反，得到的就是最终的检验和</li>
+</ul>
+</blockquote>
+<hr>
+<p><strong>P18. 假设节点 A 和节点 B 在同一个 10Mbps 广播信道上，这两个节点的传播时延为 325 比特时间。假设对这个广播信道使用 CSMA/CD 和以太网分组。假设节点 A 开始传输一帧，并且在它传输结束之前节点 B 开始传输一帧。在 A 检测到 B 已经传输之前，A 能完成传输吗？为什么？如果回答是可，则 A 错误地认为它的帧已成功传输而无碰撞。提示：假设在 \(t = 0\) 比特时刻，A 开始传输一帧。在最坏的情况下，A 传输一个 \(512 + 64\) 比特时间的最小长度的帧。因此 A 将在 \(t = 512 + 64\) 比特时刻完成帧的传输。如果 B 的信号在比特时间 \(t = 512 + 64\) 之前到达 A，则答案是否定的。在最坏情况下，B 的信号什么时候到达 A？</strong></p>
+<p>这是一道非常经典的计算机网络底层原理题，它直击了 CSMA/CD 协议的“软肋”：<strong>为什么以太网必须规定最小帧长？</strong></p>
+<p>这道题考察的核心逻辑是：<strong>发送方只有在自己还在发送数据的过程中，接收到了碰撞信号，才能识别出碰撞。如果它已经发完了数据，拍拍屁股走人了，这时候碰撞信号才传过来，它就会误以为发送成功。</strong></p>
+<h4 id="核心参数提取">核心参数提取</h4>
+<ul>
+<li><strong>A 的发送时长 (传输时延)：</strong> \(512 + 64 = 576\) 比特时间（题目给定的最小帧长发送时间）。</li>
+<li><strong>A 到 B 的单程跑腿时间 (传播时延 \(d_{prop}\))：</strong> \(325\) 比特时间。</li>
+</ul>
+<h4 id="极限碰撞时间线推演">极限碰撞时间线推演</h4>
+<p>我们要找的是“最坏情况”，即 B 尽可能晚地发送数据，导致碰撞信号尽可能晚地弹回 A。</p>
+<ul>
+<li><strong>\(t = 0\)：</strong> 节点 A 开始发送数据。电磁波开始在网线中向 B 奔跑。</li>
+<li><strong>\(t \in (0, 324)\)：</strong> A 的信号还在路上，没到 B。此时 B 的信道监听（CS）认为网络是空闲的。</li>
+<li><strong>\(t = 324\)（极限时刻）：</strong> 这是 B 能够发送数据的<strong>最晚时刻</strong>。因为到了 \(t = 325\) 时刻，A 的第一个比特就会抵达 B，B 一旦侦听到信号，就会放弃发送。为了制造碰撞，假设 B 在 \(t = 324\) 时刻（A 的信号到达前夕）也发送了数据。</li>
+<li><strong>\(t = 325\)：</strong> A 和 B 的信号在 B 的家门口发生了<strong>碰撞</strong>。</li>
+<li><strong>\(t = 324 + 325 = 649\)：</strong> B 发出的信号（包含碰撞产生的乱码），经过了 325 个比特时间的跋涉，<strong>终于抵达了 A</strong>。</li>
+</ul>
+<h4 id="结论判定-a-此时在干嘛">结论判定：A 此时在干嘛？</h4>
+<ul>
+<li>我们已知 A 发送完整个帧只需要 <strong>\(576\)</strong> 个比特时间。</li>
+<li>所以，在 \(t = 576\) 时，A 已经完成了发送，关闭了发送器，也停止了对当前这帧的碰撞检测。</li>
+<li>当 B 的碰撞信号在 <strong>\(t = 649\)</strong> 姗姗来迟时，A 早就“收工”了。</li>
+<li><strong>最终结果：</strong> A 完美错过了碰撞信号，它会<strong>错误地认为</strong>这帧数据已经安全无碰撞地送达了目的地。这就是典型的“隐蔽碰撞”<strong>或</strong>“迟到碰撞”。</li>
+</ul>
+<h4 id="延伸思考-这道题暴露了什么问题">💡 延伸思考：这道题暴露了什么问题？</h4>
+<p>这道题其实是一个“反面教材”，它展示了一个<strong>设计不合格</strong>的以太网。</p>
+<p>在真正的以太网设计中，必须严格遵守一个铁律：<strong>最小帧的传输时间，必须大于等于网络的最长往返时间（即 \(2\tau\) 或 \(2 \times d_{prop}\)）</strong>。</p>
+<ul>
+<li>本题中的往返时间是 \(2 \times 325 = 650\) 比特时间。</li>
+<li>而最小帧长只有 \(576\) 比特时间。</li>
+<li>\(576 < 650\)，所以这个网络一定会发生检测不到的碰撞！</li>
+</ul>
+<hr>
+<p><strong>P23. 考虑图 6-15。假定所有链路都是 \(100\,\text{Mbps}\)。在该网络中的 9 台主机和两台服务器之间，能够取得的最大总聚合吞吐量是多少？你能够假设任何主机或服务器能够向任何其他主机或服务器发送分组。为什么？</strong></p>
+<p><img src="/assets/img/posts/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E4%BE%8B%E9%A2%98/image-251.webp" alt="alt text" loading="lazy"></p>
+<p>设电气工程系为 A，其中三台主机标记为 A1、A2、A3；计算机科学系为 B，包含 B1、B2、B3 三台主机；计算机工程系为 C，包含 C1、C2、C3 三台主机。流量分配策略为：<br>
+（1）A1 &lt;-&gt; A2：\(100\,\text{Mbps}\) 全双工<br>
+（2）B1 &lt;-&gt; B2：\(100\,\text{Mbps}\) 全双工<br>
+（3）C1 &lt;-&gt; C2：\(100\,\text{Mbps}\) 全双工<br>
+（4）web 服务器 &lt;-&gt; A3：\(100\,\text{Mbps}\) 全双工<br>
+（5）mail 服务器 &lt;-&gt; B3：\(50\,\text{Mbps}\) 全双工<br>
+（6）mail 服务器 &lt;-&gt; C3：\(50\,\text{Mbps}\) 全双工<br>
+（7）B3 &lt;-&gt; C3：\(50\,\text{Mbps}\) 全双工</p>
+<p>总流量：\((100 \times 4 + 50 \times 3) \times 2 = 1100\,\text{Mbps}\)</p>
+<p>其中乘以 2 是因为全双工的原因，同时上行和下行</p>
+<blockquote>
+<p>目标：尽可能让所有的主机和服务器都在以 100 Mbps 的满速发送和接收数据，并且不能让任何一条共享链路（尤其是连接中心交换机的上行链路）成为瓶颈</p>
+</blockquote>
+<hr>
+<p><strong>P24. 假定在图 6-15 中的 3 台连接各系的交换机用集线器来代替，所有链路是 100Mbps。现在回答习题 P23 中提出的问题。</strong></p>
+<p>（1）web服务器 &lt;-&gt; A：100Mbps 全双工<br>
+（2）mail服务器 &lt;-&gt; B：50Mbps 全双工<br>
+（3）mail服务器 &lt;-&gt; C：50Mbps 全双工<br>
+（4）B &lt;-&gt; C：50Mbps 全双工</p>
+<p>总流量：(100 + 50 * 3) * 2 = 500 Mbps</p>
+<p><mark>集线器是冲突域</mark>，因此使用集线器的聚合吞吐量只有 100 Mbps，因此总的聚合吞吐量为 500 Mbps</p>
+<hr>
+<p><strong>P25. 假定在图 6-15 中的所有交换机用集线器来代替。所有链路是 100Mbps。现在回答在习题 P23 中提出的问题。</strong></p>
+<p>参考答案：总聚合吞吐量为 100 Mbps。</p>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：9 计算机网络例题</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-08 06:43:13</p>
+      <p><strong>更新于</strong>：2026-08-07 23:07:52</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/9 计算机网络例题.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">9 计算机网络例题</div>
+      <ul><li class="toc-l2"><a href="#1-计算机网络和因特网">1 计算机网络和因特网</a></li><li class="toc-l2"><a href="#2-应用层">2 应用层</a></li><li class="toc-l2"><a href="#3-传输层">3 传输层</a></li><li class="toc-l2"><a href="#4-网络层-数据平面">4 网络层：数据平面</a></li><li class="toc-l2"><a href="#5-网络层-控制平面">5 网络层：控制平面</a></li><li class="toc-l2"><a href="#6-链路层和局域网">6 链路层和局域网</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/8 A-day-in-the-life-of-web-request.html">&lt; 8 A day in the life of web request</a>
+      <a class="pager-next" href="/posts/软件工程 II 复习笔记(一).html">软件工程 II 复习笔记(一) &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
+<script src="/assets/js/main.js?v=1786162127971" defer></script>
+<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+</body>
+</html>

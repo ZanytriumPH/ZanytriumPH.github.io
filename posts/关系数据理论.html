@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第6章 关系数据理论 · Zwing&#39;s blog</title>
+<meta name="description" content="第6章 关系数据理论">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">第6章 关系数据理论</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-08T11:01:00.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-08 19:01:00</time>
+            <time class="meta-item" datetime="2026-08-08T12:06:24+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-08 12:06:24</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 4065 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 14 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#数据管理基础"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>数据管理基础</a>
+              <a class="tag-chip" href="/tags.html#数据库"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>数据库</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><h2 id="1-问题的提出">1 问题的提出</h2>
+<blockquote>
+<p>如何评价关系模式设计的好坏？如何设计性能良好的关系模式？</p>
+</blockquote>
+<p>关系数据库的规范化理论，就是为了解决上述两个问题而提出的关系数据库设计理论</p>
+<blockquote>
+<p>关系模式常见的问题：数据冗余度高、更新异常、插入异常、删除异常</p>
+</blockquote>
+<p><strong>范式：是对一个关系中允许存在的数据依赖的要求</strong></p>
+<div class="math-block">\[ 1NF \supset 2NF \supset 3NF \supset BCNF \supset 4NF \supset 5NF \]</div>
+<p>如果一个关系模式满足高级别范式对数据依赖的要求，那么它肯定也满足低级别范式对函数依赖的要求</p>
+<p>如果某一关系模式 \(R\) 满足范式 \(n\) 的要求，则称关系模式 \(R\) 为第 \(n\) 范式，可简记为 \(R\in nNF\)</p>
+<p>一个低一级范式的关系模式，通过模式分解可以转换为若干个高一级范式的关系模式的集合，这种过程就叫规范化</p>
+<h2 id="2-函数依赖与码">2 函数依赖与码</h2>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>函数依赖</div><p>设 \(R(U)\) 是一个属性集 \(U\) 上的关系模式， \(X\) 和 \(Y\) 是 \(U\) 的子集。若对于 \(R(U)\) 的任意一个可能的关系 \(r\) ， \(r\) 中不可能存在两个元组在 \(X\) 上的属性值相等，而在 \(Y\) 上的属性值不等，则称 “ \(X\) 函数确定 \(Y\) ”或 “ \(Y\) 函数依赖于 \(X\) ”，记作 \(X \rightarrow Y\) 。</p>
+</div><p>如果存在函数依赖 \(X \rightarrow Y\)</p>
+<ul>
+<li>\(X\) 称为这个函数依赖的决定因素</li>
+<li>\(Y\) 称为这个函数依赖的依赖因素</li>
+</ul>
+<p>若 \(X \rightarrow Y\) , 并且 \(Y \rightarrow X\) , 则记为 \(X \leftrightarrow Y\)
+若 \(Y\) 不函数依赖于 \(X\) , 则记为 \(X \nrightarrow Y\)</p>
+<p>学生关系 \(Student(Sno, Sname, Ssex, Sage, Sdept)\)</p>
+<ul>
+<li>\(Sno → Ssex\)</li>
+<li>\(Sno → Sage\)</li>
+<li>\(Sno → Sdept\)</li>
+</ul>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>平方/非平凡函数依赖</div><p>在关系模式 \(R(U)\) 中，对于 \(U\) 的子集 \(X\) 和 \(Y\)，</p>
+<ul>
+<li>如果 \(X \rightarrow Y\) 但 <mark><strong>\(Y \not\subseteq X\)</strong></mark>，则称 \(X \rightarrow Y\) 是 ‘<strong>非平凡函数依赖</strong>’</li>
+<li>如果 \(X \rightarrow Y\) 但 <mark><strong>\(Y \subseteq X\)</strong></mark>，则称 \(X \rightarrow Y\) 是 ‘<strong>平凡函数依赖</strong>’</li>
+</ul>
+</div><blockquote>
+<p>对于任一关系模式，平凡函数依赖都是必然成立的</p>
+</blockquote>
+<p>在关系 \(SC(Sno, Cno, Grade)\) 中</p>
+<ul>
+<li>非平凡函数依赖：\((Sno, Cno) → Grade\)</li>
+<li>有平凡函数依赖：\((Sno, Cno) → Sno，(Sno, Cno) → Cno\)</li>
+</ul>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>完全/部分函数依赖</div><p>在 \(R(U)\) 中，如果 \(X \rightarrow Y\)，并且对于 <mark>\(X\) 的任何一个真子集 \(X'\)，都有 \(X' \nrightarrow Y\)</mark>，则称 \(Y\) 对 \(X\) <strong>完全函数依赖</strong>，记作 \(X \xrightarrow{F} Y\)</p>
+<p>如果 \(X \rightarrow Y\)，但 \(Y\) 不完全依赖于 \(X\)，则称 \(Y\) 对 \(X\) <strong>部分函数依赖</strong>，记作 \(X \xrightarrow{P} Y\)</p>
+</div><ul>
+<li>由于 \(Sno \nrightarrow Grade\)，\(Cno \nrightarrow Grade\)，\(Sno \rightarrow Sdept\)</li>
+<li>因此 \((Sno,Cno) \xrightarrow{F} Grade\)，\((Sno,Cno) \xrightarrow{P} Sdept\)</li>
+</ul>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>传递/直接函数依赖</div><p>在 \(R(U)\) 中，如果 \(X \rightarrow Y\)，\(Y \nsubseteq X\)，\(Y \not\rightarrow X\)，\(Y \rightarrow Z\)，\(Z \nsubseteq Y\)，则称 \(Z\) 对 \(X\) 传递函数依赖。记为：$ X \xrightarrow{\text{传递}} Z $</p>
+<p>在定义里加上条件 \(Y \nsubseteq X\) 和 \(Z \nsubseteq Y\)，是因为：如果 \(Y \subseteq X\) 或 \(Z \subseteq Y\)，则 \(X \rightarrow Z\) 就是一个直接函数依赖，并且是一个部分函数依赖或平凡函数依赖</p>
+</div><p>在关系 \(Student(Sno, Sdept, Mname, Cno, Grade)\) 中</p>
+<ul>
+<li>有：\(Sno \rightarrow Sdept\)，\(Sdept \not\rightarrow Sno\)，\(Sdept \rightarrow Mname\)</li>
+<li>所以，\(Sno \xrightarrow{\text{传递}} Mname\)</li>
+</ul>
+<p>在学生关系 \(Student(Sno, Sname, Ssex, Sage, Sdept)\) 中</p>
+<ul>
+<li>假设学生不允许有同名，则有：\(Sno \leftrightarrow Sname\)</li>
+<li>此时，\(Sno \rightarrow Sdept\) 和 \(Sname \rightarrow Sdept\) 都是直接函数依赖</li>
+</ul>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>候选码</div><p>设 \(K\) 为 \(R(U,F)\) 中的属性或属性组合。若 \(K \xrightarrow{F} U\) ，则 \(K\) 称为 \(R\) 的一个<strong>候选码</strong>，简称 ‘<strong>码</strong>’</p>
+</div><ul>
+<li>如果 \(K \to U\) （可能是部分函数依赖，也可能是完全函数依赖），则 \(K\) 称为 \(R\) 的一个<strong>超码</strong>
+<ul>
+<li>候选码是最小的超码，候选码的真子集一定不是超码</li>
+<li>候选码的超集是超码</li>
+</ul>
+</li>
+<li>如果关系 \(R\) 的所有属性 \(U\) 是 \(R\) 的码，称为<strong>全码</strong></li>
+<li>若关系模式 \(R\) 有多个候选码，则选定其中的一个做为<strong>主码</strong></li>
+</ul>
+<ul>
+<li>\(S(Sno, Sdept, Sage)\) 中，单个属性 \(Sno\) 是码（也是超码），\((Sno,Sdept)\) 是超码但不是码</li>
+</ul>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>主属性/非主属性</div><p><strong>包含在任何一个候选码中的属性，称为主属性</strong>
+<strong>不包含在任何码中的属性称为非主属性</strong></p>
+</div><ul>
+<li>\(SC(Sno, Cno, Grade)\) 中，只有一个候选码 \((Sno, Cno)\)，所以 \(Sno\) 和 \(Cno\) 是关系 SC 的 2 个主属性，\(Grade\) 是关系 SC 的非主属性</li>
+</ul>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>外码</div><p>\(R\) 中属性或属性组 \(X\) 并非 \(R\) 的码，但 \(X\) 是另一个关系模式的码，则称 \(X\) 是 \(R\) 的外部码，也称<strong>外码</strong></p>
+</div><ul>
+<li>\(SC(Sno, Cno, Grade)\) 中，\(Sno\) 不是码，\(Sno\) 是 \(S(Sno, Sdept, Sage)\) 的码，则 \(Sno\) 是 SC 的外码</li>
+</ul>
+<blockquote>
+<p>具体场景中函数依赖的发现：使用 左边 \(\rightarrow\) 右边 的表，左边的属性从一个开始并累加（组合），右边固定为某一个属性，检查左边与右边是否能达成 多对一 的关系</p>
+<p><em>题目约束 + 常识性判断？</em></p>
+</blockquote>
+<h2 id="3-范式与规范化">3 范式与规范化</h2>
+<h3 id="3-1-1nf">3.1 1NF</h3>
+<p><strong>如果一个关系模式 \(R\) 的所有属性都是不可分的基本数据项，则 \(R∈1NF\)</strong></p>
+<blockquote>
+<p>第一范式是对关系模式的最起码的要求，不满足第一范式的数据库模式不能称为关系数据库</p>
+</blockquote>
+<h3 id="3-2-2nf">3.2 2NF</h3>
+<p><strong>若关系模式 \(R∈1NF\)，并且每一个非主属性都完全函数依赖于任何一个候选码，则 \(R∈2NF\)</strong></p>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>判断方法</div><p><strong>不允许存在 “非主属性对<mark>候选码</mark>的部分函数依赖”</strong></p>
+</div><p>\(SLC(Sno,Sdept,Sloc,Cno,Grade)\)，\(Sloc\) 为学生的住处，并且每个系的学生住在同一个地方。\(SLC\) 的码为 \((Sno,Cno)\)</p>
+<ul>
+<li>函数依赖有
+<ul>
+<li>\((Sno, Cno) \xrightarrow{F} Grade\)</li>
+<li>\(Sno \rightarrow Sdept, (Sno, Cno) \xrightarrow{P} Sdept\)</li>
+<li>\(Sno \rightarrow Sloc, (Sno, Cno) \xrightarrow{P} Sloc\)</li>
+<li>\(Sdept \rightarrow Sloc\)</li>
+</ul>
+</li>
+<li>非主属性 \(Sdept\) 和 \(Sloc\) 部分函数依赖于码 \((Sno, Cno)\)</li>
+<li>关系模式 \(SLC\) 不属于 2NF</li>
+</ul>
+<h3 id="3-3-3nf">3.3 3NF</h3>
+<p><strong>设关系模式 \(R(U,F) \in 1NF\)，若 \(R\) 中不存在这样的码 \(X\)、属性组 \(Y\) 及非主属性 \(Z\) (\(Z \nsubseteq Y\))，使得 \(X \rightarrow Y\)，\(Y \rightarrow Z\) 成立，\(Y \nleftrightarrow X\)，则称 \(R(U,F) \in 3NF\)</strong></p>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>判断方法</div><p><strong>不允许存在 “非主属性对于<mark>候选码</mark>的传递函数依赖”</strong></p>
+</div><h3 id="3-4-bcnf">3.4 BCNF</h3>
+<p><strong>设关系模式 \(R(U,F) \in 1NF\)，若 \(X \to Y\) 且 \(Y \nsubseteq X\) 时 \(X\) 必含有码，则 \(R(U,F) \in BCNF\)</strong></p>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>判断方法</div><p>在关系模式 \(R(U, F)\) 中，如果每一个决定属性集都包含候选码，则 \(R ∈ BCNF\)，即</p>
+<p><strong>只要某个箭头左边的属性（集）不能唯一确定表里的所有数据，它就不满足 BCNF</strong></p>
+</div><h3 id="3-5-4nf">3.5 4NF</h3>
+<p><strong>设关系模式 \(R(U,F) \in 1NF\)，若对于 \(R\) 的每个非平凡多值依赖 \(X \to \to Y(Y \nsubseteq X)\)，\(X\) 都含有码，则 \(R(U,F) \in 4NF\)</strong></p>
+<h2 id="4-armstrong-公理系统">4 Armstrong 公理系统</h2>
+<blockquote>
+<p>由一组函数依赖推理规则构成的公理系统</p>
+</blockquote>
+<p>作用：① 从一组函数依赖求得蕴涵的函数依赖；② <strong>关系模式的码的计算</strong></p>
+<p>三条基本规则：</p>
+<ul>
+<li>自反律：若 \(Y ⊆ X ⊆U\)，则 \(X→Y\)</li>
+<li>增广律：若 \(X→Y\) 且 \(Z⊆U\)，则 \(XZ \to YZ\)</li>
+<li>传递律：若 \(X→Y\) 且 \(Y→Z\)，则 \(X→Z\)</li>
+</ul>
+<p>三条扩充规则：</p>
+<ul>
+<li>合并规则：若 \(X \rightarrow Y\) 且 \(X \rightarrow Z\) ，则 \(X \rightarrow YZ\)</li>
+<li>分解规则：若 \(X \rightarrow Y\) 且 \(Z \subseteq Y\) ，则 \(X \rightarrow Z\)</li>
+<li>伪传递规则：若 \(X \rightarrow Y\) 且 \(WY \rightarrow Z\) ，则 \(XW \rightarrow Z\)</li>
+</ul>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>属性集闭包</div><p>设 \(F\) 为属性集 \(U\) 上的一组函数依赖，\(X \subseteq U\)，
+\(X_F^+ = \{ A \mid X \rightarrow A \text{ 能由 } F \text{ 根据 Armstrong 公理导出}, A \in U \}\)</p>
+<p>\(X_F^+\) 称为属性集 \(X\) 关于函数依赖集 \(F\) 的闭包</p>
+</div><p>【计算示例】 已知关系模式 \(R(U, F)\) ，其中：\(U = \{A, B, C, D, E\}\) ， \(F = \{AB \rightarrow C, B \rightarrow D, C \rightarrow E, EC \rightarrow B, AC \rightarrow B\}\). 求 \((AB)_F^+\) 。</p>
+<ul>
+<li>\(X^{(0)} = AB\)</li>
+<li>计算 \(X^{(1)}\) :
+<ul>
+<li>逐一扫描集合 \(F\) 中的各个函数依赖，寻找左部为 \(X^{(0)}\) 的子集的函数依赖；</li>
+<li>得到两个函数依赖： \(AB \rightarrow C, B \rightarrow D\) . 于是： \(Y = \{C, D\}\)</li>
+<li>于是： \(X^{(1)} = Y \cup X^{(0)} = \{A, B, C, D\}\)</li>
+</ul>
+</li>
+<li>因为 \(X^{(1)} \neq X^{(0)}\) ，所以计算 \(X^{(2)}\) :
+<ul>
+<li>逐一扫描集合 \(F\) 中的各个函数依赖，寻找左部为 \(X^{(1)}\) 的子集的函数依赖；</li>
+<li>得到两个函数依赖： \(C \rightarrow E, AC \rightarrow B\) . 于是： \(Y = \{B, E\}\)</li>
+<li>于是： \(X^{(2)} = Y \cup X^{(1)} = \{A, B, C, D, E\}\)</li>
+</ul>
+</li>
+<li>因为 \(X^{(2)}\) 已等于全部属性集合 \(U\) ，所以 \((AB)_F^+ = X^{(2)} = \{A, B, C, D, E\}\) .</li>
+</ul>
+<h4 id="补充算法1-寻找与函数依赖集-f-等价的极小函数依赖集-g"><mark>【补充算法1】寻找与函数依赖集 \(F\) 等价的极小函数依赖集 \(G\)</mark></h4>
+<ol>
+<li><strong><mark>右部单一化</mark>（消除右边的多个属性）：</strong>
+令初始的 \(G = F\) 。检查 \(G\) 中每一个函数依赖，如果右边包含多个属性，比如 \(X \rightarrow (A_1, A_2, \dots, A_n)\)，将其拆分为多个右部只有一个属性的函数依赖：\(X \rightarrow A_1, X \rightarrow A_2, \dots, X \rightarrow A_n\) 。</li>
+<li><strong><mark>消除部分函数依赖</mark>（左部最小化）：</strong>
+检查 \(G\) 中每一个左边有多个属性的函数依赖 \(X \rightarrow A\) 。
+<ul>
+<li>针对左部 \(X\) 中的每一个属性 \(B\)，计算去掉 \(B\) 之后的属性集闭包 \((X - B)^+_G\) 。</li>
+<li>如果 \(A \in (X - B)^+_G\)，说明属性 \(B\) 是多余的，用新的函数依赖 \((X - B) \rightarrow A\) 替换掉原来的 \(X \rightarrow A\) 。</li>
+</ul>
+</li>
+<li><strong><mark>消除冗余的函数依赖</mark>（去掉多余的规则）：</strong>
+对 \(G\) 中的每一个函数依赖 <mark>\(X \rightarrow A\)</mark> 进行逐一检查 ：
+<ul>
+<li>假装把它从 \(G\) 中删掉，得到一个临时集合 <mark>\(G' = G - \{X \rightarrow A\}\)</mark> 。</li>
+<li>在这个临时集合 \(G'\) 的基础下，<mark>计算左部 \(X\) 的属性集闭包 \(X^+_{G'}\)</mark> 。</li>
+<li>如果 <mark>\(A \in X^+_{G'}\)</mark>，说明即使没有这条规则，我们依然能通过其他规则推导出 \(A\)。因此，这条规则是冗余的，直接从 \(G\) 中永久删除它 。</li>
+</ul>
+</li>
+<li><strong>合并规则：</strong>
+为了书写简洁，可以将左部相同的函数依赖重新合并起来，例如将 \(X \rightarrow A_1\) 和 \(X \rightarrow A_2\) 合并为 \(X \rightarrow A_1 A_2\) 。</li>
+</ol>
+<blockquote>
+<p><strong>计算出极小函数依赖集的结果，也要主动结合 Armstrong 公理进行 “常识性” 检查</strong>
+<strong>对形如 \(AX \rightarrow A\) 的式子（平方函数依赖），直接删除</strong></p>
+</blockquote>
+<h2 id="5-模式分解">5 模式分解</h2>
+<p>模式分解的目标：既有 ‘无损连接’，又要 ‘保持函数依赖’（但不一定能满足）</p>
+<p><strong>符号定义</strong>：</p>
+<ul>
+<li>设 \(\rho=\{R_1(U_1, F_1), R_2(U_2, F_2), \cdots, R_k(U_k, F_k)\}\) 是 \(R(U, F)\) 的一个分解，\(r\) 是 \(R(U, F)\) 的一个关系</li>
+<li>\(r_i=\pi_{R_i}(r)=\{t.U_i \mid t \in r\}=\{t[U_i] \mid t \in r\}\) 是关系 \(r\) 在关系模式 \(R_i\) 上的投影</li>
+<li>定义 \(m_\rho(r)=\pi_{R_1}(r) \bowtie \pi_{R_2}(r) \bowtie \cdots \bowtie \pi_{R_k}(r)\)，即 \(m_\rho(r)\) 是 \(r\) 在 \(\rho\) 中各关系模式上投影的连接</li>
+</ul>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>无损连接性</div><p>设 \(\rho = \{R_1(U_1, F_1), R_2(U_2, F_2), \cdots, R_k(U_k, F_k)\}\) 是 \(R(U, F)\) 的一个分解，若对 \(R(U, F)\) 的任何一个关系 \(r\) 均有 \(r = m_{\rho}(r)\) 成立，则称分解 \(\rho\) 具有无损连接性，简称 \(\rho\) 为无损分解</p>
+</div><div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>保持函数依赖</div><p>若 \(F^+ = (F_1 \cup F_2 \cup \cdots \cup F_k)^+\)，则 \(R(U, F)\) 的分解 \(\rho = \{R_1(U_1, F_1), R_2(U_2, F_2), \cdots, R_k(U_k, F_k)\}\) 保持函数依赖</p>
+</div><h4 id="补充算法2-候选码的计算"><mark>【补充算法2】候选码的计算</mark></h4>
+<p>设有关系模式 \(R(U, F)\)，\(U\) 是关系 \(R\) 的属性集合，\(F\) 是关系上的极小函数依赖集。将属性集合 \(U\) 划分为以下的三个子集：</p>
+<ol>
+<li>只在函数依赖的左边出现过的属性的集合 \(U_L\) （包括没有出现在任何函数依赖中的属性）</li>
+<li>只在函数依赖的右边出现过的属性的集合 \(U_R\)</li>
+<li>在两边都出现过的属性的集合 \(U_A\)</li>
+</ol>
+<ul>
+<li>在候选码计算中，只需要对 \(U_A\) 中的属性进行 FOR 循环检查</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E7%90%86%E8%AE%BA/image-6.webp" alt="alt text" loading="lazy"></p>
+<p>【计算示例】 \(R(A, B, C, D, E, F)\) 及其极小函数依赖集：\(\{ B \to F,\ AD \to BE,\ E \to CD \}\)</p>
+<p>只在函数依赖左边出现的属性 \(U_L = \{A\}\)<br>
+只在函数依赖右边出现的属性 \(U_R = \{C, F\}\)<br>
+在函数依赖两边出现的属性 \(U_A = \{B, D, E\}\)<br>
+故 \(A\) 是每一个候选码的组成部分<br>
+记 \(F = \{B \to F, AD \to BE, E \to CD\}\)，\(U = \{A, B, C, D, E, F\}\)<br>
+令 \(K = U - U_R = \{A, B, D, E\}\)</p>
+<p>由 \((K - B)^+_F = \{A, B, C, D, E, F\} = U\)<br>
+故 \(K = K - B = \{A, D, E\}\)<br>
+由 \((K - D)^+_F = \{A, B, C, D, E, F\} = U\)<br>
+故 \(K = K - D = \{A, E\}\)<br>
+由 \((K - E)^+_F = \{A\} \neq U\)<br>
+故 \(R\) 的一个候选码为 \(\{A, E\}\)</p>
+<p>同理，继续按 \(U_A = \{B, D, E\}\) 的不同顺序计算 \(K\)，得到 \(R\) 的所有候选码为 \(\{A, E\}, \{A, D\}\)</p>
+<h4 id="算法-转换为-3nf-既有无损连接性又保持函数依赖的分解"><mark>【算法】转换为 3NF 既有无损连接性又保持函数依赖的分解</mark></h4>
+<ol>
+<li>计算 \(F\) 的极小函数依赖集，并用来代替 \(F\) 进行后续的模式分解</li>
+<li>\(\rho = \varnothing\); // 初始化分解 \(\rho\) 为空集</li>
+<li><mark>对 \(F\) 中的每一个函数依赖 \(X \rightarrow Y\) 做如下处理</mark>：
+<ul>
+<li>如果在分解 \(\rho\) 中找不到满足下述条件的关系模式 \(Z(U_Z, F_Z)\)：\(XY \subseteq U_Z\)</li>
+<li>则由 \(X\) 和 \(Y\) 合并构成一个新的子关系模式并加入到分解 \(\rho\) 中；</li>
+</ul>
+</li>
+<li>如果关系 \(R\) 的所有候选码都没有出现在分解 \(\rho\) 的关系模式中，即：找不到一个原关系 \(R\) 的候选码 \(K\) 和一个关系模式 \(Z(U_Z, F_Z)\) (\(Z \in \rho\))，满足 \(K \subseteq U_Z\)
+那么，就从关系 \(R\) 中任选一个候选码 \(K\)，由 \(K\) 中的属性单独构成一个关系模式并加入到分解 \(\rho\) 中去。</li>
+</ol>
+<p>【计算示例】 有关系模式 \(R(A, B, C, D, E, F)\) 及其极小函数依赖集：\(\{ B \to F,\ AD \to BE,\ E \to CD \}\)</p>
+<p>令 \(\rho = \varnothing\)，</p>
+<p>\(Z_1(U_1, F_1) = Z_1(\{B, F\}, \{B \to F\})\)，</p>
+<p>\(Z_2(U_2, F_2) = Z_2(\{A, B, D, E\}, \{AD \to BE\})\)，</p>
+<p>\(Z_3(U_3, F_3) = Z_3(\{C, D, E\}, \{E \to CD\})\)，</p>
+<p>则 \(\rho = \{Z_1, Z_2, Z_3\}\)</p>
+<p>对于关系 \(R\) 的所有候选码 \(\{A, E\}, \{A, D\}\) （已计算）</p>
+<p>\(\{A, E\} \subseteq U_2\), \(\{A, D\} \subseteq U_2\)</p>
+<p>故 \(\rho = \{Z_1, Z_2, Z_3\}\)</p>
+<p>故关系 \(R\) 满足 \(3NF\) 且具有无损连接性和保持函数依赖的分解为</p>
+<p>\(\{Z_1(\{B, F\}, \{B \to F\}),~ Z_2(\{A, B, D, E\}, \{AD \to BE\}),~ Z_3(\{C, D, E\}, \{E \to CD\})\}\)</p>
+<h4 id="算法-转换为-bcnf-的无损连接分解"><mark>【算法】转换为 BCNF 的无损连接分解</mark></h4>
+<p>❑ 输入：关系模式 \(R(U, F)\)
+❑ 输出：到 BCNF 且具有无损连接性的分解 \(\rho\)
+❑ 算法：
+① 令 \(\rho = \{ R(U, F) \}\)
+② 检查 \(\rho\) 中各关系模式是否均属于 BCNF。若是，则算法终止。
+③ 设 \(\rho\) 中 \(R_i(U_i, F_i) \notin BCNF\)，那么必有 \(X \to A \in F_i^+\) \((A \notin X)\)，且 \(X\) 非 \(R_i\) 的候选码。对 \(R_i(U_i, F_i)\) 进行如下分解：</p>
+<ul>
+<li>\(\sigma = \{S_1, S_2\}\)，\(U_{S_1} = XA\)，<mark>\(U_{S_2} = U_i - A\)</mark>（只砍 A）</li>
+<li>以 \(\sigma\) 代替 \(\rho\) 中的 \(R_i(U_i, F_i)\)</li>
+<li>返回步骤 ②</li>
+</ul>
+<p>【计算示例】有关系模式 \(R(A, B, C, D, E, F)\) 及其极小函数依赖集：\(\{ B \to F,\ AD \to BE,\ E \to CD \}\)</p>
+<p>令 \(\rho = \{ R(U, F) \}\)</p>
+<p>对 \(R\) 中的 \(B \to F\)，\(B\) 不是 \(R\) 的候选码</p>
+<p>令 \(U_{S_1} = \{B, F\}\)，\(F_{S_1} = \{B \to F\}\)</p>
+<p>\(U_{S_2} = U - F = \{A, B, C, D, E\}\)，\(F_{S_2} = \{AD \to BE, E \to CD\}\)</p>
+<p>令 \(\sigma = \{S_1, S_2\}\)，以 \(\sigma\) 代替 \(\rho\) 中的 \(R\) 得</p>
+<p>\(\rho = \{ S_1(\{B, F\}, \{B \to F\}), S_2(\{A, B, C, D, E\}, \{AD \to BE, E \to CD\}) \}\)</p>
+<p>经计算，\(S_2\) 的候选码为 \(\{A, D\}, \{A, E\}\)</p>
+<p>对 \(S_2\) 中的 \(E \to CD\)，\(E\) 不是 \(S_2\) 的候选码</p>
+<p>令 \(U_{S_3} = \{C, D, E\}\)，\(F_{S_3} = \{E \to CD\}\)</p>
+<p>\(U_{S_4} = S_2 - \{C, D\} = \{A, B, E\}\)</p>
+<p>由 \(E \to CD\) 得 \(AE \to ACD \to AD \to BE \to B\)</p>
+<p>故 \(F_{S_4} = \{AE \to B\}\)</p>
+<p>令 \(\sigma = \{S_3, S_4\}\)，以 \(\sigma\) 代替 \(\rho\) 中的 \(S_2\) 得</p>
+<p>\(\rho = \{ S_1(\{B, F\}, \{B \to F\}), S_3(\{C, D, E\}, \{E \to CD\}), S_4(\{A, B, E\}, \{AE \to B\}) \}\)</p>
+<p>经检验，此时 \(\rho\) 中各关系模式均属于 \(BCNF\)</p>
+<p>故关系 \(R\) 满足 \(BCNF\) 的分解结果为</p>
+<p>\(\rho = \{ S_1(\{B, F\}, \{B \to F\}), S_3(\{C, D, E\}, \{E \to CD\}), S_4(\{A, B, E\}, \{AE \to B\}) \}\)</p>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：第6章 关系数据理论</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-08 19:01:00</p>
+      <p><strong>更新于</strong>：2026-08-08 12:06:24</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/关系数据理论.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">第6章 关系数据理论</div>
+      <ul><li class="toc-l2"><a href="#1-问题的提出">1 问题的提出</a></li><li class="toc-l2"><a href="#2-函数依赖与码">2 函数依赖与码</a></li><li class="toc-l2"><a href="#3-范式与规范化">3 范式与规范化</a></li><li class="toc-l3"><a href="#3-1-1nf">3.1 1NF</a></li><li class="toc-l3"><a href="#3-2-2nf">3.2 2NF</a></li><li class="toc-l3"><a href="#3-3-3nf">3.3 3NF</a></li><li class="toc-l3"><a href="#3-4-bcnf">3.4 BCNF</a></li><li class="toc-l3"><a href="#3-5-4nf">3.5 4NF</a></li><li class="toc-l2"><a href="#4-armstrong-公理系统">4 Armstrong 公理系统</a></li><li class="toc-l2"><a href="#5-模式分解">5 模式分解</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/数据库完整性.html">&lt; 第5章 数据库完整性</a>
+      <a class="pager-next" href="/posts/数据库设计.html">第7章 数据库设计 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
+<script src="/assets/js/main.js?v=1786162127971" defer></script>
+<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+</body>
+</html>

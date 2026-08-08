@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2 应用层 · Zwing&#39;s blog</title>
+<meta name="description" content="应用层">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">2 应用层</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-07T22:50:13.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-08 06:50:13</time>
+            <time class="meta-item" datetime="2026-08-07T23:07:52+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-07 23:07:52</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 10054 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 34 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#计算机网络"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>计算机网络</a>
+              <a class="tag-chip" href="/tags.html#计算机网络"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>计算机网络</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><div class="callout callout-warning"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>杂糅了中科大（学习过程）与南大（考前复习）的课件而成的笔记，排版与质量可能不保证</div></div><blockquote>
+<p>网络核心没有应用层功能，网络应用只在端系统上存在</p>
+</blockquote>
+<h2 id="1-应用层协议原理">1 应用层协议原理</h2>
+<h3 id="1-1-网络应用的体系结构">1.1 网络应用的体系结构</h3>
+<ul>
+<li>可能的应用架构：
+<ul>
+<li>客户-服务器模式（C/S）</li>
+<li>对等模式(P2P)</li>
+<li>混合体：客户-服务器和对等体系结构</li>
+</ul>
+</li>
+</ul>
+<h4 id="1-1-1-客户-服务器-c-s-体系结构">1.1.1 客户-服务器（C/S）体系结构</h4>
+<ul>
+<li>服务器:
+<ul>
+<li>一直运行</li>
+<li>固定的 IP 地址和周知的端口号（约定）</li>
+<li>扩展性：服务器场
+<ul>
+<li>数据中心进行扩展</li>
+<li>扩展性差</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>客户端:
+<ul>
+<li>主动与服务器通信</li>
+<li>与互联网有间歇性的连接</li>
+<li>可能是动态 IP 地址</li>
+<li>不直接与其它客户端通信</li>
+</ul>
+</li>
+</ul>
+<h4 id="1-1-2-对等体-p2p-体系结构">1.1.2 对等体（P2P）体系结构</h4>
+<ul>
+<li>（几乎）没有一直运行的服务器</li>
+<li>任意端系统之间可以进行通信</li>
+<li><mark>每一个节点既是客户端又是服务器</mark>
+<ul>
+<li>自扩展性：新 peer 节点带来新的服务能力，当然也带来新的服务请求</li>
+</ul>
+</li>
+<li>参与的主机间歇性连接且可以改变 IP 地址
+<ul>
+<li>难以管理</li>
+</ul>
+</li>
+</ul>
+<h4 id="1-1-3-c-s-和-p2p-体系结构的混合体">1.1.3 C/S 和 P2P 体系结构的混合体</h4>
+<ul>
+<li>即时通信
+<ul>
+<li>在线检测：集中
+<ul>
+<li>当用户上线时，向中心服务器注册其 IP 地址</li>
+<li>用户与中心服务器联系，以找到其在线好友的位置</li>
+</ul>
+</li>
+<li>两个用户之间聊天：P2P</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-2-进程通信">1.2 进程通信</h3>
+<p><mark>进程：在主机上运行的应用程序</mark></p>
+<ul>
+<li>在同一个主机内，使用进程间通信机制通信（操作系统定义）</li>
+<li>不同主机，通过交换报文（Message）来通信
+<ul>
+<li>使用 OS 提供的通信服务</li>
+<li>按照应用协议交换报文
+<ul>
+<li>借助传输层提供的服务</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>客户端进程：发起通信的进程
+服务器进程：等待连接的进程
+<em>P2P 架构的应用也有客户端进程和服务器进程之分</em></p>
+<p>分布式进程通信需要解决的问题：</p>
+<ul>
+<li>问题1：<strong>进程标示和寻址问题</strong>（服务用户）</li>
+<li>问题2：<strong>传输层-应用层如何提供服务</strong>
+<ul>
+<li>位置：层间界面的 SAP （TCP/IP ：socket）</li>
+<li>形式：应用程序接口 API （TCP/IP ：socket API）</li>
+</ul>
+</li>
+<li>问题3：<strong>如何使用传输层提供的服务，实现应用进程之间的报文交换</strong>，实现应用（用户使用服务）
+<ul>
+<li>定义应用层协议：报文格式，解释，时序等</li>
+<li>编制程序，使用 OS 提供的 API ，调用网络基础设施提供通信服务传报文，实现应用时序等</li>
+</ul>
+</li>
+</ul>
+<h4 id="1-2-1-对进程进行编址-addressing">1.2.1 对进程进行编址（addressing）</h4>
+<ul>
+<li>进程为了接收报文，必须有一个<strong>标识</strong>即：SAP（发送也需要标识）
+<ul>
+<li><mark>主机：唯一的 32 位 IP 地址</mark>
+<ul>
+<li>仅仅有 IP 地址不能够唯一标示一个进程</li>
+<li>在一台端系统上有很多应用进程在运行</li>
+</ul>
+</li>
+<li>所采用的传输层协议：TCP or UDP</li>
+<li>端口号（Port Numbers）</li>
+</ul>
+</li>
+<li>一些知名端口号的例子：
+<ul>
+<li>HTTP: TCP 80</li>
+<li>Mail: TCP 25</li>
+<li>FTP:TCP 2</li>
+</ul>
+</li>
+<li><mark>一个进程：用 IP + port 标示</mark> —— <strong>端节点</strong></li>
+<li>本质上，一对主机进程之间的通信由 2 个端节点构成</li>
+</ul>
+<h4 id="1-2-2-传输层提供的服务-需要穿过层间的信息">1.2.2 传输层提供的服务-需要穿过层间的信息</h4>
+<ul>
+<li>层间接口必须要携带的信息
+<ul>
+<li>要传输的报文</li>
+<li>谁传的：应用进程的标示：IP+TCP(UDP) 端口</li>
+<li>传给谁：对方的应用进程的标示：对方的 IP+TCP(UDP) 端口</li>
+</ul>
+</li>
+<li>传输层实体（TCP 或者 UDP 实体）根据这些信息进行 TCP 报文段（UDP 数据报）的封装
+<ul>
+<li>源端口号，目标端口号，数据等</li>
+<li>将 IP 地址往下交 IP 实体，用于封装 IP 数据报：源 IP，目标 IP</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>如果 Socket API 每次传输报文，都携带如此多的信息，太繁琐易错，不便于管理</li>
+<li>用个代号标示通信的双方或者单方：socket</li>
+<li>TCP socket：
+<ul>
+<li>TCP服务，两个进程之间的通信之前要建立连接
+<ul>
+<li>两个进程通信会持续一段时间，通信关系稳定</li>
+</ul>
+</li>
+<li>可以<strong>用一个整数表示两个应用实体之间的通信关系，本地标示</strong></li>
+<li><mark><strong>TCP socket：源IP，源端口，目标IP，目标端口</strong></mark></li>
+</ul>
+</li>
+<li>UDP socket：
+<ul>
+<li>UDP 服务，两个进程之间的通信之前无需建立连接
+<ul>
+<li>每个报文都是独立传输的</li>
+<li>前后报文可能给不同的分布式进程</li>
+</ul>
+</li>
+<li>因此，只能用一个整数表示本应用实体的标示
+<ul>
+<li>因为这个报文可能传给另外一个分布式进程</li>
+</ul>
+</li>
+<li><mark><strong>UDP socket：本IP，本端口</strong></mark></li>
+<li><strong>但是传输报文时：必须要提供对方 IP，port</strong>
+<ul>
+<li>接收报文时： 传输层需要上传对方的 IP，port</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="tcp-之上的套接字-socket">TCP 之上的套接字（socket）</h5>
+<ul>
+<li>对于使用面向连接服务（TCP）的应用而言，套接字是 4 元组的一个<strong>具有本地意义的标示</strong>
+<ul>
+<li>4元组：(源IP，源port，目标IP，目标port)</li>
+<li>唯一地指定了一个会话（2个进程之间的<strong>会话关系</strong>）</li>
+<li>应用使用这个标示，与远程的应用进程通信</li>
+<li>不必在每一个报文的发送都要指定这 4 元组</li>
+<li>简单，便于管理</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-0.webp" alt="alt text" loading="lazy">
+<img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-1.webp" alt="alt text" loading="lazy"></p>
+<h5 id="udp之上的套接字-socket">UDP之上的套接字（socket）</h5>
+<ul>
+<li>对于使用无连接服务（UDP）的应用而言，套接字是 2 元组的一个具有本地意义的标示
+<ul>
+<li>2 元组：IP，port （源端指定）</li>
+<li>UDP套接字指定了应用所在的一个端节点（end point）</li>
+<li>在发送数据报时，采用创建好的本地套接字（标示 ID），就不必在发送每个报文中指明自己所采用的 ip 和 port</li>
+<li>但是在发送报文时，必须要指定对方的 ip 和 udp port (另外一个段节点)</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-2.webp" alt="alt text" loading="lazy"></p>
+<h5 id="套接字-socket">套接字（Socket）</h5>
+<ul>
+<li><mark>进程向套接字发送报文或从套接字接收报文</mark></li>
+<li>套接字 &lt;-&gt; 门户
+<ul>
+<li>发送进程将报文推出门户，发送进程依赖于传输层设施在另外一侧的门户将报文交付给接收进程</li>
+<li>接收进程从另外一端的门户收到报文（依赖于传输层设施）</li>
+</ul>
+</li>
+</ul>
+<h4 id="1-2-3-如何使用传输层提供的服务实现应用">1.2.3 如何使用传输层提供的服务实现应用</h4>
+<ul>
+<li>定义应用层协议：报文格式，解释，时序等</li>
+<li>编制程序，通过 API 调用网络基础设施提供通信服务传报文，解析报文，实现应用时序等</li>
+</ul>
+<h5 id="应用层协议">应用层协议</h5>
+<ul>
+<li>定义了：运行在不同端系统上的应用进程如何相互交换报文
+<ul>
+<li>交换的<strong>报文类型</strong>：请求和应答报文</li>
+<li>各种报文类型的<strong>语法</strong>：报文中的各个字段及其描述</li>
+<li>字段的<strong>语义</strong>：即字段取值的含义</li>
+<li>进程何时、如何发送报文及对报文进行响应的<strong>规则</strong></li>
+</ul>
+</li>
+<li>应用协议仅仅是应用的一个组成部分
+<ul>
+<li>Web应用：HTTP协议，web客户端，web服务器，HTML</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-3-应用对传输层的服务的评价指标">1.3 应用对传输层的服务的评价指标</h3>
+<p>数据丢失率</p>
+<ul>
+<li>有些应用则要求100%的可靠数据传输（如文件）</li>
+<li>有些应用（如音频）能容忍一定比例以下的数据丢失</li>
+</ul>
+<p>延迟</p>
+<ul>
+<li>一些应用 出于有效性考虑，对数据传输有严格的时间限制
+<ul>
+<li>Internet 电话、交互式游戏</li>
+</ul>
+</li>
+</ul>
+<p>吞吐</p>
+<ul>
+<li>一些应用（如多媒体）必须需要最小限度的吞吐，从而使得应用能够有效运转</li>
+<li>一些应用能充分利用可供使用的吞吐（弹性应用）</li>
+</ul>
+<p>安全性</p>
+<ul>
+<li>机密性</li>
+<li>完整性</li>
+<li>可认证性（鉴别）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>应用</th>
+<th>数据丢失率</th>
+<th>吞吐</th>
+<th>时间敏感性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文件传输</td>
+<td>不能丢失</td>
+<td>弹性</td>
+<td>不</td>
+</tr>
+<tr>
+<td>e-mail</td>
+<td>不能丢失</td>
+<td>弹性</td>
+<td>不</td>
+</tr>
+<tr>
+<td>Web 文档</td>
+<td>不能丢失</td>
+<td>弹性</td>
+<td>不</td>
+</tr>
+<tr>
+<td>实时音视频</td>
+<td>容忍丢失</td>
+<td>音频：5kbps-1Mbps<br>视频：100kbps-5Mbps</td>
+<td>是，100ms</td>
+</tr>
+<tr>
+<td>存储音视频</td>
+<td>容忍丢失</td>
+<td>同上</td>
+<td>是，几秒</td>
+</tr>
+<tr>
+<td>交互式游戏</td>
+<td>容忍丢失</td>
+<td>几kbps ~10kbps</td>
+<td>是，100ms</td>
+</tr>
+<tr>
+<td>即时讯息</td>
+<td>不能丢失</td>
+<td>弹性</td>
+<td>是和不是</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-4-internet-传输层提供的服务">1.4 Internet 传输层提供的服务</h3>
+<p><strong>TCP 服务</strong>：</p>
+<ul>
+<li>可靠的传输服务</li>
+<li>流量控制：发送方不会淹没接受方</li>
+<li>拥塞控制：当网络出现拥塞时，能抑制发送方</li>
+<li>不能提供的服务：时间保证、最小吞吐保证和安全</li>
+<li>面向连接：要求在客户端进程和服务器进程之间建立连接</li>
+</ul>
+<p><strong>UDP 服务</strong>：</p>
+<ul>
+<li>不可靠数据传输</li>
+<li>不提供的服务：可靠，流量控制、拥塞控制、时间、带宽保证、建立连接</li>
+</ul>
+<p><strong>UDP 存在的必要性</strong>：</p>
+<ul>
+<li>能够区分不同的进程，而 IP 服务不能
+<ul>
+<li>在 IP 提供的主机到主机端到端功能的基础上，区分了主机的应用进程</li>
+</ul>
+</li>
+<li><mark>无需建立连接，省去了建立连接时间，适合事务性的应用</mark></li>
+<li>不做可靠性的工作，例如检错重发，适合那些对实时性要求比较高而对正确性要求不高的应用
+<ul>
+<li>因为为了实现可靠性（准确性、保序等），必须付出时间代价（检错重发）</li>
+</ul>
+</li>
+<li>没有拥塞控制和流量控制，应用能够按照设定的速度发送数据
+<ul>
+<li>而在TCP上面的应用，应用发送数据的速度和主机向网络发送的实际速度是不一致的，因为有流量控制和拥塞控制</li>
+</ul>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>应用</th>
+<th>应用层协议</th>
+<th>下层的传输协议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>e-mail</td>
+<td>SMTP [RFC 2821]</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>远程终端访问</td>
+<td>Telnet [RFC 854]</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>HTTP [RFC 2616]</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>文件传输</td>
+<td>FTP [RFC 959]</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>流媒体</td>
+<td>专用协议（如 RealNetworks）</td>
+<td>RTP, RTSP, TCP or UDP</td>
+</tr>
+<tr>
+<td>Internet电话</td>
+<td>专用协议（如 Dialpad）</td>
+<td>SIP on UDP</td>
+</tr>
+</tbody>
+</table>
+<p><strong>安全性</strong>：</p>
+<p>TCP &amp; UDP</p>
+<ul>
+<li>都没有加密</li>
+<li>明文通过互联网传输，甚至密码</li>
+</ul>
+<hr>
+<blockquote>
+<p>原件无</p>
+</blockquote>
+<p>SSL（Secure Socket Layer）</p>
+<ul>
+<li>在TCP上面实现，提供加密的TCP连接</li>
+<li>私密性</li>
+<li>数据完整性</li>
+<li>端到端的鉴别</li>
+</ul>
+<p>SSL是在应用层的（也可以说传输）</p>
+<ul>
+<li>应用采用SSL库，SSL库使用TCP通信</li>
+</ul>
+<p>SSL socket API</p>
+<ul>
+<li>应用通过 API 将明文交给 socket，SSL 将其加密在互联网上传输</li>
+</ul>
+<hr>
+<h2 id="2-web-与-http">2 Web 与 HTTP</h2>
+<h3 id="2-1-web">2.1 Web</h3>
+<p>Web 页：由一些对象组成</p>
+<p>对象可以是 HTML 文件，JPEG 图像，Java 小程序，声音剪辑文件等</p>
+<p>Web 页含有一个基本的 HTML 文件，该基本 HTML 文件又包含若干对象的引用（链接）</p>
+<p>通过 URL 对每个对象进行引用（唯一标识符），URL 格式：</p>
+<pre><code class="language-planetext">&lt;protocol&gt;://&lt;host&gt;:&lt;port&gt;/&lt;path&gt;?query_string
+</code></pre>
+<ul>
+<li>Protocol：对象的传输或解释方法，如 http、ftp、Gopher</li>
+<li>Host：对象所在主机的 DNS 名称或 IP 地址</li>
+<li>Path：包含该对象的文件路径名</li>
+<li>Query_string：发送给服务器应用的名称/值对</li>
+</ul>
+<h3 id="2-2-http-概况">2.2 HTTP 概况</h3>
+<p>HTTP: <strong>超文本传输协议</strong></p>
+<ul>
+<li>Web 的<mark>应用层协议</mark></li>
+<li><mark>客户/服务器模式</mark>
+<ul>
+<li>客户：请求、接收和显示 Web 对象的浏览器</li>
+<li>服务器：对请求进行响应，发送对象的 Web 服务器</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-3-http-使用-tcp">2.3 <mark>HTTP 使用 TCP</mark></h3>
+<ul>
+<li>客户发起一个与服务器的 TCP 连接（建立套接字），端口号为 80</li>
+<li>服务器接受客户的 TCP 连接</li>
+<li>在浏览器（HTTP 客户端）与 Web 服务器（HTTP 服务器）交换 HTTP 报文（应用层协议报文）</li>
+<li>TCP 连接关闭</li>
+</ul>
+<p><mark><strong>HTTP 是无状态的</strong>，服务器并不维护关于客户的任何信息</mark></p>
+<p>维护状态的协议很复杂</p>
+<ul>
+<li>必须维护历史信息(状态)</li>
+<li>如果服务器/客户端死机，它们的状态信息可能不一致，二者的信息必须是一致</li>
+<li>无状态的服务器能够支持更多的客户端</li>
+</ul>
+<hr>
+<ul>
+<li>每个请求-响应独立处理
+<ul>
+<li>服务器无需保留状态</li>
+</ul>
+</li>
+<li>优点：提高服务器端的可扩展性
+<ul>
+<li>故障处理更简单</li>
+<li>可以处理更高的请求速率</li>
+<li>请求顺序无关紧要</li>
+</ul>
+</li>
+<li>缺点：某些应用需要持久状态
+<ul>
+<li>需要唯一标识用户或存储临时信息</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-4-http-连接">2.4 HTTP 连接</h3>
+<h4 id="2-4-1-非持久-http">2.4.1 非持久 HTTP</h4>
+<ul>
+<li>最多只有一个对象在TCP连接上发送</li>
+<li>下载多个对象需要多个TCP连接</li>
+<li>HTTP/1.0 使用非持久连接</li>
+</ul>
+<p>假设用户输入URL：<a href="http://www.someSchool.edu/someDept/home.index">www.someSchool.edu/someDept/home.index</a></p>
+<p>(包含文本和10个就jpeg图像的引用)</p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/%E5%9B%BE%E7%89%873.webp" alt="text" loading="lazy"></p>
+<p>对10jpeg对象，重复以上步骤</p>
+<h4 id="2-4-2-响应时间模型">2.4.2 响应时间模型</h4>
+<p><mark>往返时间 RTT</mark>（round-trip time）：</p>
+<ul>
+<li>一个小的分组从客户端到服务器，再回到客户端的时间（传输时间忽略）</li>
+</ul>
+<p><mark><strong>响应时间：2RTT + 传输时间</strong></mark></p>
+<ul>
+<li>一个RTT用来发起 TCP 连接</li>
+<li>一个 RTT 用来 HTTP 请求并等待 HTTP 响应</li>
+<li>文件传输时间</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-3.webp" alt="alt text" loading="lazy"></p>
+<h4 id="2-4-3-持久-http">2.4.3 持久 HTTP</h4>
+<ul>
+<li>多个对象可以在一个（在客户端和服务器之间的）TCP连接上传输</li>
+<li>HTTP/1.1 默认使用持久连接</li>
+</ul>
+<p><strong>非持久HTTP的缺点</strong>：</p>
+<ul>
+<li>每个对象要 2 个 RTT</li>
+<li>操作系统必须为每个 TCP 连接分配资源</li>
+<li>但浏览器通常打开并行 TCP 连接，以获取引用对象</li>
+</ul>
+<blockquote>
+<p>原件补充：并行/并发请求 (Concurrent requests and responses)</p>
+<p>核心机制：客户端同时打开多个 TCP 连接，并行地发送请求和接收响应</p>
+<ul>
+<li>客户端 😊：网页加载变快了，体验很好。</li>
+<li>内容提供商 (Server) 😊：用户满意，服务器也能并发处理。</li>
+<li>网络 (Network) 😡 为什么？</li>
+</ul>
+<p>原因：这会造成网络拥塞。如果有成千上万个客户端同时对服务器发起多个并行连接，网络上的 TCP 连接数会呈指数级暴增。这不仅会吃满路由器的缓存，还会导致严重的丢包和竞争，对脆弱的整体网络环境非常不友好。</p>
+</blockquote>
+<p><strong>持久HTTP</strong>：</p>
+<ul>
+<li>在多个请求之间维持 TCP 连接
+<ul>
+<li>包括当前页面之后的传输</li>
+<li>客户端或服务器可以断开连接</li>
+</ul>
+</li>
+<li>优点
+<ul>
+<li>避免连接建立和拆除的开销</li>
+<li>允许底层（如 TCP）学习 RTT 和带宽特性</li>
+</ul>
+</li>
+<li>HTTP/1.1 的默认模式</li>
+</ul>
+<p><strong>非流水方式的持久 HTTP</strong>：</p>
+<ul>
+<li>客户端只能在收到前一个响应后才能发出新的请求</li>
+<li>每个引用对象花费一个 RTT</li>
+</ul>
+<p><strong>流水方式的持久 HTTP</strong>：</p>
+<ul>
+<li>HTTP/1.1 的默认模式</li>
+<li>客户端遇到一个引用对象就立即产生一个请求</li>
+<li>所有引用（小）对象只花费一个 RTT 是可能的</li>
+</ul>
+<hr>
+<p><strong>性能对比：获取 n 个小对象</strong></p>
+<p><em>时间主要取决于延迟</em></p>
+<ul>
+<li>逐个获取：~2n RTT</li>
+<li>m 个并发：~2[n/m] RTT</li>
+<li><mark>持久连接：~(n+1)RTT</mark></li>
+<li><mark>流水线：~2 RTT</mark></li>
+<li><mark><strong>流水线/持久连接：首次~2 RTT，后续 RTT</strong></mark></li>
+</ul>
+<p><strong>性能对比：获取 n 个大对象（每个大小为 F）</strong></p>
+<p><em>时间主要取决于带宽</em></p>
+<ul>
+<li>逐个获取：~nF/B</li>
+<li>m 个并发：~[n/m]F/B
+<ul>
+<li>假设与大量用户共享，且每个 TCP 连接获得相同带宽</li>
+</ul>
+</li>
+<li>流水线和/或持久连接：~nF/B
+<ul>
+<li>唯一有帮助的是获得更多带宽</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="2-5-http-请求报文">2.5 HTTP 请求报文</h3>
+<p>两种类型的 HTTP 报文：<strong>请求</strong>、<strong>响应</strong></p>
+<p>HTTP 请求报文：ASCII (人能阅读)</p>
+<pre><code class="language-planetext">method URL HTTP-Version CRLF
+header-field-name:value1 CRLF
+...
+header-field-name:valueN CRLF
+CRLF
+[Entity-body]
+</code></pre>
+<ul>
+<li>第一行称为请求行</li>
+<li>中间部分为首部行</li>
+<li>最后一行换行回车符，表示报文结束</li>
+</ul>
+<pre><code class="language-planetext">GET /somedir/page.html HTTP/1.1
+Host: www.someschool.edu
+User-agent: Mozilla/4.0
+Connection: close
+Accept-language:fr 
+</code></pre>
+<h4 id="2-5-1-提交表单输入">2.5.1 提交表单输入</h4>
+<ul>
+<li>Post 方式
+<ul>
+<li>网页通常包括表单输入</li>
+<li>包含在实体主体(entity body)中的输入被提交到服务器</li>
+</ul>
+</li>
+<li>URL 方式：
+<ul>
+<li>方法：GET</li>
+<li>输入通过请求行的 URL 字段上载</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-planetext">www.somesite.com/animalsearch?monkeys&amp;banana
+
+http://www.baidu.com/s?wd=xx+yy+zzz&amp;cl=3
+</code></pre>
+<ul>
+<li>参数：wd，cl</li>
+<li>参数值：XX+YY+zzz，3</li>
+</ul>
+<h4 id="2-5-2-方法类型">2.5.2 方法类型</h4>
+<ul>
+<li>HTTP/1.0
+<ul>
+<li>GET</li>
+<li>POST</li>
+<li>HEAD：要求服务器在响应报文中不包含请求对象-&gt;故障跟踪</li>
+</ul>
+</li>
+<li>HTTP/1.1
+<ul>
+<li>GET, POST, HEAD</li>
+<li>PUT：将实体主体中的文件上载到URL字段规定的路径</li>
+<li>DELETE：删除URL字段规定的文件</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-6-http-响应报文">2.6 HTTP 响应报文</h3>
+<pre><code class="language-planetext">HTTP/1.1 200 OK\r\n
+Connection: close\r\n
+Date: Thu, 06 Aug 1998 12:00:15 GMT\r\n
+Server: Apache/1.3.0 (Unix) \r\n
+Last-Modified: Mon, 22 Jun 1998 …... \r\n
+Content-Length: 6821\r\n
+Content-Type: text/html\r\n
+\r\n
+data data data data data ...
+</code></pre>
+<ul>
+<li>第一行是状态行(协议版本、状态码和相应状态信息)</li>
+<li>中间部分为首部行</li>
+<li>最后的是数据，如请求的HTML文件</li>
+</ul>
+<h3 id="2-7-用户-服务器状态-cookies">2.7 用户-服务器状态：cookies</h3>
+<p>大多数主要的门户网站<mark>使用 cookies，解决 HTTP 协议“无状态”的特性</mark></p>
+<p>4个组成部分：</p>
+<ol>
+<li>在<mark>HTTP响应报文</mark>中有一个 cookie 的首部行</li>
+<li>在<mark>HTTP请求报文</mark>含有一个 cookie 的首部行</li>
+<li><mark>在用户端系统中保留有一个 cookie 文件，由用户的浏览器管理</mark></li>
+<li><mark>在Web站点有一个后端数据库</mark></li>
+</ol>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-4.webp" alt="alt text" loading="lazy"></p>
+<p>Cookies 能带来什么：用户验证、购物车、推荐、用户状态(Web email)</p>
+<p>如何维持状态：</p>
+<ul>
+<li>协议端节点：在多个事务上，发送端和接收端维持状态</li>
+<li>cookies: http 报文携带状态信息</li>
+</ul>
+<blockquote>
+<p>Cookies and privacy</p>
+</blockquote>
+<ul>
+<li>Cookies permit servers to learn a lot about user</li>
+<li>User may supply name and Email to servers</li>
+<li>Search engines may use cookies to obtain info across sites</li>
+<li>Hacked browser may do bad things with cookies</li>
+</ul>
+<h3 id="2-8-web-缓存-代理服务器">2.8 Web 缓存 (代理服务器)</h3>
+<p>目标：不访问原始服务器，就满足客户的请求</p>
+<ul>
+<li>用户设置浏览器： 通过缓存访问 Web</li>
+<li>浏览器将所有的 HTTP 请求发给缓存
+<ul>
+<li>在缓存中的对象：缓存直接返回对象</li>
+<li>如对象不在缓存，缓存请求原始服务器，然后再将对象返回给客户端</li>
+</ul>
+</li>
+<li>缓存既是客户端又是服务器</li>
+<li>通常缓存是由 ISP 安装 (大学、公司、居民区 ISP)
+<ul>
+<li><mark>“正向代理”</mark></li>
+</ul>
+</li>
+</ul>
+<p>使用 Web 缓存的好处：</p>
+<ul>
+<li>降低客户端的请求响应时间</li>
+<li>可以大大减少一个机构内部网络与 Internent 接入链路上的流量</li>
+<li>互联网大量采用了缓存：可以使较弱的 ICP 也能够有效提供内容</li>
+</ul>
+<hr>
+<p>假设</p>
+<ul>
+<li>平均对象大小 = 100kb</li>
+<li>机构内浏览器对原始服务器的平均请求率为 = 15请求/s</li>
+<li>平均到浏览器的速率：1.5Mbps</li>
+<li>机构内部路由器到原始服务器再返回到路由器的的延时（Internet 延时）= 2s</li>
+<li>接入链路带宽：1.54Mbps</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-5.webp" alt="alt text" loading="lazy"></p>
+<p>结果</p>
+<ul>
+<li>LAN 的流量强度 = 15%</li>
+<li>接入链路上的流量强度 = 99%（\(1.5 / 1.54 \approx 0.99\)）</li>
+<li>总延时 = LAN 延时 + 接入延时 + Internet 延时 = ms + 分 + 2s</li>
+</ul>
+<p>如果增加链路带宽，流量强度降低，总延迟降低，但是昂贵</p>
+<p>安装本地缓存：</p>
+<ul>
+<li>假设缓存命中率0.4
+<ul>
+<li>40%请求在缓存中被满足</li>
+<li>其他60%的请求需要被原始服务器满足</li>
+</ul>
+</li>
+<li>接入链路利用率:
+<ul>
+<li>60%的请求采用接入链路</li>
+<li>经过接入链路到达浏览器的数据速率 = 0.6*1.50 Mbps = 0.9 Mbps</li>
+<li>利用率 = 0.9/1.54 = 0.58</li>
+</ul>
+</li>
+<li>总体延迟：
+<ul>
+<li>= 0.6 * (从原始服务器获取对象的延迟) + 0.4 * (从缓存获取对象的延迟)</li>
+<li>= 0.6 (2.01) + 0.4 (~msecs)</li>
+<li>= ~ 1.2 secs</li>
+<li>比安装154Mbps链路还来得小 (而且比较便宜)</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="条件get方法">条件GET方法</h4>
+<p>目标：如果缓存器中的对象拷贝是最新的，就不发送对象</p>
+<p>缓存器: 在HTTP请求中指定缓存拷贝的日期 <code>If-modified-since:&lt;date&gt;</code></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-6.webp" alt="alt text" loading="lazy"></p>
+<hr>
+<h4 id="caching-where">Caching: Where?</h4>
+<ul>
+<li>Client (browser)</li>
+<li>Forward proxies</li>
+<li>Reverse proxies</li>
+<li>Content Distribution Network</li>
+</ul>
+<h2 id="3-ftp">3 FTP</h2>
+<p>文件传输协议（File Transfer Protocol）</p>
+<ul>
+<li>向远程主机上传输或接收文件</li>
+<li>客户/服务器模式
+<ul>
+<li>客户端：发起传输的一方</li>
+<li>服务器：远程主机</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-7.webp" alt="alt text" loading="lazy"></p>
+<h3 id="控制连接与数据连接分开">控制连接与数据连接分开</h3>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-8.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>
+<p><mark>FTP 客户端与 FTP 服务器通过<strong>端口 21</strong> 联系，并使用 TCP 为传输协议</mark></p>
+</li>
+<li>
+<p>客户端通过控制连接获得身份确认</p>
+</li>
+<li>
+<p>客户端通过控制连接发送命令浏览远程目录</p>
+</li>
+<li>
+<p>收到一个文件传输命令时，服务器打开一个到客户端的数据连接(服务器主动向客户端)</p>
+</li>
+<li>
+<p>一个文件传输完成后，服务器关闭连接</p>
+</li>
+<li>
+<p>服务器打开第二个TCP数据连接用来传输另一个文件</p>
+</li>
+<li>
+<p>FTP服务器维护用户的状态信息：当前路径、用户帐户与控制连接对应</p>
+</li>
+<li>
+<p><strong>有状态</strong></p>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-174.webp" alt="alt text" loading="lazy"></p>
+<table>
+<thead>
+<tr>
+<th>Sample commands:</th>
+<th>Sample return codes:</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>• Sent as ASCII text over control channel</td>
+<td>• Status code and phrase (as in HTTP)</td>
+</tr>
+<tr>
+<td>• USER username</td>
+<td>• 331 Username OK, password required</td>
+</tr>
+<tr>
+<td>• PASS password</td>
+<td>• 125 data connection already open; transfer starting</td>
+</tr>
+<tr>
+<td>• LIST return list of file in current directory</td>
+<td>• 425 Can’t open data connection</td>
+</tr>
+<tr>
+<td>• RETR filename retrieves (gets) file</td>
+<td>• 452 Error writing file</td>
+</tr>
+<tr>
+<td>• STOR filename stores (puts) file onto remote server</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-email">4 EMail</h2>
+<blockquote>
+<p>• 互联网上使用最广泛的应用之一
+• SMTP：简单邮件传输协议
+– 传送简单文本消息
+• MIME：多用途互联网邮件扩展
+– <mark>传送其他类型数据，如语音、图像、视频片段</mark>
+• POP：邮局协议
+– 从服务器检索邮件，包括身份验证和下载
+• IMAP：Internet 邮件访问协议
+– 操作服务器上存储的邮件</p>
+</blockquote>
+<p>3个主要组成部分：</p>
+<ul>
+<li>用户代理
+<ul>
+<li>又名 “邮件阅读器”</li>
+<li>撰写、编辑和阅读邮件</li>
+<li>输出和输入邮件保存在服务器上</li>
+</ul>
+</li>
+<li>邮件服务器
+<ul>
+<li>邮箱中管理和维护发送给用户的邮件</li>
+<li>输出报文队列保持待发送邮件报文</li>
+<li>邮件服务器之间的 SMTP 协议：发送 email 报文
+<ul>
+<li>客户：发送方邮件服务器</li>
+<li>服务器：接收方邮件服务器</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>简单邮件传输协议：SMTP</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-9.webp" alt="alt text" loading="lazy"></p>
+<h3 id="4-1-邮件传递的阶段">4.1 邮件传递的阶段</h3>
+<ul>
+<li>第一阶段
+<ul>
+<li>邮件从本地用户代理发送到本地 SMTP 服务器</li>
+<li>用户代理充当 SMTP 客户端</li>
+<li>本地服务器充当 SMTP 服务器</li>
+</ul>
+</li>
+<li>第二阶段
+<ul>
+<li>邮件由本地服务器中继到远程 SMTP 服务器</li>
+<li>此时本地服务器充当 SMTP 客户端</li>
+</ul>
+</li>
+<li>第三阶段
+<ul>
+<li>远程用户代理使用邮件访问协议访问远程服务器上的邮箱</li>
+<li><mark>POP3 或 IMAP4</mark></li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-175.webp" alt="alt text" loading="lazy"></p>
+<ol>
+<li>Alice 使用用户代理撰写邮件并发送给 <a href="mailto:bob@someschool.edu">bob@someschool.edu</a></li>
+<li>Alice 的用户代理将邮件发送到她的邮件服务器，邮件放在报文队列中</li>
+<li>SMTP 的客户端打开到 Bob 邮件服务器的 TCP 连接</li>
+<li>SMTP 客户端通过 TCP 连接发送 Alice 的邮件</li>
+<li>Bob 的邮件服务器将邮件放到Bob的邮箱</li>
+<li>Bob 调用他的用户代理阅读邮件</li>
+</ol>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-10.webp" alt="alt text" loading="lazy"></p>
+<h3 id="4-2-smtp">4.2 SMTP</h3>
+<ul>
+<li><mark>使用 TCP 在客户端和服务器之间传送报文，<strong>端口号为 25</strong></mark></li>
+<li>直接传输：从发送方服务器到接收方服务器</li>
+<li>传输过程依赖于写在邮件“信封”上的信息（即消息头）</li>
+<li>路径追踪：协议允许在消息头中添加日志信息，以显示邮件传输所经过的路径</li>
+<li>传输的 3 个阶段
+<ul>
+<li>握手</li>
+<li>传输报文</li>
+<li>关闭</li>
+</ul>
+</li>
+<li>命令/响应交互
+<ul>
+<li>命令：ASCII 文本</li>
+<li>响应：状态码和状态信息</li>
+</ul>
+</li>
+<li>不包含格式定义：SMTP 本身不涵盖邮件消息的具体格式或数据内容</li>
+</ul>
+<p>SMTP 的可靠性</p>
+<ul>
+<li>通过 TCP 连接从发送方向接收方传输邮件
+<ul>
+<li>依赖 TCP 提供可靠服务</li>
+</ul>
+</li>
+<li>不保证能够恢复丢失的邮件</li>
+<li>没有对发件人（用户）的端到端确认</li>
+<li>错误指示的传递无法保证
+<ul>
+<li>仅表明邮件已到达主机，但未必到达用户</li>
+</ul>
+</li>
+<li>通常被认为是可靠的</li>
+</ul>
+<p>SMTP：总结</p>
+<ul>
+<li>SMTP 使用<strong>持久连接</strong></li>
+<li>SMTP 要求报文（首部和主体）为 7 位 ASCII 编码</li>
+<li>SMTP 服务器使用 CRLF.CRLF 决定报文的尾部</li>
+</ul>
+<p>HTTP比较：</p>
+<ul>
+<li>HTTP：拉（pull）</li>
+<li>SMTP：推（push）</li>
+<li>二者都是ASCII形式的命令/响应交互、状态码</li>
+<li>HTTP：每个对象封装在各自的响应报文中</li>
+<li>SMTP：多个对象包含在一个报文中</li>
+</ul>
+<h3 id="4-3-邮件访问协议">4.3 邮件访问协议</h3>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-176.webp" alt="alt text" loading="lazy"></p>
+<p><em>前两跳是“推”，最后一跳是“拉”</em></p>
+<p>SMTP: 传送到接收方的邮件服务器
+邮件访问协议：从服务器访问邮件（Mail access protocol）</p>
+<ul>
+<li>POP：邮局访问协议（Post Office Protocol）
+<ul>
+<li>用户身份确认 (代理&lt;–&gt;服务器) 并下载</li>
+</ul>
+</li>
+<li>IMAP：Internet 邮件访问协议（Internet Mail Access Protocol）
+<ul>
+<li>更多特性 (更复杂)</li>
+<li>在服务器上处理存储的报文</li>
+</ul>
+</li>
+<li>HTTP：Hotmail , Yahoo! Mail等
+<ul>
+<li>方便</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-3-1-pop3-协议">4.3.1 POP3 协议</h4>
+<ul>
+<li>用户确认阶段
+<ul>
+<li>客户端命令：
+<ul>
+<li>user: 申明用户名</li>
+<li>pass: 口令</li>
+</ul>
+</li>
+<li>服务器响应
+<ul>
+<li>+OK</li>
+<li>-ERR</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>事物处理阶段, 客户端：
+<ul>
+<li>list: 报文号列表</li>
+<li>retr: 根据报文号检索报文</li>
+<li>dele: 删除</li>
+<li>quit</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-3-2-pop3-与-imap">4.3.2 POP3 与 IMAP</h4>
+<p>POP3 协议通过“下载并删除”或“下载并保留”模式在本地管理邮件，属于无状态协议；而 IMAP 协议则将所有邮件集中存储在服务器端，支持多设备同步访问、文件夹管理以及跨会话的状态保持（如已读、回复状态）</p>
+<p><strong>POP3</strong></p>
+<ul>
+<li><strong>操作模式</strong>：
+<ul>
+<li><strong>下载并删除</strong>：这是默认模式。邮件被下载到客户端后从服务器删除。缺点是如果用户更换客户端（例如从办公室换到家里），无法重新读取之前的邮件。</li>
+<li><strong>下载并保留</strong>：邮件在服务器上保留副本。这允许用户在不同客户端上获取邮件的副本，解决了移动办公的需求。</li>
+</ul>
+</li>
+<li><strong>状态特性</strong>：
+<ul>
+<li><strong>跨会话无状态</strong>：POP3 不记录用户在服务器上的操作状态。一旦会话结束，服务器不知道用户是否阅读或处理了邮件。</li>
+</ul>
+</li>
+</ul>
+<p><strong>IMAP</strong></p>
+<ul>
+<li><strong>集中存储</strong>：
+<ul>
+<li><mark>所有邮件都保存在服务器这一“单一位置”。</mark></li>
+</ul>
+</li>
+<li><strong>复杂用例支持</strong>：
+<ul>
+<li>支持多用户或多设备同时访问同一邮箱。例如，Bob 在办公室阅读邮件时，他的妻子可以在家里同时访问同一个邮箱，数据保持同步。</li>
+</ul>
+</li>
+<li><strong>组织与管理</strong>：
+<ul>
+<li>允许用户在服务器上创建文件夹来组织邮件。</li>
+</ul>
+</li>
+<li><strong>状态保持</strong>：
+<ul>
+<li><strong>跨会话有状态</strong>：IMAP 会在服务器上记录用户的操作状态。</li>
+<li><strong>记录内容</strong>：包括文件夹名称、邮件ID与文件夹的映射关系，以及邮件的具体状态（如：已读、已回复、已删除）。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-4-邮件报文格式">4.4 邮件报文格式</h3>
+<p>SMTP：交换 email 报文的协议</p>
+<ul>
+<li>首部行：如
+<ul>
+<li>To: <a href="mailto:Alice@sina.com">Alice@sina.com</a></li>
+<li>From: <a href="mailto:Bob@gmail.com">Bob@gmail.com</a></li>
+<li>Subject: Dinner tonight</li>
+<li><em>与 SMTP 命令不同</em></li>
+</ul>
+</li>
+<li>主体
+<ul>
+<li>报文，只能是 ASCII 码字符</li>
+</ul>
+</li>
+<li>Mail destinations: Mailbox @ SMTP Server
+<ul>
+<li>Mailbox: Name of mailbox on the SMTP server</li>
+<li>SMTP Server: DNS name or IP of the SMTP server</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-planetext">首部
+空行 &lt;-
+主体
+</code></pre>
+<h3 id="4-5-mime">4.5 MIME</h3>
+<p>MIME：多媒体邮件扩展（multimedia mail extension）</p>
+<p>解决 SMTP 只支持 7 位的 ASCII 码的问题</p>
+<ul>
+<li>核心功能与扩展性
+<ul>
+<li>扩展并自动化了邮件的编码机制</li>
+<li>允许用户将独立的组件整合到单封邮件中
+<ul>
+<li>除了普通文本，邮件现在可以包含：程序、图片、音频、视频</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>主要特性
+<ul>
+<li>向后兼容性：与现有的邮件系统完全兼容
+<ul>
+<li>编码方式：所有内容均被编码为 7 位 ASCII 格式</li>
+<li>非 MIME 系统处理：对于不支持 MIME 的旧系统，MIME 的头部信息和分隔符会被直接忽略，从而避免乱码或错误</li>
+</ul>
+</li>
+<li>可扩展性：MIME 架构是开放的。只要发送方和接收方就编码方案达成一致，即可支持新的数据类型</li>
+</ul>
+</li>
+</ul>
+<p>• 5 new mail header fields</p>
+<ul>
+<li>MIME version</li>
+<li>Content type</li>
+<li>Content transfer encoding</li>
+<li>Content Id</li>
+<li>Content Description</li>
+</ul>
+<p>• Number of content formats defined
+• Transfer encoding defined</p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-11.webp" alt="alt text" loading="lazy"></p>
+<h2 id="5-dns">5 DNS</h2>
+<p>DNS 域名系统(Domain Name System)，用于实现域名到IP地址的转换</p>
+<p>DNS 的必要性</p>
+<ul>
+<li><mark>IP地址标识主机、路由器</mark></li>
+<li>存在着 “字符串” — IP 地址的转换的必要性</li>
+<li>人类用户提供要访问机器的“字符串”名称</li>
+<li>由DNS负责转换成为二进制的网络地址</li>
+</ul>
+<p>DNS系统需要解决的问题：</p>
+<ul>
+<li>Q1 如何命名设备
+<ul>
+<li>用有意义的字符串：好记，便于人类用使用</li>
+<li>解决一个平面命名的重名问题：层次化命名</li>
+</ul>
+</li>
+<li>Q2 如何完成名字到IP地址的转换
+<ul>
+<li>分布式的数据库维护和响应名字查询</li>
+</ul>
+</li>
+<li>Q3 如何维护
+<ul>
+<li>增加或者删除一个域，需要在域名系统中做哪些工作</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-2-dns-总体思路和目标">5.2 DNS 总体思路和目标</h3>
+<h4 id="主要思路">主要思路</h4>
+<ul>
+<li><strong>分层的</strong>、基于域的命名机制</li>
+<li>若干<strong>分布式</strong>的数据库完成名字到IP地址的转换</li>
+<li>运行在UDP之上<strong>端口号为53</strong>的<strong>应用</strong>服务</li>
+<li><mark>核心的Internet功能，但以<strong>应用层协议</strong>实现</mark>
+<ul>
+<li><mark>在网络边缘处理复杂性</mark></li>
+</ul>
+</li>
+</ul>
+<h4 id="主要目的">主要目的</h4>
+<ul>
+<li>实现主机名-IP地址的转换</li>
+<li>其它目的
+<ul>
+<li>主机别名到规范名字的转换：Host aliasing</li>
+<li>邮件服务器别名到邮件服务器的正规名字的转换：Mail server aliasing</li>
+<li>负载均衡：Load Distribution</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-3-q1-dns-名字空间">5.3 Q1 DNS 名字空间</h3>
+<h4 id="dns域名结构">DNS域名结构</h4>
+<ul>
+<li>一个层面命名设备会有很多重名</li>
+<li>DNS 采用<strong>层次树状结构的命名方法</strong></li>
+<li>Internet 根被划为几百个顶级域</li>
+<li>每个(子)域下面可划分为若干子域</li>
+<li>树叶是主机</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-13.webp" alt="alt text" loading="lazy"></p>
+<h4 id="域名-domain-name">域名(Domain Name)</h4>
+<ul>
+<li>从本域往上，直到树根</li>
+<li>中间使用“.”间隔不同的级别
+<ul>
+<li>域的域名：可以用于表示一个域</li>
+<li>主机的域名：一个域上的一个主机</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-note"><p>假设你正在为一个小游戏项目搭建网络架构，并且你注册了一个域的域名叫 <a href="http://mygame.com">mygame.com</a>。</p>
+<ul>
+<li>域的使用：<a href="http://mygame.com">mygame.com</a> 是你拥有的整个资产的名称。</li>
+<li>主机的分配：
+<ul>
+<li>你配置了一台运行着 Spring Boot 后端程序的 Linux 虚拟机，你可以给这台主机分配一个域名：<a href="http://api.mygame.com">api.mygame.com</a>。</li>
+<li>你可能还有另一台专门运行 MySQL 的数据库服务器，你可以给这台主机分配域名：<a href="http://db.mygame.com">db.mygame.com</a>。</li>
+<li>前端 React 页面所在的 Web 服务器，主机域名可以是 <a href="http://www.mygame.com">www.mygame.com</a>。</li>
+</ul>
+</li>
+</ul>
+<p>在这个例子中，api、db、www 都是特定主机的名称，而它们共同归属于 <a href="http://mygame.com">mygame.com</a> 这个域。当客户端发起网络请求时，DNS 最终会将这些“主机的域名”解析为你那些虚拟机的具体 IP 地址。</p>
+</div><h4 id="域名的管理">域名的管理</h4>
+<ul>
+<li>一个域管理其下的子域
+.jp 被划分为 <a href="http://ac.jp">ac.jp</a>, <a href="http://co.jp">co.jp</a>
+.cn 被划分为 <a href="http://edu.cn">edu.cn</a>, <a href="http://com.cn">com.cn</a></li>
+<li>创建一个新的域，必须征得它所属域的同意</li>
+</ul>
+<h4 id="域与物理网络无关">域与物理网络无关</h4>
+<ul>
+<li>域遵从组织界限，而不是物理网络
+<ul>
+<li>一个域的主机可以不在一个网络</li>
+<li>一个网络的主机不一定在一个域</li>
+</ul>
+</li>
+<li>域的划分是逻辑的，而不是物理的</li>
+</ul>
+<h3 id="5-4-q2-解析问题-名字服务器">5.4 Q2 解析问题-名字服务器</h3>
+<ul>
+<li>一个名字服务器的问题
+<ul>
+<li>可靠性问题：单点故障</li>
+<li>扩展性问题：通信容量</li>
+<li>维护问题：远距离的集中式数据库</li>
+</ul>
+</li>
+<li>区域(zone)
+<ul>
+<li>区域的划分由区域管理者自己决定</li>
+<li>将DNS名字空间划分为互不相交的区域，每个区域都是树的一部分</li>
+<li>名字服务器：
+<ul>
+<li>每个区域都有一个名字服务器：维护着它所管辖区域的权威信息</li>
+<li>名字服务器允许被放置在区域之外，以保障可靠性</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>权威DNS服务器：组织机构的DNS服务器，提供组织机构服务器（如Web和mail）可访问的主机和IP之间的映射</p>
+<p>组织机构可以选择实现自己维护或由某个服务提供商来维护</p>
+<h4 id="tld服务器">TLD服务器</h4>
+<ul>
+<li>顶级域(TLD)服务器：负责顶级域名和所有国家级的顶级域名</li>
+</ul>
+<h4 id="区域名字服务器维护资源记录-resource-record-rr">区域名字服务器维护资源记录(Resource Record, RR)</h4>
+<p>资源记录</p>
+<ul>
+<li>作用：维护域名-IP地址(其它)的映射关系</li>
+<li>位置：Name Server的分布式数据库中</li>
+</ul>
+<p>RR格式: (domain_name, ttl, type,class,Value)</p>
+<ul>
+<li>Domain_name: 域名</li>
+<li>Ttl: time to live: 生存时间(权威，缓冲记录)</li>
+</ul>
+<h4 id="dns大致工作过程">DNS大致工作过程</h4>
+<ul>
+<li>应用调用解析器(resolver)</li>
+<li>解析器作为客户向Name Server发出查询报文（封装在UDP段中）</li>
+<li>Name Server返回响应报文(name/ip)</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-14.webp" alt="alt text" loading="lazy"></p>
+<p>本地名字服务器（Local Name Server）:</p>
+<ul>
+<li>并不严格属于层次结构</li>
+<li>每个ISP（居民区的ISP、公司、大学）都有一个本地DNS服务器
+<ul>
+<li>也称为 “默认名字服务器”</li>
+</ul>
+</li>
+<li>当一个主机发起一个DNS查询时，查询被送到其本地DNS服务器
+<ul>
+<li>起着代理的作用，将查询转发到层次结构中</li>
+</ul>
+</li>
+</ul>
+<h4 id="名字服务器-name-server">名字服务器 (Name Server)</h4>
+<p>名字解析过程：</p>
+<ul>
+<li>目标名字在Local Name Server中
+<ul>
+<li>情况1：查询的名字在该区域内部（权威应答）</li>
+<li>情况2：缓存(caching)</li>
+</ul>
+</li>
+</ul>
+<p>当与本地名字服务器不能解析名字时，联系根名字服务器顺着根-TLD一直找到权威名字服务器</p>
+<h4 id="递归查询">递归查询</h4>
+<ul>
+<li>名字解析负担都放在当前联络的名字服务器上</li>
+<li>问题：根服务器的负担太重</li>
+<li>解决办法：迭代查询</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-15.webp" alt="alt text" loading="lazy"></p>
+<h4 id="迭代查询">迭代查询</h4>
+<ul>
+<li><mark>根（及各级域名）服务器返回的不是查询结果，而是下一个NS的地址</mark></li>
+<li>最后由权威名字服务器给出解析结果</li>
+<li>当前联络的服务器给出可以联系的服务器的名字</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-16.webp" alt="alt text" loading="lazy"></p>
+<h4 id="dns协议-报文">DNS协议、报文*</h4>
+<p>DNS协议：<strong>查询</strong>和<strong>响应</strong>报文的<strong>报文格式</strong>相同</p>
+<pre><code class="language-planetext">|&lt;--- 2 bytes ----&gt;|&lt;--- 2 bytes ----&gt;|
++------------------+------------------+
+|  identification  |     flags        |
++------------------+------------------+
+|  # questions     | # answer RRs     |
++------------------+------------------+
+| # authority RRs  | # additional RRs |
++------------------+------------------+
+| questions (variable # of questions) | 一个查询的Name, type字段
++------------------+------------------+
+|    answers (variable # of RRs)      | 对应查询的RR记录
++------------------+------------------+
+|    authority (variable # of RRs)    | 权威服务器的记录
++------------------+------------------+
+| additional info (variable # of RRs) | 权威服务器的记录
++------------------+------------------+
+</code></pre>
+<p>报文首部</p>
+<ul>
+<li>标识符（ID）：16位</li>
+<li>flags:
+<ul>
+<li>查询/应答</li>
+<li>希望递归</li>
+<li>递归可用</li>
+<li>应答为权威</li>
+</ul>
+</li>
+</ul>
+<h4 id="提高性能-缓存">提高性能：缓存</h4>
+<ul>
+<li>一旦名字服务器学到了一个映射，就将该映射缓存起来</li>
+<li>根服务器通常都在本地服务器中缓存着
+<ul>
+<li>使得根服务器不用经常被访问</li>
+</ul>
+</li>
+<li>目的：提高效率</li>
+<li>可能存在的问题：如果情况变化，缓存结果和权威资源记录<strong>不一致</strong></li>
+<li>解决方案：TTL（默认2天）</li>
+</ul>
+<h3 id="5-5-q3-维护问题-新增一个域">5.5 Q3 维护问题：新增一个域</h3>
+<ul>
+<li>在上级域的名字服务器中增加两条记录，指向这个新增的 子域的域名 和 域名服务器的地址</li>
+<li>在新增子域的名字服务器上运行名字服务器，负责本域的名字解析：名字 -&gt; IP地址</li>
+</ul>
+<p>例子：在 com 域中建立一个 “Network Utopia”</p>
+<ul>
+<li>到注册登记机构注册域名 <a href="http://networkutopia.com">networkutopia.com</a>
+<ul>
+<li>需要向该机构提供权威DNS服务器（基本的、和辅助的）的名字和IP地址</li>
+<li>登记机构在com TLD服务器中插入两条RR记录: (<a href="http://networkutopia.com">networkutopia.com</a>, <a href="http://dns1.networkutopia.com">dns1.networkutopia.com</a>, NS)
+(<a href="http://dns1.networkutopia.com">dns1.networkutopia.com</a>, 212.212.212.1, A)</li>
+</ul>
+</li>
+<li>在networkutopia.com的权威服务器中确保有
+<ul>
+<li>用于Web服务器的www.networkuptopia.com的类型为A的记录</li>
+<li>用于邮件服务器mail.networkutopia.com的类型为MX的记录</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><em>攻击DNS（结论：DNS比较健壮）</em>。</p>
+</blockquote>
+<h2 id="6-p2p-应用">6 P2P 应用</h2>
+<h3 id="6-1-纯p2p架构">6.1 纯P2P架构</h3>
+<ul>
+<li>没有（或极少）一直运行的服务器</li>
+<li>任意端系统都可以直接通信</li>
+<li>利用peer的服务能力</li>
+<li>Peer 节点间歇上网，每次IP地址都有可能变化</li>
+</ul>
+<h3 id="6-2-文件分发-c-s-vs-p2p">6.2 文件分发：C/S vs P2P</h3>
+<blockquote>
+<p>从一台服务器分发文件（大小 F）到 N 个 peer 需要多少时间？</p>
+</blockquote>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-17.webp" alt="alt text" loading="lazy"></p>
+<h4 id="c-s模式">C/S模式</h4>
+<ul>
+<li>
+<p><strong>服务器传输</strong>：都是由服务器发送给 peer，服务器必须顺序传输（上载）N 个文件拷贝：</p>
+<ul>
+<li>发送一个 copy：\(F/u_s\)</li>
+<li><mark>发送 N 个 copy：\(NF/u_s\)</mark></li>
+</ul>
+</li>
+<li>
+<p><strong>客户端</strong>：每个客户端必须下载一个文件拷贝</p>
+<ul>
+<li>\(d_{min}\) = 客户端最小的下载速率</li>
+<li>下载带宽最小的客户端下载的时间：\(F/d_{min}\)</li>
+</ul>
+</li>
+</ul>
+<p>采用 C-S 方法将一个 \(F\) 大小的文件分发给 \(N\) 个客户端耗时:</p>
+<div class="math-block">\[D_{c-s} \geq \max\{NF/u_s, F/d_{min}\}\]</div>
+<ul>
+<li>当 \(N\) 很小时 \(F/d_{min}\) 为主导（本质是客户端下载带宽 \(d_{min}\)），一般不考虑</li>
+<li>当 \(N\) 很大时 \(NF/u_s\) 为主导（本质是<mark>服务器上载带宽</mark> \(u_s\)），而 \(NF/u_s\) 随着 \(N\) 的增大而<strong>线性增大</strong></li>
+</ul>
+<h4 id="p2p模式">P2P模式</h4>
+<ul>
+<li>
+<p><strong>服务器传输</strong>：最少需要上载一份拷贝</p>
+<ul>
+<li>发送一个拷贝的时间：\(F/u_s\)</li>
+</ul>
+</li>
+<li>
+<p>客户端：每个客户端必须下载一个拷贝</p>
+<ul>
+<li>最小下载带宽客户端单耗时：\(F/d_{min}\)</li>
+</ul>
+</li>
+<li>
+<p>客户端：所有客户端总体下载量 \(NF\)</p>
+<ul>
+<li>除了服务器可以上载，其他所有的 peer 节点都可以上载</li>
+<li><mark>最大上载带宽是：\(u_s + Σu_i\)</mark></li>
+</ul>
+</li>
+</ul>
+<p>采用 P2P 方法将一个 \(F\) 大小的文件分发给 \(N\) 个客户端耗时：</p>
+<div class="math-block">\[D_{P2P} \geq \max\{F/u_s, F/d_{min}, NF/(u_s + \sum u_i)\}\]</div>
+<ul>
+<li>\(NF/(u_s + \sum u_i)\)：分子随着N线性变化，但分母也在变</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-18.webp" alt="alt text" loading="lazy"></p>
+<blockquote>
+<p>P2P 详细内容：略</p>
+</blockquote>
+<h2 id="7-cdn">7 CDN</h2>
+<ul>
+<li>视频流量：占据着互联网大部分的带宽</li>
+<li>挑战：规模性-如何服务者
+<ul>
+<li>单个超级服务器无法提供服务</li>
+</ul>
+</li>
+<li>挑战：异构性
+<ul>
+<li>不同用户拥有不同的能力（例如：有线接入和移动用户；带宽丰富和受限用户）</li>
+</ul>
+</li>
+<li><strong>解决方案</strong>: 分布式的，应用层面的基础设施</li>
+</ul>
+<h3 id="7-2-多媒体流化服务-dash">7.2 多媒体流化服务：DASH*</h3>
+<p>DASH: Dynamic, Adaptive Streaming over HTTP</p>
+<ul>
+<li>服务器:
+<ul>
+<li>将视频文件分割成多个块</li>
+<li>每个块独立存储，编码于不同码率（8-10种）</li>
+<li><strong>告示文件（manifest file）</strong>: 提供不同块的URL</li>
+</ul>
+</li>
+<li>客户端:
+<ul>
+<li>先获取告示文件</li>
+<li>周期性地测量服务器到客户端的带宽</li>
+<li>查询告示文件，在一个时刻请求一个块，HTTP头部指定字节范围
+<ul>
+<li>如果带宽足够，选择最大码率的视频块</li>
+<li>会话中的不同时刻，可以切换请求不同的编码块 (取决于当时的可用带宽)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>“智能” 客户端: 客户端自适应决定</p>
+<ul>
+<li>什么时候去请求块 (不至于缓存挨饿，或者溢出)</li>
+<li>请求什么编码速率的视频块 (当带宽够用时，请求高质量的视频块)</li>
+<li>哪里去请求块 (可以向离自己近的服务器发送URL，或者向高可用带宽的服务器请求)</li>
+</ul>
+<h3 id="7-3-cdn-内容分发网络">7.3 <mark>CDN: 内容分发网络</mark></h3>
+<p>CDN: Content Delivery Network</p>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>挑战: 服务器如何通过网络向上百万用户同时流化视频内容 (上百万视频内容)?</div></div><p>选择1: 单个的、大的超级服务中心</p>
+<ul>
+<li>服务器到客户端路径上<strong>跳数较多</strong>，瓶颈链路的带宽小导致停顿</li>
+<li>“二八规律” 决定了网络同时充斥着同一个视频的<strong>多个拷贝</strong>，效率低（付费高、带宽浪费、效果差）</li>
+<li>单点故障，性能瓶颈</li>
+<li>周边网络的拥塞</li>
+</ul>
+<p>评述：相当简单，但是这个方法<strong>不可扩展</strong></p>
+<hr>
+<p>选项2: <mark>通过CDN，<strong>全网部署缓存节点</strong></mark>，存储服务内容，就近为用户提供服务，提高用户体验</p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-177.webp" alt="alt text" loading="lazy"></p>
+<p>部署缓存节点策略：</p>
+<ul>
+<li>深入部署模式
+<ul>
+<li>将 CDN 服务器深入到许多接入网</li>
+<li>更接近用户，数量多，离用户近，管理困难</li>
+</ul>
+</li>
+<li>集中部署 / 带回式模式
+<ul>
+<li>部署在少数(10个左右)关键位置，如将服务器簇安装于POP附近（离若干1st ISP POP较近）</li>
+<li>采用租用线路将服务器簇连接起来</li>
+</ul>
+</li>
+</ul>
+<p>CDN: 在CDN节点中存储内容的多个拷贝</p>
+<p>用户从CDN中请求内容</p>
+<ul>
+<li><mark>重定向到最近的拷贝，请求内容</mark></li>
+<li><mark>如果网络路径拥塞，可能选择不同的拷贝</mark></li>
+</ul>
+<hr>
+<p>内容复制</p>
+<ul>
+<li>内容提供者（源服务器）是 CDN 的客户</li>
+<li>CDN 在 CDN 服务器中复制客户的内容</li>
+<li>当提供者更新内容时，CDN 更新其服务器</li>
+<li>使用权威 DNS 服务器重定向请求</li>
+</ul>
+<p>支撑技术</p>
+<ul>
+<li>DNS
+<ul>
+<li>一个名称映射到多个地址</li>
+</ul>
+</li>
+<li>路由
+<ul>
+<li>基于内容的路由（到最近的 CDN 服务器）</li>
+</ul>
+</li>
+<li>URL 重写
+<ul>
+<li>将“<a href="http://www.sina.com/sports/tennis.mov%E2%80%9D%E6%9B%BF%E6%8D%A2%E4%B8%BA%E2%80%9Chttp://www.cdn.com/www.sina.com/sports/tennis.mov%E2%80%9D">http://www.sina.com/sports/tennis.mov”替换为“http://www.cdn.com/www.sina.com/sports/tennis.mov”</a></li>
+</ul>
+</li>
+<li>重定向策略
+<ul>
+<li>负载均衡、网络延迟、缓存/内容局部性</li>
+</ul>
+</li>
+</ul>
+<p>重定向</p>
+<ul>
+<li>CDN 创建一张“地图”，指示各叶 ISP 与 CDN 服务器之间的距离</li>
+<li>当查询到达权威 DNS 服务器时
+<ul>
+<li>服务器确定查询来源于哪个 ISP</li>
+<li>使用“地图”确定最佳 CDN 服务器</li>
+</ul>
+</li>
+<li>CDN 服务器创建一个应用层覆盖网络</li>
+</ul>
+<hr>
+<ul>
+<li>用户代理：与上层应用和下层网络进行交互
+<ul>
+<li>实现用户界面和应用层协议，例如</li>
+<li>Web：浏览器、Web 服务器</li>
+<li>Email：邮件阅读器、邮件服务器</li>
+<li>流媒体音/视频：媒体播放器、媒体服务器</li>
+</ul>
+</li>
+</ul>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：2 应用层</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-08 06:50:13</p>
+      <p><strong>更新于</strong>：2026-08-07 23:07:52</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/2 应用层.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">2 应用层</div>
+      <ul><li class="toc-l2"><a href="#1-应用层协议原理">1 应用层协议原理</a></li><li class="toc-l3"><a href="#1-1-网络应用的体系结构">1.1 网络应用的体系结构</a></li><li class="toc-l3"><a href="#1-2-进程通信">1.2 进程通信</a></li><li class="toc-l3"><a href="#1-3-应用对传输层的服务的评价指标">1.3 应用对传输层的服务的评价指标</a></li><li class="toc-l3"><a href="#1-4-internet-传输层提供的服务">1.4 Internet 传输层提供的服务</a></li><li class="toc-l2"><a href="#2-web-与-http">2 Web 与 HTTP</a></li><li class="toc-l3"><a href="#2-1-web">2.1 Web</a></li><li class="toc-l3"><a href="#2-2-http-概况">2.2 HTTP 概况</a></li><li class="toc-l3"><a href="#2-3-http-使用-tcp">2.3 <mark>HTTP 使用 TCP</mark></a></li><li class="toc-l3"><a href="#2-4-http-连接">2.4 HTTP 连接</a></li><li class="toc-l3"><a href="#2-5-http-请求报文">2.5 HTTP 请求报文</a></li><li class="toc-l3"><a href="#2-6-http-响应报文">2.6 HTTP 响应报文</a></li><li class="toc-l3"><a href="#2-7-用户-服务器状态-cookies">2.7 用户-服务器状态：cookies</a></li><li class="toc-l3"><a href="#2-8-web-缓存-代理服务器">2.8 Web 缓存 (代理服务器)</a></li><li class="toc-l2"><a href="#3-ftp">3 FTP</a></li><li class="toc-l3"><a href="#控制连接与数据连接分开">控制连接与数据连接分开</a></li><li class="toc-l2"><a href="#4-email">4 EMail</a></li><li class="toc-l3"><a href="#4-1-邮件传递的阶段">4.1 邮件传递的阶段</a></li><li class="toc-l3"><a href="#4-2-smtp">4.2 SMTP</a></li><li class="toc-l3"><a href="#4-3-邮件访问协议">4.3 邮件访问协议</a></li><li class="toc-l3"><a href="#4-4-邮件报文格式">4.4 邮件报文格式</a></li><li class="toc-l3"><a href="#4-5-mime">4.5 MIME</a></li><li class="toc-l2"><a href="#5-dns">5 DNS</a></li><li class="toc-l3"><a href="#5-2-dns-总体思路和目标">5.2 DNS 总体思路和目标</a></li><li class="toc-l3"><a href="#5-3-q1-dns-名字空间">5.3 Q1 DNS 名字空间</a></li><li class="toc-l3"><a href="#5-4-q2-解析问题-名字服务器">5.4 Q2 解析问题-名字服务器</a></li><li class="toc-l3"><a href="#5-5-q3-维护问题-新增一个域">5.5 Q3 维护问题：新增一个域</a></li><li class="toc-l2"><a href="#6-p2p-应用">6 P2P 应用</a></li><li class="toc-l3"><a href="#6-1-纯p2p架构">6.1 纯P2P架构</a></li><li class="toc-l3"><a href="#6-2-文件分发-c-s-vs-p2p">6.2 文件分发：C/S vs P2P</a></li><li class="toc-l2"><a href="#7-cdn">7 CDN</a></li><li class="toc-l3"><a href="#7-2-多媒体流化服务-dash">7.2 多媒体流化服务：DASH*</a></li><li class="toc-l3"><a href="#7-3-cdn-内容分发网络">7.3 <mark>CDN: 内容分发网络</mark></a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/1 计算机网络概论.html">&lt; 1 计算机网络概论</a>
+      <a class="pager-next" href="/posts/3 传输层.html">3 传输层 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
+<script src="/assets/js/main.js?v=1786162127971" defer></script>
+<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+</body>
+</html>

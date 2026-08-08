@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7 无线网络和移动网络 · Zwing&#39;s blog</title>
+<meta name="description" content="无线网络和移动网络">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">7 无线网络和移动网络</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-07T22:45:13.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-08 06:45:13</time>
+            <time class="meta-item" datetime="2026-08-07T23:07:52+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-07 23:07:52</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 6128 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 21 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#计算机网络"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>计算机网络</a>
+              <a class="tag-chip" href="/tags.html#计算机网络"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>计算机网络</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><div class="callout callout-warning"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>杂糅了中科大（学习过程）与南大（考前复习）的课件而成的笔记，排版与质量可能不保证</div></div><h2 id="一-无线网络基本要素与分类">一、 无线网络基本要素与分类</h2>
+<h3 id="1-无线网络的核心要素-elements-of-a-wireless-network">1. 无线网络的核心要素 (Elements of a Wireless Network)</h3>
+<p>无线网络主要由以下三个基本要素组成：</p>
+<ul>
+<li><strong>无线主机 (Wireless Hosts)</strong>
+<ul>
+<li><strong>设备类型</strong>：笔记本电脑、智能手机、物联网设备 (IoT) 等。</li>
+<li><strong>运行应用</strong>：运行各种网络应用程序。</li>
+<li><strong>移动状态</strong>：可以是<strong>静态的（非移动）<strong>或</strong>移动的</strong>。</li>
+<li>
+<div class="callout callout-note"><p><strong>无线 (Wireless) 并不总是意味着移动 (Mobility)</strong>。许多无线设备（如台式机、智能家电）在连接无线网络时是保持静止的。</p>
+</div></li>
+</ul>
+</li>
+<li><strong>基站 (Base Station)</strong>
+<ul>
+<li><strong>功能</strong>：负责在其覆盖“区域”（Cell）内，作为有线网络和无线主机之间的数据包中继器（Relay）。通常直接连接到有线网络。</li>
+<li><strong>典型代表</strong>：蜂窝网络基站塔 (Cell Towers)、802.11 无线接入点 (Access Point, AP)。</li>
+</ul>
+</li>
+<li><strong>无线链路 (Wireless Link)</strong>
+<ul>
+<li><strong>功能</strong>：通常用于将移动设备连接到基站，也可以用作骨干链路 (Backbone Link)。</li>
+<li><strong>访问协调</strong>：使用多路访问协议 (Multiple Access Protocol) 来协调多个主机对链路的访问。</li>
+<li><strong>特征</strong>：具有不同的传输速率、传输距离以及频段。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="2-常见无线链路特征对比">2. 常见无线链路特征对比</h3>
+<p>不同无线技术在传输速率和覆盖范围上有很大差异，如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">无线技术</th>
+<th style="text-align:left">推出年份</th>
+<th style="text-align:left">最大数据速率</th>
+<th style="text-align:left">典型覆盖范围</th>
+<th style="text-align:left">常用频段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Bluetooth (蓝牙)</strong></td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">2 Mbps</td>
+<td style="text-align:left">室内 10-30m</td>
+<td style="text-align:left">2.4 GHz</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>802.11b</strong></td>
+<td style="text-align:left">1999</td>
+<td style="text-align:left">11 Mbps</td>
+<td style="text-align:left">室内 30m</td>
+<td style="text-align:left">2.4 GHz</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>802.11g</strong></td>
+<td style="text-align:left">2003</td>
+<td style="text-align:left">54 Mbps</td>
+<td style="text-align:left">室内 30m</td>
+<td style="text-align:left">2.4 GHz</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>802.11n (WiFi 4)</strong></td>
+<td style="text-align:left">2009</td>
+<td style="text-align:left">600 Mbps</td>
+<td style="text-align:left">室内/室外 70m</td>
+<td style="text-align:left">2.4 GHz, 5 GHz</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>802.11ac (WiFi 5)</strong></td>
+<td style="text-align:left">2013</td>
+<td style="text-align:left">3.47 Gbps</td>
+<td style="text-align:left">室内/室外 70m</td>
+<td style="text-align:left">5 GHz</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>802.11ax (WiFi 6)</strong></td>
+<td style="text-align:left">2020 (预估)</td>
+<td style="text-align:left">14 Gbps</td>
+<td style="text-align:left">室内/室外 70m</td>
+<td style="text-align:left">2.4 GHz, 5 GHz</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>802.11af</strong></td>
+<td style="text-align:left">2014</td>
+<td style="text-align:left">35 – 560 Mbps</td>
+<td style="text-align:left">室外 1 Km</td>
+<td style="text-align:left">空闲电视波段 (54-790 MHz)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>802.11ah</strong></td>
+<td style="text-align:left">2017</td>
+<td style="text-align:left">347 Mbps</td>
+<td style="text-align:left">室外 1 Km</td>
+<td style="text-align:left">900 MHz</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>4G LTE</strong></td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">600 Mbps</td>
+<td style="text-align:left">远距离室外 4-15 Km</td>
+<td style="text-align:left">蜂窝频段</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>5G</strong></td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">10 Gbps</td>
+<td style="text-align:left">远距离室外 4-15 Km</td>
+<td style="text-align:left">蜂窝/毫米波频段</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="3-无线网络运行模式">3. 无线网络运行模式</h3>
+<p>无线网络主要有两种运行模式：</p>
+<ol>
+<li><strong>基础设施模式 (Infrastructure Mode)</strong>
+<ul>
+<li>有基站（AP）存在，基站负责将无线主机连接到有线网络。</li>
+<li><strong>切换 (Handoff)</strong>：当移动设备移动时，它会改变所关联的基站，以维持到有线网络的连接。</li>
+</ul>
+</li>
+<li><strong>自组织模式 (Ad Hoc Mode)</strong>
+<ul>
+<li><strong>无基站</strong>协助。</li>
+<li>节点之间只能与处于其无线链路覆盖范围内的其他节点直接通信。</li>
+<li>节点需要自我组织成一个网络，在彼此之间进行路由转发（如多跳自组织路由）。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="4-无线网络分类法-wireless-network-taxonomy">4. 无线网络分类法 (Wireless Network Taxonomy)</h3>
+<p>根据“<strong>是一跳还是多跳</strong>”以及“<strong>是否有基础设施（基站）</strong>”，无线网络可以划分为以下四类：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">分类</th>
+<th style="text-align:left">单跳 (Single Hop)</th>
+<th style="text-align:left">多跳 (Multiple Hops)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>有基础设施 (Infrastructure)</strong></td>
+<td style="text-align:left">主机通过单跳无线链路连接到基站（如 WiFi、蜂窝网络），基站再接入互联网。</td>
+<td style="text-align:left">主机需要通过多个无线节点进行中继，最终连接到基站以接入互联网（如<strong>无线网状网 Mesh Network</strong>）。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>无基础设施 (No Infrastructure)</strong></td>
+<td style="text-align:left">无基站，也不连接到互联网。主机之间直接单跳通信（如蓝牙、临时的 Ad-hoc 连接）。</td>
+<td style="text-align:left">无基站，不连接到互联网。节点需要通过其他无线节点中继才能到达目标节点（如<strong>移动自组织网络 MANET</strong>、<strong>车载自组织网络 VANET</strong>）。</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="二-无线链路的物理特征">二、 无线链路的物理特征</h2>
+<p>与有线链路相比，无线链路在物理层面临更多挑战，主要具有以下特征：</p>
+<h3 id="1-信号衰减与路径损耗-fading-path-loss">1. 信号衰减与路径损耗 (Fading &amp; Path Loss)</h3>
+<ul>
+<li>无线电信号在自由空间中传播时，其能量会随着距离的增加而发散，导致接收功率下降，这被称为<strong>自由空间路径损耗 (Free Space Path Loss)</strong>。</li>
+<li>路径损耗关系式：
+$\(\text{Path Loss} \propto (f \cdot d)^2\)$
+（其中 \(f\) 为信号频率，\(d\) 为传输距离）。</li>
+<li><strong>结论</strong>：频率越高或距离越远，自由空间的路径损耗就越大。</li>
+</ul>
+<h3 id="2-多径传播-multipath-propagation">2. 多径传播 (Multipath Propagation)</h3>
+<ul>
+<li>无线电信号会受到地面、建筑物等障碍物的反射、折射，导致同一信号的多个副本通过不同的路径、在<strong>略微不同的时间</strong>到达接收端。</li>
+<li><strong>相干时间 (Coherence Time, \(T_c\))</strong>：
+<ul>
+<li>表示一个比特在信道中稳定存在并可被正确接收的时间跨度。</li>
+<li>它限制了最大可能的传输速率，因为不同比特的相干时间不能重叠。</li>
+<li>相干时间与<strong>信号频率</strong>和<strong>接收端移动速度</strong>成反比。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-噪声与信噪比-noise-snr">3. 噪声与信噪比 (Noise &amp; SNR)</h3>
+<ul>
+<li>无线环境容易受到电机、家电等其他电磁源的干扰。</li>
+<li><strong>信噪比 (Signal-to-Noise Ratio, SNR)</strong>：接收信号功率与噪声功率的比值。SNR 越大，说明信号越强，越容易从噪声中提取出原始信号。</li>
+<li><strong>误码率 (Bit Error Rate, BER) 与 SNR 的权衡关系</strong>：
+<ul>
+<li>对于给定的物理层调制技术：增加发射功率 \(\rightarrow\) 提高 SNR \(\rightarrow\) 降低误码率 BER。</li>
+<li>当移动设备移动时，SNR 会动态变化。物理层需要动态调整<strong>调制技术和传输速率 (Rate Adaptation)</strong>：
+<ul>
+<li><strong>BPSK (1 Mbps)</strong>：适用于低 SNR 环境，抗噪能力强，但速率低。</li>
+<li><strong>QAM16 (4 Mbps)</strong>：适用于中等 SNR。</li>
+<li><strong>QAM256 (8 Mbps)</strong>：适用于高 SNR，速率极快，但对噪声极为敏感。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-隐藏终端问题-hidden-terminal-problem">4. 隐藏终端问题 (Hidden Terminal Problem)</h3>
+<pre><code>       [A] ─── (障碍物/距离限制) ─── [C]
+        │                             │
+        └───────────&gt; [B] &lt;───────────┘
+</code></pre>
+<ul>
+<li><strong>定义</strong>：由于物理阻挡或严重的信号衰减，节点 A 和 C 无法听到彼此的信号，但它们都能与处于中间位置的节点 B 通信。</li>
+<li><strong>冲突</strong>：当 A 和 C 同时向 B 发送数据时，它们由于无法监听到对方的信号，会认为信道是空闲的，从而在 B 处造成信号叠加冲突。A 和 C 对此冲突完全无法察觉。</li>
+</ul>
+<hr>
+<h2 id="三-码分多址-cdma-code-division-multiple-access">三、 码分多址 (CDMA: Code Division Multiple Access)</h2>
+<p>CDMA 是一种物理层/链路层的多路复用技术，允许多个用户共享同一频段并同时发送数据。</p>
+<h3 id="1-cdma-核心原理">1. CDMA 核心原理</h3>
+<ul>
+<li><strong>码片划分</strong>：给每个用户分配一个唯一的、长度为 \(M\) 位的<strong>码片序列 (Chipping Sequence / Code)</strong>。所有用户的码片序列必须是<strong>正交的 (Orthogonal)</strong>。</li>
+<li><strong>符号规定</strong>：
+<ul>
+<li>原始数据比特 \(d_i \in \{-1, +1\}\)（比特 0 表示为 \(-1\)，比特 1 表示为 \(+1\)）。</li>
+<li>码片向量 \(c \in \{-1, +1\}^M\)。</li>
+</ul>
+</li>
+<li><strong>编码 (Encoding)</strong>：发送信号是原始数据比特与码片序列的内积：
+$\(Z_{i,m} = d_i \cdot c_m\)$</li>
+<li><strong>解码 (Decoding)</strong>：接收端将接收到的合成信号与发送端的码片序列进行内积运算并累加求和：
+$\(D_i = \frac{1}{M} \sum_{m=1}^{M} Z_{i,m} \cdot c_m\)$</li>
+</ul>
+<hr>
+<h3 id="2-双发送端冲突消除示例-two-sender-interference">2. 双发送端冲突消除示例 (Two-Sender Interference)</h3>
+<p>当发送端 1 (使用码片 \(c^1\)) 和发送端 2 (使用码片 \(c^2\)) 同时在空中传输时，信道中的合成信号为两者信号的叠加：
+$\(Z_{i,m}^* = Z_{i,m}^1 + Z_{i,m}^2 = d_i^1 \cdot c_m^1 + d_i^2 \cdot c_m^2\)$</p>
+<p>接收端 1 恢复发送端 1 数据的解码计算为：
+$\(D_i^1 = \frac{1}{M} \sum_{m=1}^{M} Z_{i,m}^* \cdot c_m^1 = \frac{1}{M} \sum_{m=1}^{M} (d_i^1 \cdot c_m^1 + d_i^2 \cdot c_m^2) \cdot c_m^1\)$
+$\(D_i^1 = d_i^1 \cdot \left( \frac{1}{M} \sum_{m=1}^{M} c_m^1 \cdot c_m^1 \right) + d_i^2 \cdot \left( \frac{1}{M} \sum_{m=1}^{M} c_m^2 \cdot c_m^1 \right)\)$</p>
+<p>因为码片序列是正交的：</p>
+<ul>
+<li>自己与自己内积：\(\frac{1}{M} \sum c_m^1 \cdot c_m^1 = 1\)</li>
+<li>不同码片相互正交内积：\(\frac{1}{M} \sum c_m^2 \cdot c_m^1 = 0\)</li>
+</ul>
+<p>代入后得到：
+$\(D_i^1 = d_i^1 \cdot 1 + d_i^2 \cdot 0 = d_i^1\)$
+由此可见，<strong>正交性使得接收端能够完全消除另一个发送端的干扰</strong>，提取出干净的原始数据。</p>
+<hr>
+<h2 id="四-ieee-802-11-无线局域网-wifi">四、 IEEE 802.11 无线局域网 (WiFi)</h2>
+<h3 id="1-架构与服务集">1. 架构与服务集</h3>
+<ul>
+<li><strong>接入点 (Access Point, AP)</strong>：充当基础设施模式下的基站。</li>
+<li><strong>基本服务集 (Basic Service Set, BSS)</strong>（俗称无线小区）：
+<ul>
+<li>包含一个或多个无线主机，以及一个接入点 AP（在基础设施模式下）。</li>
+<li>如果是自组织模式，则 BSS 中只有主机，没有 AP。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-信道划分与干扰">2. 信道划分与干扰</h3>
+<ul>
+<li>802.11 将可用频谱划分为多个不同中心频率的信道。</li>
+<li>在 2.4 GHz 频段中，共有 11 个信道。为了避免邻近 AP 之间的同频干扰，应选择互不重叠的信道。</li>
+<li>
+<div class="callout callout-tip"><p>在 2.4 GHz 频段下，<strong>信道 1、6、11</strong> 是最常用的三个互不重叠的信道。</p>
+</div></li>
+</ul>
+<hr>
+<h3 id="3-主机接入过程-association-scanning">3. 主机接入过程 (Association &amp; Scanning)</h3>
+<p>新到达的无线主机必须与一个 AP 建立<strong>关联 (Association)</strong> 才能接入网络：</p>
+<h4 id="a-被动扫描-passive-scanning">A. 被动扫描 (Passive Scanning)</h4>
+<ol>
+<li>各 AP 定期广播发送<strong>信标帧 (Beacon Frames)</strong>，其中包含 AP 的 SSID（网络名称）和 MAC 地址。</li>
+<li>主机 H1 接收信标帧，选择一个 AP 并发送<strong>关联请求帧 (Association Request)</strong>。</li>
+<li>AP 响应<strong>关联响应帧 (Association Response)</strong> 予以确认。</li>
+</ol>
+<h4 id="b-主动扫描-active-scanning">B. 主动扫描 (Active Scanning)</h4>
+<ol>
+<li>主机 H1 主动广播<strong>探测请求帧 (Probe Request)</strong>。</li>
+<li>覆盖范围内的所有 AP 回应<strong>探测响应帧 (Probe Response)</strong>。</li>
+<li>主机 H1 选择其中一个 AP，发送<strong>关联请求帧 (Association Request)</strong>。</li>
+<li>该 AP 回应<strong>关联响应帧 (Association Response)</strong>。</li>
+</ol>
+<p>建立关联后，主机通常会通过 <strong>DHCP</strong> 协议在 AP 所在的子网中动态获取 IP 地址。</p>
+<hr>
+<h3 id="4-多路访问控制-csma-ca-协议">4. 多路访问控制：CSMA/CA 协议</h3>
+<p>由于无线环境下<strong>难以实现冲突检测 (Collision Detection, CD)</strong>：</p>
+<ol>
+<li><strong>信号衰减大</strong>：发射信号的能量远大于接收到的冲突信号能量，发送节点在自身发送时很难察觉到微弱的冲突。</li>
+<li><strong>隐藏终端</strong>：即使能检测冲突，也无法感知到隐藏终端处的冲突。</li>
+</ol>
+<p>因此，802.11 采用 <strong>CSMA/CA (Collision Avoidance, 冲突避免)</strong> 协议，并配合 <strong>确认应答 (ACK)</strong> 机制。</p>
+<h4 id="csma-ca-工作流程">CSMA/CA 工作流程</h4>
+<pre><code>发送方：
+ 监听到信道空闲？
+   ├── 是 (持续空闲时间达到 DIFS) ──&gt; 发送整个帧 (不进行冲突检测)
+   └── 否 (信道忙) ──&gt; 启动随机退避定时器 (Random Backoff)
+                        ├── 信道空闲时：定时器倒计时
+                        ├── 信道变忙时：定时器暂停
+                        └── 定时器归零时：发送数据帧
+                              └── 等待 ACK ─────── 收到 ACK (成功)
+                                    └── 超时未收到 ──&gt; 增大退避窗口，重新退避
+
+接收方：
+ 正确收到数据帧 ──&gt; 等待 SIFS 时间 ──&gt; 发送 ACK 帧给发送方
+</code></pre>
+<hr>
+<p>无线局域网中的 MAC：CSMA/CA</p>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>WLAN 构成</div><ul>
+<li>基站：AP（Access Point）</li>
+<li>无线链路</li>
+<li>移动主机节点</li>
+</ul>
+</div><ul>
+<li>冲突: 2+ 站点（AP 或者站点）在同一个时刻发送</li>
+<li>802.11: CSMA —— 发送前侦听信道
+<ul>
+<li>不会和其它节点正在进行的传输发生冲突</li>
+</ul>
+</li>
+<li>802.11: <mark>没有冲突检测!</mark>
+<ul>
+<li>无法检测冲突：自身信号远远大于其他节点信号</li>
+<li>即使能 CD：<mark>不冲突 != 成功</mark></li>
+<li>目标: avoid collisions: CSMA/C(ollision)A(voidance)
+<ul>
+<li>无法 CD，一旦发送一股脑全部发送完毕，不 CD</li>
+<li>为了避免无 CD 带来的信道利用率低的问题，事前进行冲突避免</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>无法 CD 的两个例子：</p>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>“隐藏终端” 问题</div><p>站点 A、C 都能和 B 通信，但 A 和 C 之间无法通信，导致 A 和 C 可能同时发送（实际上有冲突），B 接收失败
+<img src="/assets/img/posts/%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/image-143.webp" alt="alt text" loading="lazy"></p>
+</div><div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>“暴露终端” 问题</div><p>假设有四个无线节点，在地理位置上排成一排：A —— B —— C —— D</p>
+<p>假设它们的无线电波覆盖范围只能到达相邻的节点（即：B 能听到 A 和 C；C 能听到 B 和 D；但 A 听不到 C，B 也听不到 D）</p>
+<ul>
+<li>
+<p>当前状态：节点 B 正在向节点 A 发送数据。</p>
+</li>
+<li>
+<p>产生需求：此时，节点 C 想要向节点 D 发送数据</p>
+</li>
+<li>
+<p>侦听信道：按照 CSMA/CA 规则，C 在发送前会先侦听信道</p>
+<ul>
+<li>因为 C 处在 B 的信号覆盖范围内，所以 C 听到了 B 正在发送信号的电磁波</li>
+</ul>
+</li>
+<li>
+<p>错误决策：C 的网卡会判定：“信道正忙，如果我现在发送就会发生冲突”</p>
+<ul>
+<li>于是，C 放弃了发送，进入退避等待状态</li>
+</ul>
+</li>
+</ul>
+</div><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>隐藏终端 (Hidden Terminal)</th>
+<th>暴露终端 (Exposed Terminal)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>通俗比喻</td>
+<td>看不见的敌人</td>
+<td>虚惊一场的围观群众</td>
+</tr>
+<tr>
+<td>行为表现</td>
+<td>信道其实忙，但误以为“闲”而发送</td>
+<td>信道其实可用，但误以为“忙”而等待</td>
+</tr>
+<tr>
+<td>直接后果</td>
+<td>接收端发生碰撞 (Collision)，数据损坏重传</td>
+<td>并发传输被阻止，信道利用率 (吞吐量) 降低</td>
+</tr>
+<tr>
+<td>受害方</td>
+<td>接收端（收到了混杂的冲突信号）</td>
+<td>发送端（被无辜剥夺了发送权利）</td>
+</tr>
+</tbody>
+</table>
+<p>由于无法 CD，CSMA/CA 需要在<mark>发送前避免冲突</mark></p>
+<p>发送方：</p>
+<p>1 如果站点侦测到信道空闲持续 DIFS 长，则传输整个帧 (no CD)
+2 如果侦测到信道忙碌，那么选择一个随机回退值，并在信道空闲时递减该值</p>
+<ul>
+<li>如果信道忙碌，回退值不会变化</li>
+<li>当回退值为 0 时（只发生在信道空闲时）发送整个帧</li>
+<li>如果没有收到 ACK，增加回退值，重复 2</li>
+</ul>
+<p>802.11 接收方</p>
+<ul>
+<li>如果帧正确，则在 SIFS 后发送 ACK</li>
+<li>无线链路特性，需要每帧确认
+<ul>
+<li>例如：由于隐藏终端问题，在接收端可能形成干扰，接收方没有正确地收到</li>
+<li>链路层可靠机制</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/image-146.webp" alt="alt text" loading="lazy"></p>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>补充：DIFS 与 SIFS</div><p><strong>DIFS</strong> 和 <strong>SIFS</strong> 是两个非常关键的 “等待时间”（专业术语叫<strong>帧间间隔</strong>，InterFrame Space）</p>
+<p>它们的核心设计逻辑就是：<strong>通过设置不同长短的等待时间，来硬性规定谁有优先发言权</strong></p>
+<p>1 SIFS（Short InterFrame Space）—— 短帧间间隔</p>
+<ul>
+<li><strong>在图中的位置</strong>：接收方在收完绿色的 <code>data</code> 帧后，等待了一个较短的 <code>SIFS</code> 时间，紧接着就发送了蓝色的 <code>ACK</code></li>
+<li><strong>它的含义</strong>：顾名思义，它是<strong>最短</strong>的等待时间，代表着<strong>最高优先级</strong>。</li>
+<li><strong>主要作用</strong>：当接收方成功收到数据，它需要以最快的速度告诉发送方 “我收到了”。为了防止此时信道被其他无关设备抢走，接收方只需等待极短的 SIFS 时间就能立刻霸占信道发送 ACK。</li>
+</ul>
+<ol start="2">
+<li>DIFS（DCF InterFrame Space）—— 分布式协调功能帧间间隔</li>
+</ol>
+<ul>
+<li><strong>在图中的位置</strong>：发送方想要发送全新的 <code>data</code> 时，必须侦听信道，并且发现信道持续空闲了 <code>DIFS</code> 这么长的时间后，才能开始发送</li>
+<li><strong>它的含义</strong>：这是一个<strong>较长</strong>的等待时间，代表着<strong>普通优先级</strong></li>
+<li><strong>主要作用</strong>：用于发送普通的、全新的数据帧。它要求想发新数据的站点必须展现出“耐心”</li>
+</ul>
+<p>核心机制：为什么 SIFS &lt; DIFS？</p>
+<p>这是 802.11 协议中非常巧妙的防冲突设计，核心就在于<strong>时间差</strong>：</p>
+<p>假设网络刚刚空闲下来，有两方正在暗中较劲：</p>
+<ol>
+<li><strong>接收方</strong>：刚收完数据，正准备发 <code>ACK</code>（只需等待 <strong>SIFS</strong>）</li>
+<li><strong>路人站点</strong>：憋了很久，正准备发全新的 <code>Data</code>（需要等待 <strong>DIFS</strong>）</li>
+</ol>
+<p>因为 <strong>SIFS 的时间严格短于 DIFS</strong>，所以接收方的等待倒计时会率先结束！当路人站点的 DIFS 还没等完时，接收方就已经把 ACK 发射出去了。路人站点听到信道又忙了，只能乖乖闭嘴继续等</p>
+<p><strong>总结来说：</strong> <mark>SIFS 短，保证了回复消息（ACK）的绝对优先权</mark>，不会被别人打断；DIFS 长，确保了只有在大家真的都没话说的空闲期，才能开启下一轮新的对话</p>
+</div><div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>在count down时，侦听到了信道空闲为什么不发送，而要等到 0 时再发送</div></div><ul>
+<li>2 个站点有数据帧需要发送，第三个节点正在发送</li>
+<li>LAN CD：让 2 者听完第三个节点发完，立即发送
+<ul>
+<li>冲突：放弃当前的发送，避免了信道的浪费于无用冲突帧的发送</li>
+<li>代价不昂贵</li>
+</ul>
+</li>
+<li>WLAN：CA
+<ul>
+<li>无法 CD，一旦发送就必须发完，如冲突信道浪费严重，代价高昂</li>
+<li>思想：尽量事先避免冲突，而不是在发生冲突时放弃然后重发</li>
+<li>听到发送的站点，分别选择随机值，回退到 0 发送
+<ul>
+<li>不同的随机值，一个站点会胜利</li>
+<li>失败站点会冻结计数器，当胜利节点发完再发</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>无法完全避免冲突</p>
+<ul>
+<li>
+<p>两个站点相互隐藏：</p>
+<ul>
+<li>\(A, B\) 相互隐藏，\(C\) 在传输</li>
+<li>\(A, B\) 选择了随机回退值</li>
+<li>一个节点如 \(A\) 胜利了，发送</li>
+<li>而 \(B\) 节点收不到，顺利 count down 到 0 发送</li>
+<li>\(A, B\) 的发送在 \(C\) 附近形成了干扰</li>
+</ul>
+</li>
+<li>
+<p>选择了非常靠近的随机回退值：</p>
+<ul>
+<li>\(A, B\) 选择的值非常近</li>
+<li>\(A\) 到 0 后发送</li>
+<li>但是这个信号还没到达 \(B\) 时</li>
+<li>\(B\) 也到 0 了，发送</li>
+<li>冲突</li>
+</ul>
+</li>
+</ul>
+<p><strong>思想: 允许发送方 “预约” 信道，而不是随机访问该信道：避免长数据帧的冲突（可选项）</strong></p>
+<ul>
+<li>发送方首先使用 CSMA 向 BS（基站，在 WLAN 中通常即 AP） 发送一个小的 RTS 分组
+<ul>
+<li>RTS 可能会冲突（但是由于比较短，浪费信道较少）</li>
+</ul>
+</li>
+<li>BS 广播 clear-to-send CTS，作为 RTS 的响应</li>
+<li>CTS 能够被所有涉及到的节点听到
+<ul>
+<li>发送方发送数据帧</li>
+<li>其它节点抑制发送</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>采用小的预约分组，可以完全避免数据帧的冲突</div></div><p><img src="/assets/img/posts/%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/image-147.webp" alt="alt text" loading="lazy"></p>
+<ol>
+<li>
+<p><strong>预约冲突</strong></p>
+<ul>
+<li>最上方，节点A和节点B同时想发数据，于是它们同时向中心节点 AP 发送了 <code>RTS</code> 小分组，冲突。</li>
+</ul>
+</li>
+<li>
+<p><strong>成功发送请求 (RTS(A))</strong></p>
+<ul>
+<li>经过随机等待，节点A率先再次发出了 <code>RTS(A)</code>，这次没有人和它抢，成功到达了 AP。</li>
+</ul>
+</li>
+<li>
+<p><strong>基站广播许可 (CTS(A))</strong></p>
+<ul>
+<li>AP 收到请求后，向外广播 <code>CTS(A)</code>，这个许可不仅传回给了节点A，也传给了右侧的节点B。</li>
+</ul>
+</li>
+<li>
+<p><strong>数据传输与旁观者抑制 (DATA(A) &amp; defer)</strong></p>
+<ul>
+<li>节点A收到 CTS 许可，开始安心地发送巨大的蓝色数据块 <code>DATA(A)</code>。</li>
+<li>节点B听到了刚才 AP 发出的 CTS(A)，里面包含了A需要占用信道的时间，因此B <strong><code>defer</code></strong>。</li>
+<li><strong>解决隐藏终端问题</strong>：B 知道现在信道被A占用了，所以在 <code>defer</code> 这段时间内，B 会保持“闭嘴”状态，绝对不发送任何信号去干扰A。这样就<strong>完全避免了长数据帧的冲突</strong>。</li>
+</ul>
+</li>
+<li>
+<p><strong>传输确认 (ACK(A))</strong></p>
+<ul>
+<li>数据传输完毕后，AP 广播 <code>ACK(A)</code>（确认帧），告诉所有人数据已安全收到。</li>
+<li>节点B听到 ACK 后，就知道 A 的传输彻底结束了，它的 <code>defer</code> 状态解除，可以重新开始竞争信道了。</li>
+</ul>
+</li>
+</ol>
+<p><img src="/assets/img/posts/%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/20260510-0803-28.8792520-anim.webp" alt="alt text" loading="lazy"></p>
+<hr>
+<h4 id="rts-cts-预留机制-解决隐藏终端冲突">RTS/CTS 预留机制（解决隐藏终端冲突）</h4>
+<p>为了防止隐藏终端同时发送数据导致长数据帧冲突，802.11 引入了可选的信道预留机制：</p>
+<ol>
+<li><strong>RTS (Request to Send)</strong>：发送方先利用 CSMA 发送一个很短的 RTS 帧给 AP，申请预留信道。</li>
+<li><strong>CTS (Clear to Send)</strong>：AP 收到后，广播发送一个 CTS 帧作为答复。</li>
+<li><strong>效果</strong>：
+<ul>
+<li>发送方收到 CTS，开始安全传输数据帧。</li>
+<li><strong>所有听到 CTS 的邻近节点</strong>（包括隐藏终端）都得知有设备将要占用信道，在数据传输期间推迟发送数据（Defer），从而有效避免了冲突。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="5-802-11-mac-帧格式与寻址-addressing">5. 802.11 MAC 帧格式与寻址 (Addressing)</h3>
+<p>802.11 帧的头部包含 <strong>4 个 MAC 地址</strong>，格式如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">帧控制 (FC)</th>
+<th style="text-align:center">生存期 (Duration)</th>
+<th style="text-align:center">地址 1</th>
+<th style="text-align:center">地址 2</th>
+<th style="text-align:center">地址 3</th>
+<th style="text-align:center">序号控制</th>
+<th style="text-align:center">地址 4</th>
+<th style="text-align:center">有效载荷</th>
+<th style="text-align:center">CRC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">2 字节</td>
+<td style="text-align:center">2 字节</td>
+<td style="text-align:center">6 字节</td>
+<td style="text-align:center">6 字节</td>
+<td style="text-align:center">6 字节</td>
+<td style="text-align:center">2 字节</td>
+<td style="text-align:center">6 字节</td>
+<td style="text-align:center">0-2312 字节</td>
+<td style="text-align:center">4 字节</td>
+</tr>
+</tbody>
+</table>
+<h4 id="四个-mac-地址的定义">四个 MAC 地址的定义</h4>
+<ul>
+<li><strong>地址 1 (Address 1)</strong>：直接接收该无线帧的设备 MAC 地址（Receiver MAC，例如主机的 MAC 或 AP 的 MAC）。</li>
+<li><strong>地址 2 (Address 2)</strong>：直接发送该无线帧的设备 MAC 地址（Transmitter MAC）。</li>
+<li><strong>地址 3 (Address 3)</strong>：连接 AP 的路由器接口的 MAC 地址（用于在有线和无线分界处进行桥接路由）。</li>
+<li><strong>地址 4 (Address 4)</strong>：仅在自组织模式 (Ad Hoc) 中使用。</li>
+</ul>
+<h4 id="寻址桥接示例-从无线主机发送数据到有线路由器">寻址桥接示例 (从无线主机发送数据到有线路由器)</h4>
+<pre><code> [无线主机 H1] ────────(WiFi 帧)────────&gt; [接入点 AP] ────────(以太网帧)────────&gt; [路由器 R1]
+</code></pre>
+<ol>
+<li><strong>H1 发出的 802.11 WiFi 帧</strong>：
+<ul>
+<li><strong>地址 1 (接收端)</strong> = AP 的 MAC 地址</li>
+<li><strong>地址 2 (发送端)</strong> = H1 的 MAC 地址</li>
+<li><strong>地址 3 (实际网关)</strong> = R1 接口的 MAC 地址</li>
+</ul>
+</li>
+<li><strong>AP 转发给有线网络的 802.3 以太网帧</strong>（AP 去掉 WiFi 头部，封装为以太网帧）：
+<ul>
+<li><strong>目的 MAC 地址 (Destination MAC)</strong> = R1 接口的 MAC 地址 (来自地址 3)</li>
+<li><strong>源 MAC 地址 (Source MAC)</strong> = H1 的 MAC 地址 (来自地址 2)</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="6-同一子网内的移动性-mobility-within-subnet">6. 同一子网内的移动性 (Mobility within Subnet)</h3>
+<ul>
+<li>当主机从一个 BSS (如 AP1) 移动到另一个 BSS (如 AP2) 时，如果两个 AP 处于<strong>同一个 IP 子网</strong>中，主机的 IP 地址可以保持不变。</li>
+<li><strong>自学习交换机 (Self-Learning Switch)</strong> 的作用：
+<ul>
+<li>当主机通过 AP2 发送数据时，该帧经过连接 AP 的局域网交换机。</li>
+<li>交换机通过源 MAC 地址自学习机制，更新其转发表，将主机的 MAC 地址指向连接 AP2 的新端口，从而实现无缝的数据通路切换。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="7-802-11-高级特性">7. 802.11 高级特性</h3>
+<ul>
+<li><strong>速率自适应 (Rate Adaptation)</strong>
+<ul>
+<li>主机和 AP 监视信道的信噪比 (SNR)。</li>
+<li>当节点远离基站导致 SNR 变差、误码率 (BER) 升高时，自动切换到低速率的调制技术（如从 QAM256 降到 QPSK 或 BPSK），牺牲速度换取链路的可靠性。</li>
+</ul>
+</li>
+<li><strong>功率管理 (Power Management)</strong>
+<ul>
+<li>无线主机可以向 AP 声明：“我要睡眠（Sleep）到下一个信标帧到来”。</li>
+<li>AP 缓存发往该主机的帧，暂时不发送。</li>
+<li>下一个信标帧到来前，主机自动唤醒。信标帧中包含了缓存有数据的设备列表。若列表里有自己，主机保持唤醒接收数据；否则继续进入睡眠状态，以此大幅节省电量。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="五-个人局域网-蓝牙技术-bluetooth">五、 个人局域网：蓝牙技术 (Bluetooth)</h2>
+<p>蓝牙技术是 IEEE 802.15.1 标准，主要用于替代近距离线缆连接。</p>
+<h3 id="1-蓝牙基本特征">1. 蓝牙基本特征</h3>
+<ul>
+<li><strong>覆盖范围</strong>：直径小于 10 米。</li>
+<li><strong>应用场景</strong>：外设连接（鼠标、键盘、耳机、手环等）。</li>
+<li><strong>网络模式</strong>：自组织运行 (Ad-hoc)，无基础设施。</li>
+<li><strong>物理参数</strong>：2.4-2.5 GHz ISM 频段，最高物理层速率约 3 Mbps。</li>
+<li><strong>微微网 (Piconet) 架构</strong>：
+<ul>
+<li>采用 <strong>主控/客户端 (Master/Client)</strong> 结构。</li>
+<li>一个主控节点最多可以与 7 个活动的客户端节点连接。</li>
+<li>主控节点轮询 (Poll) 客户端，并授权其进行数据发送。</li>
+<li>支持<strong>停靠节点 (Parked Device)</strong>：处于非活跃的省电睡眠状态。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-物理与-mac-层机制">2. 物理与 MAC 层机制</h3>
+<ul>
+<li><strong>时分复用 (TDM)</strong>：时间被划分为 625 微秒 (\(\mu s\)) 的时隙 (Slot)。</li>
+<li><strong>跳频扩频 (FHSS)</strong>：发送方在 79 个不同的信道中，以已知且伪随机的顺序逐个时隙跳频。
+<ul>
+<li><strong>优点</strong>：显著提高了抗干扰能力，只在少部分时隙上会受到外界干扰。</li>
+</ul>
+</li>
+<li><strong>停靠模式 (Parked Mode)</strong>：客户端可以进入省电睡眠状态，定期醒来检测主节点的唤醒信号。</li>
+<li><strong>自动组网 (Bootstrapping)</strong>：节点自动发现、自动连接（即插即用）组建微微网。</li>
+</ul>
+<h3 id="3-应用案例-新冠接触者追踪技术-exposure-notification">3. 应用案例：新冠接触者追踪技术 (Exposure Notification)</h3>
+<p>大流行期间，Google 和 Apple 联合开发了基于低功耗蓝牙 (BLE) 的接触者追踪机制：</p>
+<ol>
+<li><strong>匿名交换</strong>：Alice 和 Bob 靠近并交谈时，两人的手机通过蓝牙后台广播交换频繁变化的<strong>匿名标识符信标 (Anonymous Identifier Beacons)</strong>。</li>
+<li><strong>本地缓存</strong>：手机将这些收到的匿名标识符在本地安全地存储 14 天。</li>
+<li><strong>密钥上传</strong>：如果 Bob 确诊，经他授权同意，手机会将他过去 14 天广播过的匿名密钥（生成信标的源密钥）上传到公共卫生服务器的云端。</li>
+<li><strong>本地比对</strong>：Alice 的手机定期下载云端的确诊密钥，并在本地重新生成对应的匿名标识符列表，与本地 14 天内的接触记录进行比对。如果发现匹配，且接触时间与距离（通过蓝牙 RSSI 信号强度测算）达到高风险阈值，系统就会发出警报通知，在保证个人隐私的前提下实现了接触者追踪。</li>
+</ol>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：7 无线网络和移动网络</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-08 06:45:13</p>
+      <p><strong>更新于</strong>：2026-08-07 23:07:52</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/7 无线网络和移动网络.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">7 无线网络和移动网络</div>
+      <ul><li class="toc-l2"><a href="#一-无线网络基本要素与分类">一、 无线网络基本要素与分类</a></li><li class="toc-l3"><a href="#1-无线网络的核心要素-elements-of-a-wireless-network">1. 无线网络的核心要素 (Elements of a Wireless Network)</a></li><li class="toc-l3"><a href="#2-常见无线链路特征对比">2. 常见无线链路特征对比</a></li><li class="toc-l3"><a href="#3-无线网络运行模式">3. 无线网络运行模式</a></li><li class="toc-l3"><a href="#4-无线网络分类法-wireless-network-taxonomy">4. 无线网络分类法 (Wireless Network Taxonomy)</a></li><li class="toc-l2"><a href="#二-无线链路的物理特征">二、 无线链路的物理特征</a></li><li class="toc-l3"><a href="#1-信号衰减与路径损耗-fading-path-loss">1. 信号衰减与路径损耗 (Fading &amp; Path Loss)</a></li><li class="toc-l3"><a href="#2-多径传播-multipath-propagation">2. 多径传播 (Multipath Propagation)</a></li><li class="toc-l3"><a href="#3-噪声与信噪比-noise-snr">3. 噪声与信噪比 (Noise &amp; SNR)</a></li><li class="toc-l3"><a href="#4-隐藏终端问题-hidden-terminal-problem">4. 隐藏终端问题 (Hidden Terminal Problem)</a></li><li class="toc-l2"><a href="#三-码分多址-cdma-code-division-multiple-access">三、 码分多址 (CDMA: Code Division Multiple Access)</a></li><li class="toc-l3"><a href="#1-cdma-核心原理">1. CDMA 核心原理</a></li><li class="toc-l3"><a href="#2-双发送端冲突消除示例-two-sender-interference">2. 双发送端冲突消除示例 (Two-Sender Interference)</a></li><li class="toc-l2"><a href="#四-ieee-802-11-无线局域网-wifi">四、 IEEE 802.11 无线局域网 (WiFi)</a></li><li class="toc-l3"><a href="#1-架构与服务集">1. 架构与服务集</a></li><li class="toc-l3"><a href="#2-信道划分与干扰">2. 信道划分与干扰</a></li><li class="toc-l3"><a href="#3-主机接入过程-association-scanning">3. 主机接入过程 (Association &amp; Scanning)</a></li><li class="toc-l3"><a href="#4-多路访问控制-csma-ca-协议">4. 多路访问控制：CSMA/CA 协议</a></li><li class="toc-l3"><a href="#5-802-11-mac-帧格式与寻址-addressing">5. 802.11 MAC 帧格式与寻址 (Addressing)</a></li><li class="toc-l3"><a href="#6-同一子网内的移动性-mobility-within-subnet">6. 同一子网内的移动性 (Mobility within Subnet)</a></li><li class="toc-l3"><a href="#7-802-11-高级特性">7. 802.11 高级特性</a></li><li class="toc-l2"><a href="#五-个人局域网-蓝牙技术-bluetooth">五、 个人局域网：蓝牙技术 (Bluetooth)</a></li><li class="toc-l3"><a href="#1-蓝牙基本特征">1. 蓝牙基本特征</a></li><li class="toc-l3"><a href="#2-物理与-mac-层机制">2. 物理与 MAC 层机制</a></li><li class="toc-l3"><a href="#3-应用案例-新冠接触者追踪技术-exposure-notification">3. 应用案例：新冠接触者追踪技术 (Exposure Notification)</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/6 链路层和局域网.html">&lt; 6 链路层和局域网</a>
+      <a class="pager-next" href="/posts/8 A-day-in-the-life-of-web-request.html">8 A day in the life of web request &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
+<script src="/assets/js/main.js?v=1786162127971" defer></script>
+<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+</body>
+</html>

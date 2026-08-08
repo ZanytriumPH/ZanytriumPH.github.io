@@ -1,9 +1,338 @@
 [
   {
+    "title": "第1章 数据库绪论",
+    "url": "/posts/数据库绪论.html",
+    "tags": [
+      "数据库"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "第1章 数据库绪论",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "第2章 关系数据库",
+    "url": "/posts/关系数据库.html",
+    "tags": [
+      "数据库",
+      "关系代数"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "第2章 关系数据库",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "第3章 关系数据库标准语言SQL",
+    "url": "/posts/关系数据库标准语言SQL.html",
+    "tags": [
+      "数据库",
+      "SQL"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "第3章 关系数据库标准语言SQL",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "第4章 数据库安全性",
+    "url": "/posts/数据库安全性.html",
+    "tags": [
+      "数据库"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "第4章 数据库安全性",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "第5章 数据库完整性",
+    "url": "/posts/数据库完整性.html",
+    "tags": [
+      "数据库"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "第5章 数据库完整性",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "第6章 关系数据理论",
+    "url": "/posts/关系数据理论.html",
+    "tags": [
+      "数据库"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "第6章 关系数据理论",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "第7章 数据库设计",
+    "url": "/posts/数据库设计.html",
+    "tags": [
+      "数据库"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "第7章 数据库设计",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "第8章 数据库编程",
+    "url": "/posts/数据库编程.html",
+    "tags": [
+      "数据库"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "第8章 数据库编程",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "DB2601 - 关系代数基本运算的应用",
+    "url": "/posts/数据库作业-1.html",
+    "tags": [
+      "数据库",
+      "关系代数",
+      "作业/例题"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "DB2601-关系代数基本运算的应用",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "DB2602 - 关系代数的应用",
+    "url": "/posts/数据库作业-2.html",
+    "tags": [
+      "数据库",
+      "关系代数",
+      "作业/例题"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "DB2602-关系代数的应用",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "DB2603 - 数据库的安装、创建、使用",
+    "url": "/posts/数据库作业-3.html",
+    "tags": [
+      "数据库",
+      "SQL",
+      "作业/例题"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "DB2603 - 数据库的安装、创建、使用",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "DB2604 - 数据定义与数据操纵",
+    "url": "/posts/数据库作业-4.html",
+    "tags": [
+      "数据库",
+      "SQL",
+      "作业/例题"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "DB2604 - 数据定义与数据操纵",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "DB2605 - 关系规范化设计",
+    "url": "/posts/数据库作业-5.html",
+    "tags": [
+      "数据库",
+      "作业/例题"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "DB2605 - 关系规范化设计",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "DB2606 - 数据库设计",
+    "url": "/posts/数据库作业-6.html",
+    "tags": [
+      "数据库",
+      "作业/例题"
+    ],
+    "categories": [
+      "数据管理基础"
+    ],
+    "description": "DB2606 - 数据库设计",
+    "date": "2026-08-08"
+  },
+  {
+    "title": "1 计算机网络概论",
+    "url": "/posts/1 计算机网络概论.html",
+    "tags": [
+      "计算机网络"
+    ],
+    "categories": [
+      "计算机网络"
+    ],
+    "description": "计算机网络概论",
+    "date": "2026-08-07"
+  },
+  {
+    "title": "2 应用层",
+    "url": "/posts/2 应用层.html",
+    "tags": [
+      "计算机网络"
+    ],
+    "categories": [
+      "计算机网络"
+    ],
+    "description": "应用层",
+    "date": "2026-08-07"
+  },
+  {
+    "title": "3 传输层",
+    "url": "/posts/3 传输层.html",
+    "tags": [
+      "计算机网络"
+    ],
+    "categories": [
+      "计算机网络"
+    ],
+    "description": "传输层",
+    "date": "2026-08-07"
+  },
+  {
+    "title": "4 网络层：数据平面",
+    "url": "/posts/4 网络层-数据平面.html",
+    "tags": [
+      "计算机网络"
+    ],
+    "categories": [
+      "计算机网络"
+    ],
+    "description": "网络层：数据平面",
+    "date": "2026-08-07"
+  },
+  {
+    "title": "5 网络层：控制平面",
+    "url": "/posts/5 网络层-控制平面.html",
+    "tags": [
+      "计算机网络"
+    ],
+    "categories": [
+      "计算机网络"
+    ],
+    "description": "网络层：控制平面",
+    "date": "2026-08-07"
+  },
+  {
+    "title": "6 链路层和局域网",
+    "url": "/posts/6 链路层和局域网.html",
+    "tags": [
+      "计算机网络"
+    ],
+    "categories": [
+      "计算机网络"
+    ],
+    "description": "链路层和局域网",
+    "date": "2026-08-07"
+  },
+  {
+    "title": "7 无线网络和移动网络",
+    "url": "/posts/7 无线网络和移动网络.html",
+    "tags": [
+      "计算机网络"
+    ],
+    "categories": [
+      "计算机网络"
+    ],
+    "description": "无线网络和移动网络",
+    "date": "2026-08-07"
+  },
+  {
+    "title": "8 A day in the life of web request",
+    "url": "/posts/8 A-day-in-the-life-of-web-request.html",
+    "tags": [
+      "计算机网络"
+    ],
+    "categories": [
+      "计算机网络"
+    ],
+    "description": "A day in the life of web request",
+    "date": "2026-08-07"
+  },
+  {
+    "title": "9 计算机网络例题",
+    "url": "/posts/9 计算机网络例题.html",
+    "tags": [
+      "计算机网络",
+      "作业/例题"
+    ],
+    "categories": [
+      "计算机网络"
+    ],
+    "description": "计算机网络例题",
+    "date": "2026-08-07"
+  },
+  {
+    "title": "软件工程 II 复习笔记(一)",
+    "url": "/posts/软件工程 II 复习笔记(一).html",
+    "tags": [
+      "软件工程",
+      "课程复习"
+    ],
+    "categories": [
+      "软件工程"
+    ],
+    "description": "质量保障、配置管理、需求分析与用例建模、体系结构与详细设计、信息隐藏",
+    "date": "2026-08-07"
+  },
+  {
+    "title": "软件工程 II 复习笔记(二)",
+    "url": "/posts/软件工程 II 复习笔记(二).html",
+    "tags": [
+      "软件工程",
+      "课程复习"
+    ],
+    "categories": [
+      "软件工程"
+    ],
+    "description": "包设计原则、设计模式、软件构造、测试与维护、过程模型",
+    "date": "2026-08-07"
+  },
+  {
+    "title": "软件工程 II 复习笔记(三)",
+    "url": "/posts/软件工程 II 复习笔记(三).html",
+    "tags": [
+      "软件工程",
+      "课程复习"
+    ],
+    "categories": [
+      "软件工程"
+    ],
+    "description": "软工 II 全课程笔记:从需求工程、体系结构到详细设计、测试与演化",
+    "date": "2026-08-07"
+  },
+  {
     "title": "人机交互",
     "url": "/posts/人机交互.html",
     "tags": [
-      "人机交互"
+      "人机交互",
+      "课程复习"
     ],
     "categories": [
       "人机交互"

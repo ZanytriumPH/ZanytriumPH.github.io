@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>软件工程 II 复习笔记(三) · Zwing&#39;s blog</title>
+<meta name="description" content="软工 II 全课程笔记:从需求工程、体系结构到详细设计、测试与演化">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">软件工程 II 复习笔记(三)</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-07T22:37:42.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-08 06:37:42</time>
+            <time class="meta-item" datetime="2026-08-07T22:43:32+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-07 22:43:32</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 5821 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 20 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#软件工程"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>软件工程</a>
+              <a class="tag-chip" href="/tags.html#软件工程"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>软件工程</a> <a class="tag-chip" href="/tags.html#课程复习"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>课程复习</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><div class="callout callout-warning"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>考前按复习大纲临时整理而成，排版不美观，内容可能有误，且不保证完整性，仅供参考。若有错误或遗漏，请及时指出。</div></div><h2 id="1-1-软件工程基础">1.1 软件工程基础</h2>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>软件的本质是信息处理</div></div><div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>什么是软件？</div><ul>
+<li>软件是独立于硬件的</li>
+<li>软件是一种工具</li>
+<li>软件 = 程序 + 文档 + 数据+ 知识</li>
+<li>软件开发比编程复杂得多</li>
+<li>应用软件源于现实，又反过来改进现实</li>
+</ul>
+</div><h2 id="1-2-项目管理基础">1.2 项目管理基础</h2>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>项目是为创建唯一产品、服务或成果而进行的临时性工作</div></div><ul>
+<li>项目管理的目标：在铁三角约束下交付质量</li>
+</ul>
+<pre><code>       范围
+       / \
+      /   \
+     / 质量 \
+    /________\
+ 时间         成本
+</code></pre>
+<h2 id="2-1-需求工程基础">2.1 需求工程基础</h2>
+<ul>
+<li>需求开发过程模型</li>
+</ul>
+<pre class="mermaid">graph LR
+    A[需求获取] --> B[需求分析]
+    B --> C[需求规格说明]
+    C --> D[需求验证]
+    D -- 反馈与迭代 --> A
+    subgraph 输入 [利益相关人、问题域]
+        direction TB
+        A1( )
+    end
+    A1 --> A
+    subgraph 输出 [需求规格说明文档]
+        direction TB
+        D1( )
+    end
+    D --> D1
+</pre>
+<h2 id="2-2-ai-辅助需求获取">2.2 AI 辅助需求获取</h2>
+<ul>
+<li>需求工程的四个核心活动</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>活动</th>
+<th>核心问题</th>
+<th>常用方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>获取</strong></td>
+<td>利益相关者真正需要什么？</td>
+<td>访谈、问卷、观察、场景分析</td>
+</tr>
+<tr>
+<td><strong>分析</strong></td>
+<td>需求之间是否冲突？优先级如何？</td>
+<td>MoSCoW、冲突矩阵</td>
+</tr>
+<tr>
+<td><strong>规格说明</strong></td>
+<td>如何无歧义地描述需求？</td>
+<td>用户故事、Use Case、IEEE 830</td>
+</tr>
+<tr>
+<td><strong>验证</strong></td>
+<td>需求是否完整、可测试、可追踪？</td>
+<td>评审、原型、验收测试</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>用户故事标准格式</div><p>作为 ＿＿＿（角色），
+我希望 ＿＿＿（功能），
+以便 ＿＿＿（价值/目标）。</p>
+<p>验收标准：</p>
+<ul>
+<li>Given ＿＿＿（前置条件）</li>
+<li>When ＿＿＿（触发动作）</li>
+<li>Then ＿＿＿（预期结果）</li>
+</ul>
+</div><blockquote>
+<p>[INVEST] “好需求” 的关键维度为<strong>可测试</strong></p>
+</blockquote>
+<h2 id="2-3-用例建模与用户故事">2.3 用例建模与用户故事</h2>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>名词解释：用例</div><p>用例描述了在不同条件下系统对某一用户的请求的响应。每一个行为序列被称为一个场景。一个用例是多个场景的集合。</p>
+</div><ul>
+<li><strong>用例描述</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>10 字段</th>
+<th>内容描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>用例的唯一标识（如 <code>UC1</code>、<code>UC2</code>）</td>
+</tr>
+<tr>
+<td>名称</td>
+<td>对用例内容的精确描述</td>
+</tr>
+<tr>
+<td>参与者</td>
+<td>描述系统的参与者和每个参与者的目</td>
+</tr>
+<tr>
+<td>触发条件</td>
+<td>标识启动用例的事件</td>
+</tr>
+<tr>
+<td>前置条件</td>
+<td>用例能够正常启动和工作的系统状态条件</td>
+</tr>
+<tr>
+<td>后置条件</td>
+<td>用例执行完成后的系统状态条件</td>
+</tr>
+<tr>
+<td>正常流程</td>
+<td>在常见和符合预期的条件下，系统与外界的行为交互序列</td>
+</tr>
+<tr>
+<td>扩展流程</td>
+<td>用例中可能发生的其他场景（异常、分支）</td>
+</tr>
+<tr>
+<td>特殊需求</td>
+<td>和用例相关的其他特殊需求，尤其是非功能性需求</td>
+</tr>
+<tr>
+<td>补充说明</td>
+<td>其他需要记录的信息</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>前 6 个字段描述基本信息，后 4 个字段描述行为与约束</p>
+</blockquote>
+<ul>
+<li>UC1 销售处理 —— 基本信息</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td><code>UC1</code></td>
+</tr>
+<tr>
+<td>名称</td>
+<td>销售处理</td>
+</tr>
+<tr>
+<td>参与者</td>
+<td>收银员</td>
+</tr>
+<tr>
+<td>触发条件</td>
+<td>顾客携带商品到达销售点</td>
+</tr>
+<tr>
+<td>前置条件</td>
+<td>收银员必须已经被识别和授权（<strong>登录</strong>）</td>
+</tr>
+<tr>
+<td>后置条件</td>
+<td>存储销售记录，<strong>更新</strong>库存，打印收据</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>前置条件描述的是系统在用例开始前必须满足的状态，不是用例自身要执行的步骤（如&quot;登录&quot;不应出现在正常流程中）
+后置条件描述的是什么改变了（创建对象、修改属性、建立关联），不是怎么做</p>
+</blockquote>
+<ul>
+<li>UC1 销售处理 —— 正常流程</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>行为描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>收银员开始一次新的销售</td>
+</tr>
+<tr>
+<td>2</td>
+<td>如果是 VIP 顾客，收银员输入客户编号</td>
+</tr>
+<tr>
+<td>3</td>
+<td>收银员输入商品标识</td>
+</tr>
+<tr>
+<td>4</td>
+<td>系统记录商品并显示商品和赠品信息</td>
+</tr>
+<tr>
+<td>5</td>
+<td>系统显示已购入的商品清单和赠品清单</td>
+</tr>
+<tr>
+<td>6</td>
+<td>收银员结束输入，系统计算总价</td>
+</tr>
+<tr>
+<td>7</td>
+<td>系统根据赠送策略补充赠品清单</td>
+</tr>
+<tr>
+<td>8</td>
+<td>收银员请顾客支付</td>
+</tr>
+<tr>
+<td>9</td>
+<td>顾客支付，收银员输入现金数额</td>
+</tr>
+<tr>
+<td>10</td>
+<td>系统给出应找的余额</td>
+</tr>
+<tr>
+<td>11</td>
+<td>系统记录销售信息并更新库存</td>
+</tr>
+<tr>
+<td>12</td>
+<td>系统打印收据</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>UC1 销售处理 —— 扩展流程</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>扩展条件</th>
+<th>处理方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2a</td>
+<td>非法客户编号</td>
+<td>系统提示错误并拒绝输入</td>
+</tr>
+<tr>
+<td>3a</td>
+<td>非法商品标识</td>
+<td>系统提示错误并拒绝输入</td>
+</tr>
+<tr>
+<td>3b</td>
+<td>多个相同类别商品</td>
+<td>收银员手工输入商品标识和数量</td>
+</tr>
+<tr>
+<td>3–7a</td>
+<td>顾客要求删除商品</td>
+<td>收银员输入标识删除，系统更新列表和总价</td>
+</tr>
+<tr>
+<td>3–7b</td>
+<td>顾客要求取消交易</td>
+<td>收银员在系统中取消交易</td>
+</tr>
+<tr>
+<td>6a</td>
+<td>没有可执行的特价策略</td>
+<td>系统计算并生成抵价券</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>扩展流程的编号规则：数字表示从正常流程的哪一步分支出去，如 “3-7a” 表示在步骤 3 到 7 之间的任意时刻都可能发生</p>
+</blockquote>
+<blockquote>
+<p>注意 *a 编号——表示在任意步骤都可能发生的替代场景</p>
+<ul>
+<li>任意步骤顾客取消</li>
+<li>顾客修改某商品数量</li>
+<li>顾客移除某商品</li>
+</ul>
+</blockquote>
+<ul>
+<li>BDD：用 “测试怎么写” 来倒逼需求精确化（验收标准）
+<ul>
+<li>Given - When - Then</li>
+<li>消除歧义、可直接转为自动化测试、开发/测试/业务三方对齐</li>
+</ul>
+</li>
+</ul>
+<pre><code>用例描述（正常流程 + 扩展流程）
+         │
+         │ 等价转换
+         ▼
+BDD 场景集（Given-When-Then）
+         │
+         │ 自动化框架
+         ▼    
+可执行的验收测试
+</code></pre>
+<h2 id="2-4-需求分析方法与-ai-辅助建模">2.4 需求分析方法与 AI 辅助建模</h2>
+<blockquote>
+<p>需求分析是从获取结果到共同理解的桥梁。
+它的核心目标：消除歧义、建立模型、为设计奠基。</p>
+</blockquote>
+<ul>
+<li>需求分析的任务
+<ul>
+<li>建立分析模型
+<ul>
+<li>抽象：忽略细节，聚焦本质特征和关键关系</li>
+<li>分解：将复杂系统拆分为可理解的子部分</li>
+</ul>
+</li>
+<li>创建解决方案</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-5-需求文档化-验证与冲突检测">2.5 需求文档化、验证与冲突检测</h2>
+<p>两种核心文档：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>用例文档</th>
+<th>软件规格说明文档（SRS）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>视角</td>
+<td>用户视角</td>
+<td>系统视角</td>
+</tr>
+<tr>
+<td>侧重点</td>
+<td>交互流程</td>
+<td>独立需求</td>
+</tr>
+<tr>
+<td>基础</td>
+<td>以一次交互为基础</td>
+<td>以一次交互中的软件系统处理细节为基础</td>
+</tr>
+<tr>
+<td>组织方式</td>
+<td>按用例组织</td>
+<td>按功能模块/特性组织</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>需求沟通、用户确认</td>
+<td>设计、开发、测试</td>
+</tr>
+</tbody>
+</table>
+<p>需求可追踪性</p>
+<blockquote>
+<p>记录需求与其他工作产品之间的对应关系，确保每条需求都有来源、有实现、有验证。</p>
+</blockquote>
+<ul>
+<li>前向追踪
+<ul>
+<li>需求 → 设计 → 代码 → 测试</li>
+<li>确保每条需求都被实现和验证</li>
+</ul>
+</li>
+<li>后向追踪
+<ul>
+<li>代码 → 设计 → 需求</li>
+<li>确保每段代码都有需求依据</li>
+</ul>
+</li>
+</ul>
+<p>需求追踪矩阵</p>
+<table>
+<thead>
+<tr>
+<th>需求ID</th>
+<th>来源</th>
+<th>设计模块</th>
+<th>代码模块</th>
+<th>测试用例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>REQ-001</td>
+<td>客户访谈#3</td>
+<td>M-Auth</td>
+<td><a href="http://auth.py">auth.py</a></td>
+<td>TC-001, TC-002</td>
+</tr>
+<tr>
+<td>REQ-002</td>
+<td>法规要求</td>
+<td>M-Security</td>
+<td><a href="http://crypto.py">crypto.py</a></td>
+<td>TC-010</td>
+</tr>
+<tr>
+<td>REQ-003</td>
+<td>用户故事#7</td>
+<td>M-Cart</td>
+<td><a href="http://cart.py">cart.py</a></td>
+<td>TC-020</td>
+</tr>
+</tbody>
+</table>
+<p>追踪的两个核心用途</p>
+<ol>
+<li>一致性审计：每条需求是否都有设计元素来实现？每个设计元素是否都有需求依据？</li>
+<li>变更影响分析：如果 <code>REQ-001</code> 变更 → 追踪矩阵立刻告诉你受影响的设计、代码和测试</li>
+</ol>
+<h2 id="3-1-软件设计基础与体系结构概念">3.1 软件设计基础与体系结构概念</h2>
+<p>什么是架构气味？</p>
+<ul>
+<li>架构气味是系统体系结构中可能导致<strong>维护困难、性能下降或演化受阻</strong>的结构性问题。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>气味类型</th>
+<th>描述</th>
+<th>后果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>循环依赖</td>
+<td>\(A \to B \to C \to A\) 形成环</td>
+<td>无法独立编译/部署/测试</td>
+</tr>
+<tr>
+<td>God Component</td>
+<td>一个包/模块承担过多职责</td>
+<td>修改波及面大，测试困难</td>
+</tr>
+<tr>
+<td>层违观调用</td>
+<td>展示层直接访问数据层</td>
+<td>绕过业务规则，安全风险</td>
+</tr>
+<tr>
+<td>Feature Envy</td>
+<td>模块频繁访问另一模块的内部数据</td>
+<td>高耦合，应考虑职责迁移</td>
+</tr>
+<tr>
+<td>Scattered Functionality</td>
+<td>同一功能分散在多个模块</td>
+<td>修改需同时改多处</td>
+</tr>
+</tbody>
+</table>
+<p>ADR —— 架构决策记录</p>
+<ul>
+<li>不仅记录决策，还要记录为什么拒绝其他方案</li>
+</ul>
+<h2 id="3-2-体系结构风格与设计过程">3.2 体系结构风格与设计过程</h2>
+<h3 id="体系结构风格">体系结构风格</h3>
+<h4 id="5-管道-过滤器风格">5 管道-过滤器风格</h4>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-12.webp" alt="alt text" loading="lazy"></p>
+<h4 id="6-客户端-服务器-rest-风格">6 客户端-服务器 + REST 风格</h4>
+<ul>
+<li>无状态：每次请求包含所有信息</li>
+<li>统一接口：HTTP 动词 + URI 资源</li>
+<li>分层系统：客户端不知道是否直连服务器</li>
+</ul>
+<h4 id="7-微服务风格">7 微服务风格</h4>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-13.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>每个服务独立部署、独立数据库</li>
+<li>通过 REST/消息队列通信</li>
+<li>团队按服务边界划分</li>
+</ul>
+<h3 id="体系结构设计过程">体系结构设计过程</h3>
+<p><strong>步骤 1：分析关键需求和项目约束</strong></p>
+<ul>
+<li><strong>非功能需求</strong>（可维护、性能）和<strong>项目约束</strong>往往对架构选择的影响大于功能需求</li>
+<li>ASR —— 架构重要需求</li>
+</ul>
+<p><strong>步骤 2：选择体系结构风格</strong></p>
+<table>
+<thead>
+<tr>
+<th>需求特征</th>
+<th>推荐风格</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>企业级业务系统、团队分工</td>
+<td>分层</td>
+<td>职责分明、易于分工</td>
+</tr>
+<tr>
+<td>数据流式处理、转换链</td>
+<td>管道–过滤器</td>
+<td>数据逐步变换</td>
+</tr>
+<tr>
+<td>高交互、多视图同步</td>
+<td>MVC</td>
+<td><mark>界面与逻辑分离</mark></td>
+</tr>
+<tr>
+<td>大规模、独立部署、多团队</td>
+<td>微服务</td>
+<td>独立开发/部署/扩展</td>
+</tr>
+<tr>
+<td>松耦合、异步通信</td>
+<td>事件驱动</td>
+<td>发布/订阅解耦</td>
+</tr>
+<tr>
+<td>小型工具、脚本</td>
+<td>主程序–子程序</td>
+<td>简单直接</td>
+</tr>
+</tbody>
+</table>
+<p><strong>步骤 3：逻辑设计 — 需求到模块的映射</strong></p>
+<p>设计原则</p>
+<ol>
+<li>高内聚 — 相关功能放在同一模块</li>
+<li>低耦合 — 模块间依赖最小化</li>
+<li>单一职责 — 每个模块只做一件事</li>
+<li>信息隐藏 — 隐藏实现细节，暴露接口</li>
+</ol>
+<p><strong>步骤 4：接口设计</strong></p>
+<ul>
+<li>定义模块对外暴露的 API</li>
+<li>确定参数、返回值、异常</li>
+<li>使用 Interface / DTO 解耦</li>
+</ul>
+<p><strong>步骤 5：物理设计</strong></p>
+<ul>
+<li>决定部署拓扑（单机/分布式）</li>
+<li>数据库选型与部署</li>
+<li>网络、中间件配置</li>
+</ul>
+<p><strong>步骤 6：验证设计方案</strong></p>
+<ul>
+<li>对照需求逐条检查</li>
+<li>场景走查</li>
+<li>原型验证关键风险点</li>
+</ul>
+<p><strong>步骤 7：评审与改进</strong></p>
+<ul>
+<li>组织架构评审会</li>
+<li>检查一致性与完整性</li>
+<li>记录架构决策记录 (ADR)</li>
+<li>输出《架构设计文档》</li>
+</ul>
+<h3 id="案例">案例</h3>
+<table>
+<thead>
+<tr>
+<th>考虑因素</th>
+<th>分析</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>系统类型</td>
+<td>企业级业务信息系统</td>
+<td>适合分层</td>
+</tr>
+<tr>
+<td>团队技术栈</td>
+<td>Java + Spring（天然分层）</td>
+<td>适合分层</td>
+</tr>
+<tr>
+<td>非功能需求</td>
+<td>安全（认证/鉴权可作为独立层）</td>
+<td>适合分层</td>
+</tr>
+<tr>
+<td>可维护性</td>
+<td>功能模块多，需要清晰职责划分</td>
+<td>适合分层</td>
+</tr>
+<tr>
+<td>项目约束</td>
+<td>进度紧，分层架构成熟度高</td>
+<td>适合分层</td>
+</tr>
+<tr>
+<td>兼容约束</td>
+<td>IC2 需在数据层封装 ERP 接口</td>
+<td>适合分层</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-14.webp" alt="alt text" loading="lazy"></p>
+<blockquote>
+<p>改进：三层均按功能域拆分为独立子包，每层约 5 个包，粒度合理，支持团队并行开发</p>
+</blockquote>
+<p><strong>初步设计方案三 — 接口独立层与依赖倒置</strong></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-15.webp" alt="alt text" loading="lazy"></p>
+<h4 id="核心改进">核心改进</h4>
+<table>
+<thead>
+<tr>
+<th>改进点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>接口独立成层</td>
+<td><code>Service Interface</code> 和 <code>DAO Interface</code> 作为独立层</td>
+</tr>
+<tr>
+<td>实现继承接口</td>
+<td><code>Service Impl → implements → Service Interface</code></td>
+</tr>
+<tr>
+<td>上层依赖接口</td>
+<td>展示层依赖 <code>Service Interface</code>，不依赖实现</td>
+</tr>
+<tr>
+<td>VO/PO分离</td>
+<td>VO用于展示层–逻辑层，PO用于逻辑层–数据层</td>
+</tr>
+</tbody>
+</table>
+<h4 id="依赖关系">依赖关系</h4>
+<table>
+<thead>
+<tr>
+<th>依赖方向</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>展示层 → <code>Service Interface</code></td>
+<td>上层依赖接口</td>
+</tr>
+<tr>
+<td><code>Service Impl</code> → <code>Service Interface</code></td>
+<td>实现继承接口</td>
+</tr>
+<tr>
+<td><code>Service Impl</code> → <code>DAO Interface</code></td>
+<td>上层依赖接口</td>
+</tr>
+<tr>
+<td><code>DAO Impl</code> → <code>DAO Interface</code></td>
+<td>实现继承接口</td>
+</tr>
+<tr>
+<td><mark>展示层 + <code>Service Interface</code> → VO</mark></td>
+<td>共同依赖值对象</td>
+</tr>
+<tr>
+<td><mark><code>Service Impl</code> + <code>DAO Interface</code> → PO</mark></td>
+<td>共同依赖持久化对象</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-3-体系结构设计实践与验证">3.3 体系结构设计实践与验证</h2>
+<table>
+<thead>
+<tr>
+<th>视图</th>
+<th>关注点</th>
+<th>对应 UML 图</th>
+<th>面向角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>逻辑视图</td>
+<td>功能需求、类与包的组织</td>
+<td>包图、类图</td>
+<td>架构师、开发者</td>
+</tr>
+<tr>
+<td>开发视图</td>
+<td>代码组织、模块划分</td>
+<td>组件图</td>
+<td>开发者</td>
+</tr>
+<tr>
+<td>进程视图</td>
+<td>并发、同步、性能</td>
+<td>活动图、序列图</td>
+<td>系统集成者</td>
+</tr>
+<tr>
+<td>物理视图</td>
+<td>部署拓扑、硬件映射</td>
+<td>部署图</td>
+<td>运维工程师</td>
+</tr>
+<tr>
+<td>场景视图</td>
+<td>用例驱动、验证其他视图</td>
+<td>用例图</td>
+<td>所有利益相关者</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>视图</th>
+<th>核心问题</th>
+<th>在线书店案例要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>逻辑</td>
+<td>功能怎么划分？</td>
+<td><code>controller / service / dao / entity</code> 四层包</td>
+</tr>
+<tr>
+<td>开发</td>
+<td>代码怎么组织和构建？</td>
+<td>4 个 Maven 模块，<code>entity</code> 是公共依赖</td>
+</tr>
+<tr>
+<td>进程</td>
+<td>运行时线程 / 并发如何？</td>
+<td>200 worker + 20 DB连接 + 定时器 + 异步池</td>
+</tr>
+<tr>
+<td>物理</td>
+<td>部署在哪里？</td>
+<td>Browser → Tomcat → MySQL（单体）</td>
+</tr>
+<tr>
+<td>场景</td>
+<td>用例能否穿透所有层？</td>
+<td>购买图书穿透 4 层 + 库存锁 + 支付幂等</td>
+</tr>
+</tbody>
+</table>
+<p>案例：在线书店 — <strong>逻辑视图（包图）</strong></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-20.webp" alt="alt text" loading="lazy"></p>
+<p>案例：在线书店 — <strong>物理视图（部署图）</strong></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-21.webp" alt="alt text" loading="lazy"></p>
+<p>案例：在线书店 — <strong>开发视图（组件图）</strong></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-22.webp" alt="alt text" loading="lazy"></p>
+<p><strong>接口的三大好处</strong></p>
+<ol>
+<li>解耦：上层不依赖下层实现</li>
+<li>可替换：实现类可以随时替换</li>
+<li>可测试：用 Mock 替代真实实现</li>
+</ol>
+<p><strong>接口设计小结</strong></p>
+<table>
+<thead>
+<tr>
+<th>设计要点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>接口 = 契约</td>
+<td>定义层间交互的 What，隐藏 How</td>
+</tr>
+<tr>
+<td>PO vs VO</td>
+<td>隔离持久化细节与展示需求</td>
+</tr>
+<tr>
+<td>DIP</td>
+<td>高层和低层都依赖抽象，不直接耦合</td>
+</tr>
+<tr>
+<td>无状态设计</td>
+<td>Service 不持有请求级别的状态，确保线程安全</td>
+</tr>
+</tbody>
+</table>
+<p><strong>案例：Spring Boot 项目结构</strong></p>
+<pre><code>bookstore/
+├── src/main/java/com/bookstore/
+│   ├── BookStoreApplication.java          ← 启动类
+│   ├── controller/
+│   │   ├── BookController.java
+│   │   └── OrderController.java
+│   ├── service/
+│   │   ├── BookService.java               ← 接口
+│   │   ├── OrderService.java              ← 接口
+│   │   └── impl/
+│   │       ├── BookServiceImpl.java
+│   │       └── OrderServiceImpl.java
+│   ├── dao/
+│   │   ├── BookDao.java                   ← 接口
+│   │   └── OrderDao.java                  ← 接口
+│   └── entity/
+│       ├── Book.java
+│       └── Order.java
+├── src/main/resources/
+│   └── application.properties
+└── pom.xml
+</code></pre>
+<p><strong>持续集成（CI）</strong></p>
+<ul>
+<li>开发者提交代码 -&gt; 编译构建 -&gt; 单元测试 -&gt; 集成测试 -&gt; 代码质量检查 -&gt; 部署到测试环境</li>
+</ul>
+<ul>
+<li>快速反馈：提交后几分钟内知道是否破坏了集成</li>
+<li>降低风险：频繁小集成 vs 一次大集成</li>
+<li>工具链：Git + GitHub Actions + Maven/Gradle</li>
+</ul>
+<p><strong>集成验证小结</strong></p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>方法</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>设计阶段</td>
+<td><code>ATAM</code> / <code>SAAM</code> 评审</td>
+<td>发现架构风险与权衡</td>
+</tr>
+<tr>
+<td>编码阶段</td>
+<td>持续集成 CI</td>
+<td>快速反馈集成问题</td>
+</tr>
+<tr>
+<td>测试阶段</td>
+<td><code>Stub</code> / <code>Driver</code></td>
+<td>隔离测试各层</td>
+</tr>
+<tr>
+<td>测试阶段</td>
+<td>集成测试</td>
+<td>验证端到端链路</td>
+</tr>
+</tbody>
+</table>
+<p><strong>包级度量</strong></p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>公式</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\(Ca\) (传入依赖)</td>
+<td>依赖本包的外部包数</td>
+<td>越高越稳定</td>
+</tr>
+<tr>
+<td>\(Ce\) (传出依赖)</td>
+<td>本包依赖的外部包数</td>
+<td>越高越不稳定</td>
+</tr>
+<tr>
+<td>\(I\) (不稳定性)</td>
+<td>\(Ce / (Ca + Ce)\)</td>
+<td>\(0=\)完全稳定, \(1=\)完全不稳定</td>
+</tr>
+<tr>
+<td>\(A\) (抽象度)</td>
+<td>抽象类数 / 总类数</td>
+<td>接口包→高, 实现包→低</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ADL —— 架构描述语言</strong></p>
+<table>
+<thead>
+<tr>
+<th>ADL 工具</th>
+<th>用途</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PlantUML</td>
+<td>包图、组件图、部署图</td>
+<td><code>@startuml ... package ... @enduml</code></td>
+</tr>
+<tr>
+<td>Mermaid</td>
+<td>流程图、时序图</td>
+<td><code>graph TD; A--&gt;B</code></td>
+</tr>
+<tr>
+<td>Spring Boot 目录结构</td>
+<td>架构的代码级表达</td>
+<td><code>com.bookstore.controller/service/dao</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-1-详细设计">4.1 详细设计</h2>
+<p><strong>详细设计的输入</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>来自需求工程（RE）</th>
+<th>来自体系结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用例（Use Case）—— 功能场景</td>
+<td>模块的规格（Specification）</td>
+</tr>
+<tr>
+<td>领域模型 / 概念类图 —— 业务实体</td>
+<td>导入/导出接口（Export / Import）</td>
+</tr>
+<tr>
+<td>系统顺序图 —— 系统级交互</td>
+<td>风格约束（分层、MVC、微服务……）</td>
+</tr>
+<tr>
+<td>状态图 —— 复杂对象生命周期</td>
+<td>构件间接口（如 <code>SalesBLService</code>）</td>
+</tr>
+<tr>
+<td>非功能需求 —— 性能、可靠性、安全等</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>面向对象详细设计的过程</strong></p>
+<pre><code class="language-planetext">设计模型建立
+├── 通过职责建立静态设计模型
+│   ├── 抽象类的职责（数据职责 + 行为职责）
+│   ├── 抽象类之间的关系（关联/聚合/组合；继承/实现）
+│   └── 添加辅助类（DTO、Helper、Util...）
+└── 通过协作建立动态设计模型
+    ├── 抽象对象之间协作（顺序图 / 通讯图）
+    ├── 明确对象的创建（GRASP-Creator）
+    └── 选择合适的控制风格（集中 / 委托 / 分散）
+
+设计模型重构
+├── 根据模块化的思想进行重构（目标：高内聚、低耦合）
+├── 根据信息隐藏的思想进行重构（目标：隐藏职责与变更）
+└── 利用设计模式重构（GoF 23 / DDD / ...）
+</code></pre>
+<p><strong>协作的集成测试：</strong></p>
+<ul>
+<li>针对逻辑复杂、交互较多的类间协作，需要进行集成测试。</li>
+<li>在测试中，通常使用 <strong>Mock Object（模拟对象）</strong> 来替代外部依赖。Mock 是一种可控的“假对象”，使开发者能只关注被测的协作逻辑</li>
+</ul>
+<h3 id="16-设计模式">16 设计模式</h3>
+<h4 id="16-1-可修改性">16.1 可修改性</h4>
+<p><strong>组合优于继承</strong>：为了获得更高的灵活性，推荐使用类与类之间的 “组合” 关系而非仅仅依赖继承（父改子必改）。组合不仅解除了前后端在接口上的耦合，还能让底层实现类的对象进行动态创建、动态配置和动态销毁。</p>
+<pre><code class="language-java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Backend</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">method_2</span><span class="hljs-params">()</span>{
+    }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Frontend</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-type">Backend</span> <span class="hljs-variable">back</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Backend</span>();
+    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">method_2</span><span class="hljs-params">()</span>{
+        back.method_2();
+    }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Client</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span>{
+        <span class="hljs-type">Frontend</span> <span class="hljs-variable">front</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Frontend</span>();
+        <span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> front.method_2();
+    }
+}
+</code></pre>
+<h3 id="17-软件构造">17 软件构造</h3>
+<p><strong>重构的时机</strong></p>
+<ul>
+<li>增加新的功能时</li>
+<li>发现了缺陷进行修复时</li>
+<li>进行代码评审时</li>
+</ul>
+<p><strong>代码的坏味道</strong></p>
+<ul>
+<li>太长的方法</li>
+<li>太大的类</li>
+<li>太多的方法参数</li>
+<li>多处相似的复杂控制结构</li>
+<li>重复的代码</li>
+<li>过多的注释</li>
+</ul>
+<p><strong>测试驱动开发（TDD）的三个阶段</strong></p>
+<ol>
+<li>🔴 <strong>阶段一：红灯（Red）—— 编写失败的测试</strong></li>
+</ol>
+<ul>
+<li><strong>动作：</strong> 编写测试代码，运行测试。</li>
+<li><strong>结果：</strong> 此时因为真实的业务逻辑尚未实现（甚至连类或方法名都还不存在，会导致编译错误），测试必然会<strong>失败</strong>（通常在测试框架中显示为红色）。</li>
+<li><strong>目的：</strong> 明确需求和接口设计。这个失败的测试定义了成功的标准。</li>
+</ul>
+<ol start="2">
+<li>🟢 <strong>阶段二：绿灯（Green）—— 编写刚好通过测试的代码</strong></li>
+</ol>
+<p>在这个阶段，你的唯一目标是用最快、最简单的方式让刚刚失败的测试通过。</p>
+<ul>
+<li><strong>动作：</strong> 编写实现代码，再次运行测试。</li>
+<li><strong>结果：</strong> 测试<strong>成功通过</strong>（显示为绿色）。</li>
+<li><strong>注意：</strong> 此时<strong>不要</strong>考虑代码的优雅性、性能优化或架构设计。哪怕是用最粗暴的 <code>if-else</code> 或硬编码（Hardcode）把数据凑出来，只要能让测试变绿即可。</li>
+<li><strong>目的：</strong> 快速提供一个可运行的、满足当前需求的基线版本。</li>
+</ul>
+<ol start="3">
+<li><strong>阶段三：重构（Refactor）—— 优化代码结构</strong></li>
+</ol>
+<p>现在你有了一个由测试保护的安全网，可以放心地对刚才匆忙写出的代码进行整理。</p>
+<ul>
+<li><strong>动作：</strong> 消除重复代码、提取方法/类、优化命名、改善设计模式。</li>
+<li><strong>结果：</strong> 每次修改后都要重新运行所有测试，确保它们<strong>依然保持绿色</strong>。</li>
+<li><strong>目的：</strong> 在不改变软件外部行为的前提下，提升代码的内部质量、可读性和可维护性。</li>
+</ul>
+<h3 id="19-软件测试">19 软件测试</h3>
+<ul>
+<li>随机测试：从所有可能的输入值中选择输入子集，建立测试用例</li>
+</ul>
+<h3 id="20-软件交付">20 软件交付</h3>
+<ul>
+<li>安装/部署（单安装包不行）将软件产品移交给用户</li>
+<li>培训/文档支持保障用户能够有效掌握和使用软件</li>
+</ul>
+<h3 id="21-软件维护与演化">21 软件维护与演化</h3>
+<p><strong>软件维护的过程</strong></p>
+<ol>
+<li>问题/修改的标识、分类与划分优先级</li>
+<li>分析：可行性分析、详细分析</li>
+<li>设计</li>
+<li>实现</li>
+<li>回归测试</li>
+<li>验收测试</li>
+<li>交付</li>
+</ol>
+<blockquote>
+<p>回归测试：在代码修改后，重新运行之前的测试，以确保旧功能没有被破坏</p>
+</blockquote>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>演化</div><p>意指软件交付后的 “修改” 活动，有时是开发与维护的综合</p>
+</div><p><strong>软件演化生命周期模型</strong></p>
+<pre class="mermaid">graph TD
+    InitialDev[初始开发] -->|第一个运行版本| Evolution(演化)
+    
+    %% Feedback loop for Evolution with label "修改"
+    Evolution -->|修改| Evolution
+    
+    Evolution -->|丧失可演化性| Service(服务)
+    
+    %% Feedback loop for Service with label "补丁"
+    Service -->|补丁| Service
+    
+    Service -->|终止服务| PhaseOut[逐步淘汰]
+    PhaseOut -->|替换| Stop[停止]
+</pre>
+<ul>
+<li><strong>初步开发</strong>：建立一个好的软件体系结构
+<ul>
+<li>可扩展性、可修改性</li>
+</ul>
+</li>
+<li><strong>演化</strong>
+<ul>
+<li>预先安排的需求增量</li>
+<li>变更请求</li>
+<li>修正缺陷</li>
+<li>新增需求</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-info"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>演化阶段的软件产品要具备两个特征：</div><p>(1) 软件产品具有较好的可演化性
+(2) 软件产品能够帮助用户实现较好的业务价值</p>
+<ul>
+<li>不满足第（2）条特征 -&gt; 停止阶段</li>
+<li>满足第（2）条同时不满足第（1）条 -&gt; 服务阶段</li>
+<li>由于竞争产品的出现或者其他市场考虑，也可以让同时满足上面两条特征的软件产品提前进入服务阶段</li>
+</ul>
+</div><ul>
+<li><strong>服务</strong>
+<ul>
+<li>不再持续的增加自己的价值，而只是周期性的修正已有的缺陷</li>
+<li>进入该阶段，可能由于无法继续演化，也可能是出于市场考虑，不再重点关注该产品</li>
+</ul>
+</li>
+<li><strong>逐步淘汰</strong>
+<ul>
+<li>不再提供软件产品的任何服务</li>
+<li>用户仍在使用</li>
+<li>考虑是否可以作为有用的遗留资源用于新软件的开发</li>
+</ul>
+</li>
+<li><strong>停止</strong>
+<ul>
+<li>开发者不再维护，用户不再使用</li>
+</ul>
+</li>
+</ul>
+<h3 id="22-软件开发过程模型">22 软件开发过程模型</h3>
+<h4 id="6-螺旋模型">6 螺旋模型</h4>
+<ul>
+<li><mark>充分利用原型方法，尽早解决比较高的风险</mark></li>
+<li>风险驱动，完全按照风险解决的方式组织软件开发活动</li>
+<li>迭代与瀑布的结合
+<ul>
+<li>开发阶段是瀑布式的</li>
+<li>风险分析是迭代的</li>
+</ul>
+</li>
+</ul>
+<p><strong>优点</strong></p>
+<ul>
+<li>降低风险，减少项目因风险造成的损失</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>存在<mark>原型自身带来的风险，与原型模型相同</mark></li>
+<li>模型过于复杂，不利于组织软件开发活动</li>
+</ul>
+<p><strong>适用性</strong>：</p>
+<ul>
+<li>高风险的大规模软件系统开发</li>
+</ul>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>原型模型 vs 螺旋模型</div><p>原型模型：使用原型解决需求的不确定性
+螺旋模型：使用原型解决项目开发中的技术风险</p>
+</div><h4 id="7-rational-统一过程-rup-模型">7 Rational 统一过程（RUP）模型</h4>
+<p><strong>核心实践方法</strong></p>
+<ol>
+<li>迭代式开发</li>
+<li>管理需求</li>
+<li>使用基于组件的体系结构</li>
+<li>可视化建模</li>
+<li>验证软件质量</li>
+<li>控制软件变更</li>
+</ol>
+<p><strong>RUP 裁剪</strong></p>
+<blockquote>
+<p>RUP 是一个<mark>通用的过程模板</mark>，在一个项目使用 RUP 指导开发活动组织时，需要对 RUP 进行<mark>裁剪和配置</mark></p>
+</blockquote>
+<ol>
+<li>确定本项目需要哪些工作流</li>
+<li>确定每个工作流需要哪些制品</li>
+<li>确定 4 个阶段之间如何演进
+4、确定每个阶段内的迭代计划
+5、规划工作流的组织</li>
+</ol>
+<p><strong>优点</strong></p>
+<ul>
+<li>吸收和借鉴了传统上的最佳实践方法，保证软件开发过程的组织是基本有效和合理的</li>
+<li>大小型项目开发均适用，适用面广泛</li>
+<li>有一套软件工程工具的支持，帮助有效实施</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>没有考虑交付之后的软件维护问题</li>
+<li>裁剪和配置工作不是一个简单的任务</li>
+</ul>
+<p><strong>适用性</strong>：</p>
+<ul>
+<li>RUP 是重量级过程，能够胜任开发大型项目时的活动组织，但经过裁剪，也可以变为轻量级过程，也能够胜任小团队的开发活动组织</li>
+</ul>
+<h4 id="8-敏捷过程">8 敏捷过程</h4>
+<p>敏捷思想：</p>
+<ul>
+<li>个体和互动 高于 流程和工具</li>
+<li>工作的软件 高于 详尽的文档</li>
+<li>客户合作 高于 合同谈判</li>
+<li>响应变化 高于 遵循计划</li>
+</ul>
+<p>敏捷原则：</p>
+<ol>
+<li>我们最重要的目标，是通过持续不断地及早交付有价值的软件使客户满意。</li>
+<li>欣然面对需求变化，即使在开发后期也一样。为了客户的竞争优势，敏捷过程掌控变化。</li>
+<li>经常地交付可工作的软件，相隔几星期或一两个月，倾向于采取较短的周期。</li>
+<li>业务人员和开发人员必须相互合作，项目中的每一天都不例外。</li>
+<li>激发个体的斗志，以他们为核心搭建项目。提供所需的环境和支援，辅以信任，从而达成目标。</li>
+<li>不论团队内外，传递信息效果最好效率也最高的方式是面对面的交谈。</li>
+<li>可工作的软件是进度的首要度量标准。</li>
+<li>敏捷过程倡导可持续开发。责任人、开发人员和用户要能够共同维持其步调稳定延续。</li>
+<li>坚持不懈地追求技术卓越和良好设计，敏捷能力由此增强。</li>
+<li>以简洁为本，它是极力减少不必要工作量的艺术。</li>
+<li>最好的架构、需求和设计出自自组织团队。</li>
+<li>团队定期地反思如何能提高成效，并依此调整自身的举止表现。</li>
+</ol>
+<p>践行敏捷思想与原则的过程方法</p>
+<ul>
+<li>极限编程 XP 的一个重要思想是极限利用简单、有效的方法解决问题</li>
+</ul>
+<blockquote>
+<p>敏捷过程包含的方法众多，各有特点，除了共同的思想和原则之外，很难准确描述它们的共同点，所以也无法确切界定它们的优缺点</p>
+</blockquote>
+<hr>
+<ul>
+<li>敏捷开发：侧重于开发阶段，强调<mark>通过迭代和客户反馈来应对需求变化</mark>，确保 “<strong>做正确的事</strong>”。</li>
+<li>DevOps：侧重于交付和运维阶段，强调通过自动化和跨部门协作来加速软件上线，确保 “<strong>快速、稳定地把事做完</strong>”</li>
+<li>总结：敏捷开发是 DevOps 的基础，而 DevOps 则是敏捷开发在运维和交付环节的延伸与补全</li>
+</ul>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：软件工程 II 复习笔记(三)</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-08 06:37:42</p>
+      <p><strong>更新于</strong>：2026-08-07 22:43:32</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/软件工程 II 复习笔记(三).html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">软件工程 II 复习笔记(三)</div>
+      <ul><li class="toc-l2"><a href="#1-1-软件工程基础">1.1 软件工程基础</a></li><li class="toc-l2"><a href="#1-2-项目管理基础">1.2 项目管理基础</a></li><li class="toc-l2"><a href="#2-1-需求工程基础">2.1 需求工程基础</a></li><li class="toc-l2"><a href="#2-2-ai-辅助需求获取">2.2 AI 辅助需求获取</a></li><li class="toc-l2"><a href="#2-3-用例建模与用户故事">2.3 用例建模与用户故事</a></li><li class="toc-l2"><a href="#2-4-需求分析方法与-ai-辅助建模">2.4 需求分析方法与 AI 辅助建模</a></li><li class="toc-l2"><a href="#2-5-需求文档化-验证与冲突检测">2.5 需求文档化、验证与冲突检测</a></li><li class="toc-l2"><a href="#3-1-软件设计基础与体系结构概念">3.1 软件设计基础与体系结构概念</a></li><li class="toc-l2"><a href="#3-2-体系结构风格与设计过程">3.2 体系结构风格与设计过程</a></li><li class="toc-l3"><a href="#体系结构风格">体系结构风格</a></li><li class="toc-l3"><a href="#体系结构设计过程">体系结构设计过程</a></li><li class="toc-l3"><a href="#案例">案例</a></li><li class="toc-l2"><a href="#3-3-体系结构设计实践与验证">3.3 体系结构设计实践与验证</a></li><li class="toc-l2"><a href="#4-1-详细设计">4.1 详细设计</a></li><li class="toc-l3"><a href="#16-设计模式">16 设计模式</a></li><li class="toc-l3"><a href="#17-软件构造">17 软件构造</a></li><li class="toc-l3"><a href="#19-软件测试">19 软件测试</a></li><li class="toc-l3"><a href="#20-软件交付">20 软件交付</a></li><li class="toc-l3"><a href="#21-软件维护与演化">21 软件维护与演化</a></li><li class="toc-l3"><a href="#22-软件开发过程模型">22 软件开发过程模型</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/软件工程 II 复习笔记(二).html">&lt; 软件工程 II 复习笔记(二)</a>
+      <a class="pager-next" href="/posts/人机交互.html">人机交互 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
+<script src="/assets/js/main.js?v=1786162127971" defer></script>
+<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+</body>
+</html>

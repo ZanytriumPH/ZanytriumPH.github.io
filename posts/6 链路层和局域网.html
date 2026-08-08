@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6 链路层和局域网 · Zwing&#39;s blog</title>
+<meta name="description" content="链路层和局域网">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">6 链路层和局域网</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-07T22:46:13.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-08 06:46:13</time>
+            <time class="meta-item" datetime="2026-08-07T23:07:52+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-07 23:07:52</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 10580 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 36 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#计算机网络"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>计算机网络</a>
+              <a class="tag-chip" href="/tags.html#计算机网络"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>计算机网络</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><div class="callout callout-warning"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>杂糅了中科大（学习过程）与南大（考前复习）的课件而成的笔记，排版与质量可能不保证</div></div><div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>一个子网中的若干节点是如何连接到一起的</div><ul>
+<li><mark>点到点连接</mark></li>
+<li><mark>多点连接</mark>：
+<ul>
+<li>共享型介质</li>
+<li>通过网络交换机</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-133.webp" alt="alt text" loading="lazy"></p>
+</div><ul>
+<li>
+<p><mark><strong>WAN</strong>: 网络形式采用<strong>点到点</strong>链路</mark></p>
+<ul>
+<li>带宽大、距离远（延迟大） -&gt; 带宽延迟积大</li>
+<li>如果采用多点连接方式
+<ul>
+<li>竞争方式：一旦冲突代价大</li>
+<li>令牌等协调方式：在其中协调节点的发送代价大</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>点到点链路的链路层服务</strong> 实现非常简单，封装和解封装</p>
+</li>
+<li>
+<p><mark><strong>LAN</strong> 一般采用<strong>多点连接</strong>方式</mark></p>
+<ul>
+<li>连接节点非常方便</li>
+<li>接到共享型介质上（或网络交换机），就可以连接所有其他节点</li>
+</ul>
+</li>
+<li>
+<p><strong>多点连接方式网络的链路层功能</strong> 实现相当复杂</p>
+<ul>
+<li>多点接入：协调各节点对共享性介质的访问和使用</li>
+<li>竞争方式：冲突之后的协调</li>
+<li>令牌方式：令牌产生，占有和释放等</li>
+</ul>
+</li>
+</ul>
+<h2 id="1-引论与服务">1 引论与服务</h2>
+<h3 id="1-1-一些术语">1.1 一些术语</h3>
+<ul>
+<li>主机和路由器是节点：<strong>nodes</strong></li>
+<li>沿着通信路径，连接各相邻节点通信信道的是链路：<strong>links</strong>
+<ul>
+<li>有线链路</li>
+<li>无线链路</li>
+<li>局域网，共享性链路</li>
+</ul>
+</li>
+<li>第二层协议数据单元帧 <strong>frame</strong>，封装数据报</li>
+</ul>
+<div class="callout callout-note"><p>数据链路层负责<mark>从一个节点通过链路将（帧中的）数据报发送到相邻的物理节点（一个子网内部的 2 节点）</mark></p>
+</div><h3 id="1-2-链路层上下文">1.2 链路层上下文</h3>
+<ul>
+<li>数据报（分组）在不同的链路上以不同的链路协议传送
+<ul>
+<li>第一跳链路：Wi-Fi（无线局域网，WLAN）</li>
+<li>下一跳链路：以太网</li>
+</ul>
+</li>
+<li>不同的链路协议提供不同的服务
+<ul>
+<li>比如在链路层上提供（或没有）可靠数据传送</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>传输类比</div><ul>
+<li>从 Princeton 到 Lausanne
+<ul>
+<li>轿车: Princeton to JFK</li>
+<li>飞机: JFK to Geneva</li>
+<li>火车: Geneva to Lausanne</li>
+</ul>
+</li>
+<li>旅行者 = 数据报 datagram</li>
+<li>交通段 = 通信链路 communication link</li>
+<li>交通模式 = 链路层协议: 数据链路层和局域网 protocol</li>
+<li>票务代理 = 路由算法 routing algorithm</li>
+</ul>
+</div><h3 id="1-3-链路层服务">1.3 链路层服务</h3>
+<div class="callout callout-tip"><p>一般化的链路层服务，不是所有的链路层都提供这些服务
+一个特定的链路层只是提供其中一部分的服务</p>
+</div><ul>
+<li><strong>成帧，链路接入</strong>：
+<ul>
+<li>将数据报封装在帧中，加上帧头、帧尾部</li>
+<li>如果采用的是共享性介质，信道接入获得信道访问权</li>
+<li>在帧头部使用 “MAC”（物理）地址来标示源和目的
+<ul>
+<li>不同于 IP 地址</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>在相邻节点间（一个子网内）进行可靠的转发</strong>
+<ul>
+<li><mark>在低差错链路上很少使用（光纤，一些双绞线）</mark>
+<ul>
+<li>出错率低，没有必要在每一个帧中做差错控制的工作，协议复杂
+<ul>
+<li>发送端对每一帧进行差错控制编码，根据反馈做相应的动作</li>
+<li>接收端进行差错控制解码，反馈给发送端（ACK，NAK）</li>
+</ul>
+</li>
+<li>在本层放弃可靠控制的工作，在网络层或者是传输层做可靠控制的工作，或者根本就不做可靠控制的工作</li>
+</ul>
+</li>
+<li><mark>在高差错链路（无线链路）上需要进行可靠的数据传送</mark>
+<ul>
+<li>Q：为什么要在采用无线链路的网络上，链路层做可靠数据传输工作，还要在传输层做端到端的可靠性工作？</li>
+<li>原因：出错率高，如果在链路层不做差错控制工作，漏出去的错误比较高；到了上层如果需要可靠控制的数据传输代价会很大
+<ul>
+<li>如不做 local recovery 工作，总体代价大</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>流量控制</strong>
+<ul>
+<li>使得相邻的发送和接收方节点的速度匹配</li>
+</ul>
+</li>
+<li><strong>错误检测</strong>
+<ul>
+<li>差错由信号衰减和噪声引起</li>
+<li>接收方检测出的错误:
+<ul>
+<li>通知发送端进行重传或丢弃帧</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>差错纠正</strong>
+<ul>
+<li>接收端检查和纠正 bit 错误，不通过重传来纠正错误</li>
+</ul>
+</li>
+<li><strong>半双工和全双工</strong>
+<ul>
+<li><mark>半双工：链路可以双向传输，但一次只有一个方向</mark></li>
+</ul>
+</li>
+</ul>
+<h3 id="1-4-链路层实现">1.4 链路层实现</h3>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>链路层在哪里实现？</div></div><ul>
+<li>在每一个主机上
+<ul>
+<li>也在每个路由器上</li>
+<li>交换机的每个端口上</li>
+</ul>
+</li>
+<li><mark>链路层功能在 “适配器” 上实现</mark>（network interface card，<strong>NIC</strong>）或者在一个芯片组上
+<ul>
+<li><em>以太网卡，802.11 网卡；以太网芯片组</em></li>
+<li>实现链路层和相应的物理层功能</li>
+</ul>
+</li>
+<li>接到主机的系统总线上</li>
+<li>硬件、软件和固件的综合体</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-134.webp" alt="alt text" loading="lazy"></p>
+<h3 id="1-5-适配器通信">1.5 适配器通信</h3>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-224.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>发送方：
+<ul>
+<li>在帧中封装数据报</li>
+<li>加上差错控制编码，实现 RDT（可靠数据传输）和流量控制功能等</li>
+</ul>
+</li>
+<li>接收方：
+<ul>
+<li>检查有无出错，执行 RDT 和流量控制功能等</li>
+<li>解封装数据报，将其交给上层</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>适配器是半自治的，实现了链路和物理层功能</div></div><h2 id="2-差错检测和纠正">2 差错检测和纠正</h2>
+<ul>
+<li><mark>EDC = 差错检测和纠正位（冗余位）</mark></li>
+<li>D = 由差错检测保护的数据，可以包含头部字段</li>
+<li>错误检测不是 100% 可靠的
+<ul>
+<li>协议会漏检一些错误，但是很少</li>
+<li>更长的 EDC 字段可以得到更好的检测和纠正效果</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-136.webp" alt="alt text" loading="lazy"></p>
+<h3 id="2-1-奇偶校验">2.1 奇偶校验</h3>
+<ul>
+<li>核心思想：数“1”的个数</li>
+</ul>
+<p>通常使用的是 <strong>偶校验</strong>，它的规则是：发送方和接收方约定好，一段数据里面加上校验位之后，数字 “1” 的总个数必须是偶数</p>
+<blockquote>
+<p>什么校验就凑成什么数</p>
+</blockquote>
+<h3 id="2-1-1-单-bit-奇偶校验-检测单个-bit-级错误">2.1.1 单 bit 奇偶校验：检测单个 bit 级错误</h3>
+<pre><code class="language-planetext">0111000110101011 0
+ d data bit      perity bit
+</code></pre>
+<ul>
+<li>数据位 (data bits)： 0111000110101011
+<ul>
+<li>里面有 8 个 1，已经是偶数了。</li>
+</ul>
+</li>
+<li>加上校验位 (parity bit)：为了保持 “1” 的总个数是偶数，我们在最后面补一个 0</li>
+<li>最终发送出去的数据是加上校验位之后的组合</li>
+</ul>
+<p>怎么发现错误？</p>
+<ul>
+<li>假设数据在网线里传输时，遇到了电磁干扰，其中一个 0 变成了 1</li>
+<li>接收方收到数据发现里面有 9 个 1，9 是奇数，破坏了“必须是偶数”的约定</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>只能检测单个错误：如果有两个位同时翻转，总数可能还是偶数</li>
+<li>不能定位错误和纠正</li>
+</ul>
+<h3 id="2-1-2-二维奇偶校验-检测和纠正单个bit错误">2.1.2 二维奇偶校验：检测和纠正单个bit错误</h3>
+<p>二维奇偶校验：把一长串数据排成一个矩阵</p>
+<ul>
+<li>行校验：给每一行算一个奇偶校验位放在最右边
+<ul>
+<li>如下图第一行 1 0 1 0 1，有三个1，补个 1 凑成偶数（四个1）</li>
+</ul>
+</li>
+<li>列校验：给每一列算一个奇偶校验位放在最下边</li>
+<li><mark>右下角的角标：是对所有校验位再做一次校验</mark></li>
+</ul>
+<p>它是怎么纠正错误的？</p>
+<ul>
+<li>假设第二行、第二列的那个 1 变成了 0（发生了单 bit 错误）。</li>
+</ul>
+<p>接收方收到数据后重新计算：</p>
+<ul>
+<li>算第二行，发现 1 的个数不对了（变成奇数了），说明第二行有错</li>
+<li>算第二列，发现 1 的个数也不对了，说明第二列有错</li>
+</ul>
+<p>行列确定即可定位，纠正只需翻转bit</p>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-137.webp" alt="alt text" loading="lazy"></p>
+<h3 id="2-2-循环冗余校验-crc">2.2 循环冗余校验（CRC）</h3>
+<div class="callout callout-tip"><p><a href="./3%20%E4%BC%A0%E8%BE%93%E5%B1%82.md#udp-%E6%A0%A1%E9%AA%8C%E5%92%8C">回顾：UDP校验和</a></p>
+</div><ul>
+<li><strong>奇偶校验</strong>：最简单，只能查单 bit 错。</li>
+<li><strong>Internet 校验和</strong>：软件算，用在传输层（TCP/UDP），简单快速但算不上特别严谨。</li>
+<li><strong>CRC（循环冗余校验）</strong>：则是<strong>硬件级别（网卡里）最强大、最广泛使用</strong>的差错检测技术。以太网、Wi-Fi 全都在用它。</li>
+</ul>
+<h4 id="2-2-1-crc-的核心思想">2.2.1 CRC 的核心思想</h4>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>铺垫</div><p>位串的两种表示：</p>
+<ul>
+<li>二进制位串：\(110101101\)（9 位长）</li>
+<li>多项式：\(x^8 + x^7 + x^5 + x^3 + x^2 + 1\)</li>
+</ul>
+</div><p>假设发送方和接收方提前约定一个 <strong>生成多项式 \(G\)</strong> 作为除数
+发送方有一段数据 \(D\) 要发，但 \(D\) 直接除以 \(G\) 通常是除不尽的
+发送方的任务就是：<strong>在 \(D\) 的尾巴上追加几个数字 \(R\)，使得拼起来的新数字，刚好能被 \(G\) 整除</strong></p>
+<p>接收方收到这段拼起来的数据后，只需要做一件事：<strong>除以 \(G\)</strong></p>
+<ul>
+<li><mark>如果余数是 0（能整除），说明数据在路上没出错</mark></li>
+<li>如果余数不是 0，说明数据被干扰了，直接丢弃</li>
+</ul>
+<p><strong>核心变量解释：</strong></p>
+<ul>
+<li><strong>\(D\)</strong>：要发送的真实二进制数据</li>
+<li><strong>\(G\)</strong>：双方约定的除数，<mark>有 \(r+1\) 位长</mark></li>
+<li><strong>\(R\)</strong>：你要算出来的附加在尾巴上的校验位，固定是 \(r\) 位</li>
+<li><strong>\(D \cdot 2^r \text{ XOR } R\)</strong>：这个数学公式的意思就是“把数据 \(D\) 左移 \(r\) 位（即在尾巴补 \(r\) 个 0），然后把 \(R\) 填进去”</li>
+</ul>
+<h4 id="2-2-2-crc-的计算方法">2.2.2 CRC 的计算方法</h4>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>目标在于发送方计算出 R，以下为公式推导过程：</div><p>需要:<br>
+$\(D \cdot 2^r \ XOR \ R = nG\)$</p>
+<p>等价于: 两边同 \(XOR\ R\)，得到余数
+$\(D \cdot 2^r = nG \ XOR \ R\)$</p>
+<p>等价于: 两边同除 \(G\)，得到余数</p>
+<div class="math-block">\[R = \operatorname{remainder}\left[\frac{D \cdot 2^r}{G}\right]\]</div>
+</div><p><strong>模 2 运算的唯一法则：不进位，不借位，其实就是异或（XOR）</strong></p>
+<ul>
+<li>相同为 <code>0</code> (<code>1 XOR 1 = 0</code>, <code>0 XOR 0 = 0</code>)</li>
+<li>不同为 <code>1</code> (<code>1 XOR 0 = 1</code>, <code>0 XOR 1 = 1</code>)</li>
+</ul>
+<p>故 CRC 的计算过程就是：<strong>把 \(D\) 左移 \(r\) 位（在尾巴补 \(r\) 个 0），然后用 \(G\) 去除（模 2 运算），得到的余数就是 \(R\)</strong></p>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-138.webp" alt="alt text" loading="lazy">{width=350,style=“display:block;margin:auto”}</p>
+<h2 id="3-多点访问协议">3 多点访问协议</h2>
+<p><strong>两种类型的链路（一个子网内部链路连接形式）</strong>：</p>
+<ul>
+<li><strong>点对点</strong>
+<ul>
+<li>拨号访问的 PPP</li>
+<li>以太网交换机和主机之间的点对点链路</li>
+</ul>
+</li>
+<li><strong>广播</strong> (共享线路或媒体)
+<ul>
+<li>传统以太网</li>
+<li>HFC 上行链路</li>
+<li>802.11 无线局域网</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>在共享介质上，多个节点如何协调访问？</div><ul>
+<li>单个共享的广播型链路</li>
+<li>2 个或更多站点同时传送: <strong>冲突</strong>
+<ul>
+<li>多个节点在同一个时刻发送，则会收到 2 个或多个信号叠加</li>
+</ul>
+</li>
+</ul>
+</div><p><strong>多路访问协议（介质访问控制协议：multiple access channel，MAC）</strong>:</p>
+<ul>
+<li>分布式算法 —— 决定节点如何使用共享信道
+<ul>
+<li>即：决定节点什么时候可以发送？</li>
+</ul>
+</li>
+<li>关于共享控制的通信必须用借助信道本身传输！
+<ul>
+<li>没有带外的信道，各节点使用其协调信道使用</li>
+</ul>
+</li>
+</ul>
+<p><strong>理想的多路访问协议</strong>：</p>
+<p>给定：R bps 的广播信道
+必要条件：</p>
+<ol>
+<li>
+<p>当一个节点要发送时，可以 R 速率发送</p>
+</li>
+<li>
+<p>当 M 个节点要发送，每个可以以 R/M 的平均速率发送</p>
+</li>
+<li>
+<p>完全分布的:</p>
+<ul>
+<li>没有特殊节点协调发送</li>
+<li>没有时钟和时隙的同步</li>
+</ul>
+</li>
+<li>
+<p>简单</p>
+</li>
+</ol>
+<p><strong>MAC 协议的分类：3 大类</strong></p>
+<ul>
+<li><mark>信道划分</mark>
+<ul>
+<li>把信道划分成小片（时间、频率、编码）</li>
+<li>分配片给每个节点专用</li>
+</ul>
+</li>
+<li><mark>随机访问</mark>
+<ul>
+<li>信道不划分，允许冲突</li>
+<li>冲突后恢复</li>
+</ul>
+</li>
+<li><mark>依次轮流</mark>
+<ul>
+<li>节点依次轮流</li>
+<li>但是有很多数据传输的节点可以获得较长的信道使用权</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-1-信道划分协议">3.1 信道划分协议</h3>
+<h4 id="3-1-1-tdma-时分">3.1.1 TDMA（时分）</h4>
+<p>TDMA: time division multiple access</p>
+<ul>
+<li>轮流使用信道，信道的时间分为周期</li>
+<li>每个<mark>站点使用每周期中固定的时隙</mark>（长度 = 帧传输时间）传输帧</li>
+<li>如果站点无帧传输，时隙空闲 -&gt; 浪费</li>
+<li>如：6 站 LAN，1、3、4 有数据报，时隙 2、5、6 空闲</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-139.webp" alt="alt text" loading="lazy"></p>
+<h4 id="3-1-2-fdma-频分">3.1.2 FDMA（频分）</h4>
+<p>FDMA: frequency division multiple access</p>
+<ul>
+<li>信道的有效频率范围被分成一个个小的频段</li>
+<li>每<mark>个站点被分配一个固定的频段</mark></li>
+<li>分配给站点的频段如果没有被使用，则空闲</li>
+<li>例如：6 站 LAN，1、3、4 有数据报，频段 2、5、6 空闲</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-140.webp" alt="alt text" loading="lazy"></p>
+<h3 id="3-2-随机访问协议">3.2 随机访问协议</h3>
+<ul>
+<li>当节点有帧要发送时
+<ul>
+<li>以信道带宽的全部 R bps 发送</li>
+<li>没有节点间的预先协调</li>
+</ul>
+</li>
+<li><mark>两个或更多节点同时传输，会发生冲突</mark></li>
+<li>随机存取协议规定：
+<ul>
+<li>如何检测冲突</li>
+<li>如何从冲突中恢复（如：通过稍后的重传）</li>
+</ul>
+</li>
+<li>随机 MAC 协议：
+<ul>
+<li>ALOHA，时隙 ALOHA</li>
+<li>CSMA，<strong>CSMA/CD</strong>，<strong>CSMA/CA</strong></li>
+</ul>
+</li>
+</ul>
+<h4 id="3-2-1-时隙-aloha">3.2.1 时隙 ALOHA</h4>
+<p><strong>假设</strong>：</p>
+<ul>
+<li>所有帧是等长的</li>
+<li>时间被划分成相等的时隙，每个时隙可发送一帧</li>
+<li><mark>节点只在时隙开始时发送帧</mark></li>
+<li>节点在时钟上是同步的</li>
+<li>如果两个或多个节点在一个时隙传输，所有的站点都能检测到冲突</li>
+</ul>
+<p><strong>运行</strong>：</p>
+<ul>
+<li>当节点获取新的帧，在下一个时隙传输</li>
+<li>传输时没有检测到冲突，成功
+<ul>
+<li>节点能够在下一时隙发送新帧</li>
+</ul>
+</li>
+<li>检测时如果检测到冲突，失败
+<ul>
+<li><mark>节点在每一个随后的时隙以概率 \(p\) 重传帧直到成功</mark></li>
+<li>退避机制，避免持续冲突</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-225.webp" alt="alt text" loading="lazy"></p>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>节点可以以信道带宽全速连续传输</li>
+<li>高度分布：仅需要节点之间在时隙上的同步</li>
+<li>简单</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>存在冲突，浪费时隙</li>
+<li>即使有帧要发送，仍然有可能存在空闲的时隙（概率问题）</li>
+<li>检测碰撞的时间远小于发送整个数据包的时间，但不能及时止损</li>
+<li>需要时钟上同步</li>
+</ul>
+<p><strong>时隙 ALOHA 的效率</strong></p>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>效率</div><p>当有很多节点，每个节点有很多帧要发送时，\(x\) % 的时隙是成功传输帧的时隙</p>
+</div><ul>
+<li>假设 \(N\) 个节点，每个节点都有很多帧要发送，在每个时隙中的传输概率是 \(p\)</li>
+<li>一个节点成功传输概率是 \(p(1-p)^{N-1}\)</li>
+<li>任何一个节点的成功概率是 \(Np(1-p)^{N-1}\)</li>
+<li>\(N\) 个节点的最大效率：求出使 \(f(P) = Np(1-p)^{N-1}\) 最大的 \(p^*\)</li>
+<li>代入 \(p^*\) 得到最大 \(f(p^*) = Np^*(1-p^*)^{N-1}\)</li>
+<li>\(N\) 为无穷大时的极限为 \(1/e = 0.37\)</li>
+</ul>
+<p>最好情况：信道利用率 37%</p>
+<h4 id="3-2-2-csma-载波侦听多路访问">3.2.2 CSMA（载波侦听多路访问）</h4>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>如何提高 ALOHA 的效率？</div><p>入手点：发之前不管有无其他节点在传输</p>
+</div><p>CSMA: 在传输前先侦听信道:</p>
+<ul>
+<li>如果侦听到信道空闲，传送整个帧</li>
+<li>如果侦听到信道忙，推迟传送</li>
+<li>人类类比：不要打断别人正在进行的说话!</li>
+</ul>
+<p>冲突仍然可能发生:</p>
+<ul>
+<li>由传播延迟造成：两个节点可能侦听不到正在进行的传输</li>
+<li>冲突：整个冲突帧的传输时间都被浪费了，是无效的传输（图中红黄区域）</li>
+<li><mark>传播延迟（<strong>距离</strong>）决定了冲突的概率</mark></li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-145.webp" alt="alt text" loading="lazy"></p>
+<blockquote>
+<p>电磁波在空间中的传播</p>
+</blockquote>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>局限性：节点依据本地的信道使用情况来判断全部信道的使用情况</div></div><h4 id="3-2-3-csma-cd-冲突检测">3.2.3 CSMA/CD（冲突检测）</h4>
+<ul>
+<li>CSMA/CD（CS：事前侦听；CD：边说边听）
+<ul>
+<li>和在 CSMA 中一样发送前侦听信道</li>
+<li>没有传完一个帧就可以在短时间内检测到冲突</li>
+<li><mark>冲突发生时则传输终止，减少对信道的浪费</mark></li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-144.webp" alt="alt text" loading="lazy"></p>
+<blockquote>
+<p>对信道的浪费减少了</p>
+</blockquote>
+<p><strong>以太网 CSMA/CD 算法</strong></p>
+<ol>
+<li>适配器获取数据报，创建帧</li>
+<li>发送前：侦听信道 “CS”
+<ol>
+<li>闲：开始传送帧</li>
+<li>忙：一直等到闲再发送</li>
+</ol>
+</li>
+<li>发送过程中，冲突检测 “CD”
+<ol>
+<li>没有冲突：成功</li>
+<li>检测到冲突：放弃，之后尝试重发</li>
+</ol>
+</li>
+<li>发送方适配器检测到冲突，除放弃外，<mark>还发送一个 <code>Jam</code> 信号</mark>，所有听到冲突的适配器也是如此
+<ul>
+<li><strong>强化冲突：让所有站点都知道冲突</strong></li>
+</ul>
+</li>
+<li>如果放弃，适配器进入指数退避状态
+<ul>
+<li><mark>在第 \(m\) 次失败后，适配器随机选择一个 \(\{0, 1, 2, 3, \dots, 2^{m}-1\}\) 中的 \(K\)，等待 \(K \times 512\) 位时</mark>，然后转到步骤 2</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p><strong>指数退避</strong>：</p>
+<ul>
+<li>
+<p>目标：适配器试图适应当前负载，在一个变化的碰撞窗口中随机选择时间点尝试重发</p>
+<ul>
+<li>高负载：重传窗口时间大，减少冲突，但等待时间长</li>
+<li>低负载：使得各站点等待时间少，但冲突概率大</li>
+</ul>
+</li>
+<li>
+<p>首次碰撞：在 \(\{0, 1\}\) 选择 \(K\)；延迟 \(K \times 512\) 位时</p>
+</li>
+<li>
+<p>第 2 次碰撞：在 \(\{0, 1, 2, 3\}\) 选择 \(K\)</p>
+</li>
+<li>
+<p>第 10 次碰撞：在 \(\{0, 1, 2, 3, \dots, 1023\}\) 选择 \(K\)</p>
+</li>
+</ul>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>自适应算法</div><p>本质上是在<mark>传输延迟和信道利用率</mark>之间进行动态的自适应妥协：</p>
+<ul>
+<li>负载轻时：系统认为不需要妥协，优先保障低延迟（小窗口）</li>
+<li>负载重时：系统判定当前首要任务是让数据能发出去，因此牺牲延迟，优先保障降低碰撞概率/维持整体吞吐率（大窗口）</li>
+</ul>
+</div><hr>
+<h4 id="3-2-4-线缆接入网络">3.2.4 线缆接入网络</h4>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-148.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>多个下行（广播）信道，FDM
+<ul>
+<li><mark>下行：通过 FDM 分成若干信道，互联网、数字电视等</mark></li>
+<li>互联网信道：只有 1 个 CMTS 在其上传输（不存在冲突）</li>
+</ul>
+</li>
+<li>多个上行的信道，TDM
+<ul>
+<li>多路访问：</li>
+<li>所有用户通过竞争（随机接入）来争夺特定的上行信道时隙</li>
+<li>其余的时隙则采用 TDM 方式进行分配</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-149.webp" alt="alt text" loading="lazy"></p>
+<p>DOCSIS: data over cable service interface spec（电缆服务接口规范）</p>
+<ul>
+<li>采用 FDM 进行信道的划分：若干上行、下行信道</li>
+<li>下行信道:
+<ul>
+<li>在下行 MAP 帧中：CMTS 告诉各节点微时隙分配方案，分配给各站点的上行微时隙</li>
+<li>另外：头端传输下行数据（给各个用户）</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>上行信道预约，下行信道发布预约结果，终端用户使用预约的上行微时隙发送数据</div></div><ul>
+<li>采用 TDM 的方式将上行信道分成若干微时隙：MAP 指定</li>
+<li>站点采用分配给它的微时隙上行数据传输：分配</li>
+<li>在特殊的上行微时隙中，各站点请求上行微时隙：竞争
+<ul>
+<li>各站点对于该时隙的使用是随机访问的</li>
+<li>一旦碰撞（请求不成功，结果是：在下行的 MAP 中没有为它分配，则二进制退避）选择时隙上传输</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>预约是随机的</p>
+</blockquote>
+<h3 id="3-3-轮流协议">3.3 轮流协议</h3>
+<p>信道划分 MAC 协议</p>
+<ul>
+<li>共享信道在高负载时是有效和公平的</li>
+<li>在低负载时效率低下
+<ul>
+<li>只能等到自己的时隙开始发送或者利用 1/N 的信道频率发送</li>
+<li>当只有一个节点有帧传时，也只能够得到 1/N 个带宽分配</li>
+</ul>
+</li>
+</ul>
+<p>随机访问 MAC 协议</p>
+<ul>
+<li>在低负载时效率高：单个节点可以完全利用信道全部带宽</li>
+<li>高负载时：冲突开销较大，效率极低，时间很多浪费在冲突中</li>
+</ul>
+<p>轮流（Taking Turns）MAC 协议：有 2 者的优点!</p>
+<p><strong>轮询式</strong>：</p>
+<ul>
+<li>主节点邀请从节点依次传送</li>
+<li>从节点一般比较 “dumb”</li>
+<li>缺点：
+<ul>
+<li>轮询开销：轮询本身消耗信道带宽</li>
+<li>等待时间：每个节点需等到主节点轮询后开始传输，即使只有一个节点，也需要等到轮询一周后才能够发送</li>
+<li>单点故障：主节点失效时造成整个系统无法工作（可靠性差）</li>
+</ul>
+</li>
+<li>蓝牙使用轮询</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-150.webp" alt="alt text" loading="lazy"></p>
+<p><strong>令牌（环）传递式</strong>：</p>
+<ul>
+<li>控制令牌（token）循环从一个节点到下一个节点传递
+<ul>
+<li>令牌最后要传递回第一个节点，形成一个环，才被吸收</li>
+<li>一个发送方可能有多个接收方</li>
+</ul>
+</li>
+<li>令牌报文：特殊的帧</li>
+<li>缺点:
+<ul>
+<li>令牌开销：本身消耗带宽</li>
+<li>延迟：只有等到抓住令牌，才可传输</li>
+<li>单点故障：
+<ul>
+<li>令牌丢失系统级故障，整个系统无法传输</li>
+<li>复杂机制重新生成令牌</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-4-mac-协议总结">3.4 MAC 协议总结</h3>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>多点接入问题：对于一个共享型介质，各个节点如何协调对它的访问和使用？</div></div><ul>
+<li>信道划分：按时间、频率或者编码
+<ul>
+<li>TDMA、FDMA、CDMA</li>
+</ul>
+</li>
+<li>随机访问（动态）
+<ul>
+<li>ALOHA，S-ALOHA，CSMA,，CSMA/CD</li>
+<li>载波侦听：在有些介质上很容易（wire: 有线介质），但在有些介质上比较困难（wireless: 无线）</li>
+<li>CSMA/CD：802.3 Ethernet 网中使用</li>
+<li>CSMA/CA：802.11 WLAN 中使用</li>
+</ul>
+</li>
+<li>依次轮流协议
+<ul>
+<li>集中：由一个中心节点轮询；分布：通过令牌控制</li>
+<li>蓝牙、FDDI、令牌环</li>
+</ul>
+</li>
+</ul>
+<h2 id="4-lans">4 LANs</h2>
+<h3 id="4-1-mac-地址和-arp">4.1 MAC 地址和 ARP</h3>
+<blockquote>
+<p><em>这里的 MAC 区别于之前的 MAC (Media Access Control，介质访问控制)</em></p>
+</blockquote>
+<h4 id="4-1-1-ip-地址和-mac-地址">4.1.1 IP 地址和 MAC 地址</h4>
+<ul>
+<li>32bit IP 地址:
+<ul>
+<li>网络层地址</li>
+<li>前 n-1 跳：用于使数据报到达目的 IP 子网</li>
+<li>最后一跳：到达子网中的目标节点
+<ul>
+<li><mark>最后一跳时 IP 地址的主机号才起作用</mark></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>LAN（MAC/物理/以太网）地址:
+<ul>
+<li>用于使帧从一个网卡传递到与其物理连接的另一个网卡（在同一个物理网络中）</li>
+<li>48bit MAC 地址固化在适配器的 ROM，有时也可以通过软件设定</li>
+<li>e.g.: 1A-2F-BB-76-09-AD</li>
+</ul>
+</li>
+</ul>
+<p><strong>IP 地址和 MAC 地址的作用不同</strong></p>
+<ul>
+<li><mark>IP 地址是分层的</mark>
+<ul>
+<li>一个子网所有站点网络号一致，路由聚集，减少路由表</li>
+<li>希望网络层地址是配置的；IP 地址完成网络到网络的交付</li>
+</ul>
+</li>
+<li><mark>MAC 地址是一个平面的</mark>
+<ul>
+<li>网卡在生产时不知道被用于哪个网络，因此给网卡一个唯一的标示，用于区分一个网络内部不同的网卡即可</li>
+<li>可以完成一个物理网络内部的节点到节点的数据交付</li>
+</ul>
+</li>
+</ul>
+<p><strong>网络地址和 MAC 地址分离</strong></p>
+<ul>
+<li>分离好处
+<ul>
+<li>网卡坏了，IP 不变，可以捆绑到另外一个网卡的 MAC 上</li>
+<li>物理网络还可以除 IP 之外支持其他网络层协议，链路协议为任意上层网络协议，如 IPX 等</li>
+</ul>
+</li>
+<li>捆绑的问题
+<ul>
+<li>如果仅仅使用 IP 地址，不用 MAC 地址，那么它仅支持 IP 协议</li>
+<li>每次上电都要重新写入网卡 IP 地址</li>
+<li>另外一个选择就是不使用任何地址；不用 MAC 地址，则每到来一个帧都要上传到 IP 层次，由它判断是不是需要接受，干扰一次</li>
+</ul>
+</li>
+</ul>
+<p><strong>局域网上每个适配器</strong>：</p>
+<ul>
+<li><mark>一个唯一的 MAC 地址</mark></li>
+<li><mark>一个局域网内唯一的 IP 地址</mark></li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-226.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>MAC 平面地址 ➜ 支持移动
+<ul>
+<li>可以将网卡到接到其它网络</li>
+</ul>
+</li>
+<li>IP 地址有层次 ➜ 不能移动
+<ul>
+<li>依赖于节点连接的 IP 子网，与子网的网络号相同（有与其相连的子网相同的网络前缀）</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-1-2-arp">4.1.2 ARP</h4>
+<p>ARP: address resolution protocol（地址解析协议）</p>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>如何知道一个 IP 地址对应的 MAC 地址？</div></div><ul>
+<li><mark>在 LAN 上的每个 IP 节点都有一个 ARP 表</mark></li>
+<li><mark>ARP 表：包括一些 LAN 节点 IP/MAC 地址的映射</mark>
+<ul>
+<li><code>&lt;IP address; MAC address; TTL&gt;</code></li>
+<li><strong>TTL</strong> 时间是指地址映射失效的时间，典型是 20min</li>
+</ul>
+</li>
+</ul>
+<p><strong>A 要发送帧给 B（IP 地址已知），但 B 的 MAC 地址不在 A 的 ARP 表中</strong>：</p>
+<ul>
+<li><mark>A 广播包含 B 的 IP 地址的 ARP 查询包</mark>
+<ul>
+<li>Dest MAC address = FF-FF-FF-FF-FF-FF</li>
+<li>LAN 上的所有节点都会收到该查询包</li>
+</ul>
+</li>
+<li><mark>B 接收到 ARP 包，回复 A 自己的 MAC 地址</mark>
+<ul>
+<li>帧发送给 A</li>
+<li>用 A 的 MAC 地址（单播）</li>
+</ul>
+</li>
+<li><mark>A 在自己的 ARP 表中，缓存 IP-to-MAC 地址映射关系，直到信息超时</mark>
+<ul>
+<li>软状态: 靠定期刷新维持的系统状态</li>
+<li>定期刷新周期之间维护的状态信息可能和原有系统不一致</li>
+<li><em>存是为了查得快，删是为了适应 IP 地址的动态变化</em></li>
+</ul>
+</li>
+<li>ARP 是即插即用的
+<ul>
+<li>节点自己创建 ARP 的表项</li>
+<li>无需网络管理员的干预</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-1-3-路由到其他-lan-例子">4.1.3 路由到其他 LAN（例子）</h4>
+<p>发送数据报：由 A 通过 R 到 B，假设 A 知道 B 的 IP 地址</p>
+<ul>
+<li><strong>A 如何知道第一跳路由器 R 的 IP 地址？</strong>
+<ul>
+<li><mark>通过 DHCP 自动分配一个 “默认网关”</mark>，这个网关就是它访问本子网外目标时必须经过的第一跳路由器</li>
+</ul>
+</li>
+<li><strong>A 如何知道 R 的 MAC 地址？</strong>
+<ul>
+<li><mark>通过 ARP 协议</mark></li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-152.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>在 R 上有两个 ARP 表，分别对应两个 LAN</li>
+<li>在源主机的路由表中，发现到目标主机的下一跳是 111.111.111.110</li>
+<li>在源主机的 ARP 表中，发现其 MAC 地址是 E6-E9-00-17-BB-4B</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-153.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>A 创建数据报，源 IP 地址：A；目标 IP 地址：B</li>
+<li>A 创建一个链路层的帧，目标 MAC 地址是 R，该帧包含 A 到 B 的 IP 数据报</li>
+<li>帧从 A 发送到 R</li>
+<li>帧被 R 接收到，从中提取出 IP 分组，交给上层 IP 协议实体</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-154.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>R 转发数据报，数据报源 IP 地址为 A，目标 IP 地址为 B</li>
+<li>R 创建一个链路层的帧，目标 MAC 地址为 B，帧中包含 A 到 B 的 IP 数据报</li>
+<li>传输链路层帧</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-227.webp" alt="alt text" loading="lazy"></p>
+<h3 id="4-2-以太网">4.2 以太网</h3>
+<ul>
+<li>目前 <mark><strong>最主流的 LAN 技术</strong></mark></li>
+</ul>
+<h4 id="4-2-1-物理拓扑">4.2.1 物理拓扑</h4>
+<ol>
+<li>
+<p><strong>总线型拓扑</strong></p>
+<ul>
+<li>所有节点处于<strong>同一个冲突域</strong>，节点之间会发生数据碰撞</li>
+</ul>
+</li>
+<li>
+<p><strong>交换型拓扑</strong>：目前占据主导地位</p>
+<ul>
+<li>中心部署有源二层交换机</li>
+<li>每个 “辐条” 链路运行独立的以太网协议，<strong>节点之间不会发生碰撞</strong></li>
+</ul>
+</li>
+</ol>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-155.webp" alt="alt text" loading="lazy"></p>
+<h4 id="4-2-2-以太帧结构">4.2.2 以太帧结构</h4>
+<p>发送方适配器在以太网帧中封装 IP 数据报，或其他网络层协议数据单元</p>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-156.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li><strong>前导码</strong>:
+<ul>
+<li><mark>用来同步接收方和发送方的时钟速率</mark></li>
+</ul>
+</li>
+<li><strong>地址</strong>：<mark>6 字节源 MAC 地址，目标 MAC 地址</mark>
+<ul>
+<li>若帧目标地址 = 本站 MAC 地址，或是广播地址，接收，递交帧中的数据到网络层</li>
+<li>否则，适配器忽略该帧</li>
+</ul>
+</li>
+<li><strong>类型</strong>：指出高层协议
+<ul>
+<li><mark>大多情况下是 IP</mark>，但也支持其它网络层协议</li>
+<li>用于在<mark>接收端上行解复用</mark></li>
+</ul>
+</li>
+<li><strong>CRC</strong>：<mark>在接收方校验</mark>
+<ul>
+<li>如果没有通过校验，丢弃错误帧</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-2-3-以太网-无连接-不可靠的服务">4.2.3 以太网：无连接、不可靠的服务</h4>
+<ul>
+<li>无连接：帧传输前，发送方和接收方之间没有握手</li>
+<li>不可靠：接收方适配器不发送 ACKs 或 NAKs 给发送方
+<ul>
+<li>如果发生了丢包，数据能不能被恢复，完全取决于最开始的发送方有没有使用像 TCP 这样具备可靠传输机制的上层协议</li>
+</ul>
+</li>
+<li><mark>以太网的 MAC 协议：采用二进制退避的 CSMA/CD 介质访问控制形式</mark></li>
+<li>很多不同的以太网标准
+<ul>
+<li>相同的 MAC 协议（介质访问控制）和帧结构</li>
+<li>不同的速率：2 Mbps、10 Mbps 、100 Mbps 、1Gbps、10Gbps</li>
+<li>不同的物理层媒介：光纤，同轴电缆和双绞线</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-157.webp" alt="alt text" loading="lazy"></p>
+<h3 id="4-4-交换机">4.4 交换机</h3>
+<h4 id="4-4-1-switch">4.4.1 Switch</h4>
+<ul>
+<li><strong>链路层设备：扮演主动角色</strong>（端口执行以太网协议）
+<ul>
+<li>对帧进行<mark>存储和转发</mark></li>
+<li>对于到来的帧，检查帧头，根据目标 MAC 地址进行<mark>选择性转发</mark></li>
+<li>当帧需要向某个（些）网段进行转发，需要使用 CSMA/CD 进行接入控制</li>
+<li>通常一个交换机端口一个独立网段</li>
+</ul>
+</li>
+<li><strong>透明</strong>：主机对交换机的存在可以不关心（网络层上看“一跳可达”）
+<ul>
+<li>通过交换机相联的各节点好像这些站点是直接相联的一样</li>
+<li>有 MAC 地址；无 IP 地址</li>
+</ul>
+</li>
+<li><strong>即插即用，自学习</strong>：
+<ul>
+<li>交换机无需配置</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-4-2-多路同时传输">4.4.2 多路同时传输</h4>
+<ul>
+<li>主机有一个<mark>专用</mark>和<mark>直接</mark>到交换机的连接</li>
+<li>交换机缓存到来的帧</li>
+<li>对每个帧进入的链路使用以太网协议
+<ul>
+<li>没有碰撞；全双工</li>
+<li>每条链路都是一个独立的碰撞域</li>
+<li><mark><em>MAC 协议在其中的作用弱化了</em></mark></li>
+</ul>
+</li>
+<li>交换：A-to-A’ 和 B-to-B’ 可以同时传输，没有碰撞
+<ul>
+<li><mark>但 A-to-A’ 和 C-to-A’ 不能同时传输</mark></li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-160.webp" alt="alt text" loading="lazy"></p>
+<h4 id="4-4-3-自学习">4.4.3 自学习</h4>
+<ul>
+<li><strong>Q</strong>: 交换机如何知道通过接口 1 到达 A，通过接口 5 到达 B′？</li>
+<li><strong>A</strong>: 每个交换机都有一个<mark>交换表 switch table</mark>，每个表项：
+<ul>
+<li>（主机的 MAC 地址，到达该 MAC 经过的接口，时戳）</li>
+<li>比较像路由表！</li>
+</ul>
+</li>
+<li><strong>Q</strong>: 每个表项是如何创建的？如何维护的？
+<ul>
+<li>有点像路由协议？</li>
+</ul>
+</li>
+</ul>
+<p>交换机通过学习得到哪些主机（MAC 地址）可以通过哪些端口到达</p>
+<ul>
+<li>当接收到帧，交换机学习到发送站点所在的端口（网段）</li>
+<li>记录发送方源 MAC 地址 / 进入端口映射关系，在交换表中</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>MAC addr</th>
+<th>interface</th>
+<th>TTL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>60</td>
+</tr>
+</tbody>
+</table>
+<p><strong>当交换机收到一个帧</strong>：</p>
+<ol>
+<li>记录进入链路，发送主机的 MAC 地址（自学习）</li>
+<li>使用目标 MAC 地址对交换表进行索引（目的地查表）</li>
+<li>决策逻辑（过滤 / 转发 / 泛洪）</li>
+</ol>
+<pre><code class="language-planetext">if entry found for destination
+then {
+  if dest on segment from which frame arrived
+  then drop the frame // 过滤
+  else forward the frame on interface indicated // 转发
+}
+else flood // 泛洪，除了帧到达的网段，向所有网络接口
+</code></pre>
+<ul>
+<li><strong>过滤</strong>
+<ul>
+<li><strong>如果查表发现，目标设备所在的端口，是刚刚接收这个帧的端口</strong>，交换机会选择丢弃这个帧</li>
+</ul>
+</li>
+<li><strong>转发</strong>
+<ul>
+<li><strong>如果查表发现目标设备在其他的端口上</strong>，交换机就会直接把这个帧从那个特定的目标端口发送出去</li>
+</ul>
+</li>
+<li><strong>泛洪</strong>
+<ul>
+<li><strong>在交换表中没有找到目标地址的记录</strong>，交换机会把这个数据帧复制，并向除了接收该帧的端口之外的所有其他端口广播发送
+<ul>
+<li>等回复，再自学习</li>
+<li>交换机级联也同理</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>假设主机 C 向主机 I 发送一个数据帧，随后主机 I 做出响应（回复 C），请展示 \(S_1, S_2, S_3, S_4\) 的交换表变化和数据帧的转发过程。</strong></p>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-228.webp" alt="alt text" loading="lazy"></p>
+<p><strong>阶段一：C 发送数据帧给 I（C \(\rightarrow\) I）</strong></p>
+<p>此时，全网交换机的表都是<strong>空的</strong>。</p>
+<ol>
+<li><strong>C \(\rightarrow\) \(S_1\)</strong>：</li>
+</ol>
+<ul>
+<li>\(S_1\) 收到帧，记录源地址：<strong>C 在连接 C 的那个端口</strong>。</li>
+<li>\(S_1\) 查表发现不知道 I 在哪，于是<strong>泛洪</strong>。数据帧被发给主机 A、B 以及上联的 <strong>\(S_4\)</strong>。</li>
+</ul>
+<ol start="2">
+<li><strong>\(S_1\) \(\rightarrow\) \(S_4\)</strong>：</li>
+</ol>
+<ul>
+<li>\(S_4\) 从连接 \(S_1\) 的端口收到该帧，记录源地址：<strong>C 在连接 \(S_1\) 的那个端口</strong>。</li>
+<li>\(S_4\) 也不知道 I 在哪，继续<strong>泛洪</strong>，把帧转发给 <strong>\(S_2\) 和 \(S_3\)</strong>。</li>
+</ul>
+<ol start="3">
+<li><strong>\(S_4\) \(\rightarrow\) \(S_2\) 和 \(S_3\)</strong>：</li>
+</ol>
+<ul>
+<li><strong>\(S_2\) 侧</strong>：\(S_2\) 收到帧，记录 <strong>C 在连接 \(S_4\) 的端口</strong>。因为不知道 I 在哪，向主机 D, E, F 泛洪。这三台主机发现目的 MAC 不是自己，直接<strong>丢弃</strong>该帧。</li>
+<li><strong>\(S_3\) 侧</strong>：\(S_3\) 收到帧，记录 <strong>C 在连接 \(S_4\) 的端口</strong>。因为不知道 I 在哪，向主机 G, H, I 泛洪。</li>
+</ul>
+<ol start="4">
+<li><strong>到达目的地</strong>：主机 I 收到该帧，匹配成功，接收数据。</li>
+</ol>
+<blockquote>
+<p>📌 <strong>阶段一结束后的交换表状态</strong>：
+所有的交换机（\(S_1, S_2, S_3, S_4\)）都成功学到了：<strong>想要找 C，走通往 \(S_1\) 方向的那个端口就对了。</strong></p>
+</blockquote>
+<p><strong>阶段二：I 做出响应回复 C（I \(\rightarrow\) C）</strong></p>
+<p>由于有了阶段一的铺垫，这次数据帧的传输将非常精准，<strong>不再需要全网泛洪</strong>。</p>
+<ol>
+<li><strong>I \(\rightarrow\) \(S_3\)</strong>：</li>
+</ol>
+<ul>
+<li>\(S_3\) 收到帧，<mark>记录源地址：<strong>I 在连接 I 的那个端口</strong>（别忘了回复也是要自学习的）。</mark></li>
+<li>\(S_3\) 查找目的地址 C，发现表里有记录（走通往 \(S_4\) 的端口），于是精准单播（Unicast）转发给 <strong>\(S_4\)</strong>。</li>
+</ul>
+<ol start="2">
+<li><strong>\(S_3\) \(\rightarrow\) \(S_4\)</strong>：</li>
+</ol>
+<ul>
+<li>\(S_4\) 收到帧，记录源地址：<strong>I 在连接 \(S_3\) 的那个端口</strong>。</li>
+<li>\(S_4\) 查找目的地址 C，表里有记录（走通往 \(S_1\) 的端口），<strong>精准单播</strong>转发给 <strong>\(S_1\)</strong>。（注意：此时 \(S_2\) 根本不会收到这个球，D, E, F 非常清静）。</li>
+</ul>
+<ol start="3">
+<li><strong>\(S_4\) \(\rightarrow\) \(S_1\)</strong>：</li>
+</ol>
+<ul>
+<li>\(S_1\) 收到帧，记录源地址：<strong>I 在连接 \(S_4\) 的那个端口</strong>。</li>
+<li>\(S_1\) 查找目的地址 C，表里有记录，直接精准送达<strong>主机 C</strong>。</li>
+</ul>
+<p>当这两个步骤完成后，各交换机的表中关于 C 和 I 的记录如下：</p>
+<table>
+<thead>
+<tr>
+<th>交换机</th>
+<th>认识 C 的路径</th>
+<th>认识 I 的路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>\(S_1\)</strong></td>
+<td>来自本地直连端口</td>
+<td>来自通往 \(S_4\) 的上联端口</td>
+</tr>
+<tr>
+<td><strong>\(S_4\)</strong></td>
+<td>来自通往 \(S_1\) 的端口</td>
+<td>来自通往 \(S_3\) 的端口</td>
+</tr>
+<tr>
+<td><strong>\(S_3\)</strong></td>
+<td>来自通往 \(S_4\) 的上联端口</td>
+<td>来自本地直连端口</td>
+</tr>
+<tr>
+<td><strong>\(S_2\)</strong></td>
+<td>来自通往 \(S_4\) 的上联端口</td>
+<td><em>(不认识 I，因为 I 回复的包没经过 \(S_2\))</em></td>
+</tr>
+</tbody>
+</table>
+<p>这就是自学习多交换机协同的奇妙之处：<strong>每个交换机不需要知道整个网络的拓扑全貌，它们只需要各司其职，记住“从哪个口能去往哪个 MAC 地址”即可。</strong></p>
+<hr>
+<p><strong>UMass Campus Network - Detail</strong></p>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-229.webp" alt="alt text" loading="lazy"></p>
+<hr>
+<h4 id="4-4-4-交换机-vs-路由器">4.4.4 交换机 vs 路由器</h4>
+<ul>
+<li><strong>都是存储转发设备</strong>，但层次不同
+<ul>
+<li><mark>交换机：链路层设备（检查链路层头部）</mark></li>
+<li><mark>路由器：网络层设备（检查网络层的头部）</mark></li>
+</ul>
+</li>
+<li><strong>都有转发表</strong>：
+<ul>
+<li><mark>交换机：使用泛洪和自学习算法，MAC 地址计算转发表</mark></li>
+<li><mark>路由器：使用路由算法，IP 地址计算路由表</mark></li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-162.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-230.webp" alt="alt text" loading="lazy"></p>
+<h3 id="4-5-虚拟局域网-vlans">4.5 虚拟局域网 (VLANs)</h3>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>随着局域网规模扩大，用户改变接入点时会发生什么？</div><p>单一广播域：</p>
+<ul>
+<li>扩展性：所有二层广播流量（ARP、DHCP、未知 MAC）必须穿越整个局域网</li>
+<li>效率、安全、隐私问题</li>
+</ul>
+<p>管理问题：</p>
+<ul>
+<li>CS 用户将办公室搬到 EE - 物理上连接到 EE 交换机，但希望保持逻辑上连接到 CS 交换机</li>
+</ul>
+</div><p>虚拟局域网 (VLAN)</p>
+<ul>
+<li>支持 VLAN 功能的交换机可以被配置为<strong>在单一物理局域网基础设施上定义多个虚拟局域网</strong></li>
+</ul>
+<p>基于端口的 VLAN</p>
+<ul>
+<li>通过（交换机管理软件）<strong>对交换机端口进行分组</strong>，使得<strong>单个物理交换机作为多个虚拟交换机运行</strong></li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-231.webp" alt="alt text" loading="lazy">
+<img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-232.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li><strong>流量隔离</strong>：进出端口 1-8 的帧只能到达端口 1-8
+<ul>
+<li>也可以基于端点的 MAC 地址而不是交换机端口来定义 VLAN</li>
+</ul>
+</li>
+<li><strong>动态成员资格</strong>：端口可以在 VLAN 之间动态分配</li>
+<li><strong>VLAN 间转发</strong>：通过路由完成（就像独立的交换机一样）
+<ul>
+<li>在现实中，供应商出售交换机和路由器的组合设备</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-233.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li><strong>干道端口</strong>：在定义于多个物理交换机之间的 VLAN 中传输帧
+<ul>
+<li><mark>在交换机之间的 VLAN 内部转发的帧不能是标准的 802.1 帧（必须携带 VLAN ID 信息）</mark></li>
+<li>802.1q 协议为在干道端口之间转发的帧添加/移除额外的头部字段</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-234.webp" alt="alt text" loading="lazy"></p>
+<p><strong>EVPN：以太网 VPN（又名 VXLAN）</strong></p>
+<p>二层以太网交换机在逻辑上相互连接（例如，使用 IP 作为底层网络）</p>
+<ul>
+<li>站点之间在 IP 数据报中承载以太网帧</li>
+<li>“一种在三层网络之上叠加二层网络的隧道方案……运行在现有的网络基础设施之上，并提供了一种‘延伸’二层网络的手段。”</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-235.webp" alt="alt text" loading="lazy"></p>
+<h2 id="5-链路虚拟化-mpls">5 链路虚拟化：MPLS</h2>
+<p>MPLS: multi-protocol label switching（多协议标签交换）</p>
+<p><strong>目标</strong>：在支持 MPLS 的路由器网络中实现高速 IP 转发，使用固定长度的标签（代替最长前缀匹配）</p>
+<ul>
+<li>使用固定长度标识符进行更快的查找</li>
+<li>借鉴虚电路 (VC) 方法的思想</li>
+<li>但 IP 数据报仍然保留 IP 地址</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-236.webp" alt="alt text" loading="lazy"></p>
+<p><strong>支持 MPLS 的路由器</strong>（标签交换路由器）</p>
+<ul>
+<li><mark>仅根据标签值将数据包<strong>转发</strong>到传出接口（不检查 IP 地址）</mark>
+<ul>
+<li>MPLS 转发表不同于 IP 转发表</li>
+</ul>
+</li>
+<li>灵活性：MPLS 转发决策可以与 IP 不同
+<ul>
+<li>使用目的地址和源地址将流向同一目的地的流以不同方式路由（流量工程）</li>
+<li>如果链路发生故障，快速重新路由流：预先计算的备份路径</li>
+</ul>
+</li>
+</ul>
+<p><strong>MPLS vs IP paths</strong></p>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-237.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>IP 路由：通往目的地的路径仅由目的地址决定</li>
+<li>MPLS 路由：通往目的地的路径可以基于源地址和目的地址
+<ul>
+<li>通用转发的一种形式</li>
+<li>快速重路由：预先计算备份路由以应对链路故障</li>
+</ul>
+</li>
+</ul>
+<p><strong>MPLS 信令</strong></p>
+<ul>
+<li>修改 OSPF、IS-IS 链路状态泛洪协议，以携带 MPLS 路由所需的信息：
+<ul>
+<li>例如，链路带宽、“已预留”链路带宽的数量</li>
+</ul>
+</li>
+<li>入口 MPLS 路由器使用 RSVP-TE 信令协议在下行路由器上建立 MPLS 转发</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-238.webp" alt="alt text" loading="lazy"></p>
+<p><strong>MPLS 转发表</strong></p>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-239.webp" alt="alt text" loading="lazy"></p>
+<h2 id="6-数据中心网络">6 数据中心网络</h2>
+<ul>
+<li>数万-数十万台主机构成，密集耦合、距离临近:
+<ul>
+<li>电子商务</li>
+<li>内容服务器</li>
+<li>搜索引擎，数据挖掘</li>
+</ul>
+</li>
+<li>挑战:
+<ul>
+<li>多种应用，每一种都服务海量的客户端</li>
+<li>管理/负载均衡，避免处理、网络和数据的瓶颈</li>
+</ul>
+</li>
+</ul>
+<p>在交换机之间，机器阵列之间有丰富的互连措施</p>
+<ul>
+<li>在阵列之间增加吞吐（多个可能的路由路径）</li>
+<li>通过冗余度增加可靠性</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-240.webp" alt="alt text" loading="lazy"></p>
+<blockquote>
+<p><em>在机架 1 和 11 之间突出显示两条不相交的路径</em></p>
+</blockquote>
+<p><mark>负载均衡器：应用层路由</mark></p>
+<ul>
+<li>接受外部的客户端请求</li>
+<li>将请求导入到数据中心内部</li>
+<li>返回结果给外部客户端（对于客户端隐藏数据中心的内部结构）</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-241.webp" alt="alt text" loading="lazy"></p>
+<p>数据中心网络：协议创新</p>
+<ul>
+<li>链路层：
+<ul>
+<li>RoCE：融合以太网上的远程 DMA (RDMA)</li>
+</ul>
+</li>
+<li>传输层：
+<ul>
+<li>ECN（显式拥塞通知）用于传输层拥塞控制（DCTCP, DCQCN）</li>
+<li>逐跳（反压）拥塞控制的实验</li>
+</ul>
+</li>
+<li>路由，管理：
+<ul>
+<li>SDN 广泛用于组织内部/之间的数据中心</li>
+<li>将相关服务、数据尽可能放置在一起（例如，在同一机架或附近的机架），以最大限度地减少二层（tier-2）、一层（tier-1）通信</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>ORION: Google’s new SDN control plane for internal datacenter (Jupiter) + wide area (B4) network</p>
+<ul>
+<li>路由（域内，iBGP），流量工程：在 ORION 核心之上的应用程序中实现</li>
+<li>边缘到边缘的基于流的控制（例如，CoFlow 调度）以满足合同 SLA</li>
+<li>管理：Orion 核心中的发布-订阅（pub-sub）分布式微服务，用于交换机信令/监控的 OpenFlow</li>
+</ul>
+<p>注：</p>
+<ul>
+<li>没有路由协议，拥塞控制（部分）也由 SDN 管理，而不是由协议管理</li>
+<li>协议正在消亡吗？</li>
+</ul>
+<p><img src="/assets/img/posts/%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/image-215.webp" alt="alt text" loading="lazy"></p>
+<p>这一页课件进入了现代大规模互联网架构的硬核领域，讲解的是 Google 的 <strong>ORION</strong> 系统——这是 Google 用来统一管理其<strong>数据中心内部网络（Jupiter）<strong>和</strong>跨数据中心广域网（B4）<strong>的</strong>软件定义网络（SDN）控制平面</strong>。</p>
+<p>传统网络靠每台交换机“各自为政”地跑分布式路由协议，而 Google 的思路是：<strong>通过一个中心化的超级大脑（SDN 控制器），去直接操控全网的所有交换机。</strong></p>
+<p>我们可以结合左侧的文本和右侧的架构图，从以下三个核心维度来理解：</p>
+<hr>
+<h2 id="1-orion-的三大核心功能与架构映射">1. ORION 的三大核心功能与架构映射</h2>
+<p>右侧的架构图展示了一个经典的 <strong>SDN 三层架构</strong>（自上而下：应用层 \(\rightarrow\) 控制平面 \(\rightarrow\) 数据平面）。左侧的三个点正好对应了图中的红圈部分：</p>
+<h3 id="1-路由与流量工程-routing-traffic-engineering">1️⃣ 路由与流量工程（Routing &amp; Traffic Engineering）</h3>
+<ul>
+<li><strong>课件称</strong>：<code>routing (intradomain, iBGP), traffic engineering: implemented in applications on top of ORION core</code></li>
+<li><strong>如何理解</strong>：在传统网络中，BGP 或 OSPF 路由协议是跑在每个物理路由器上的。但在 ORION 架构中，路由和流量工程（TE）被解耦出来，变成了<strong>运行在 ORION Core 之上的“上层应用程序”</strong>（即右图红圈的 <strong>Routing Engine</strong>）。这个引擎在全球视角下计算出最优路径，再下发给底层。</li>
+</ul>
+<h3 id="2-边缘到边缘的流控-edge-edge-flow-based-controls">2️⃣ 边缘到边缘的流控（Edge-edge flow-based controls）</h3>
+<ul>
+<li><strong>课件称</strong>：<code>edge-edge flow-based controls (e.g., CoFlow scheduling) to meet contract SLAs</code></li>
+<li><strong>如何理解</strong>：数据中心有大量的分布式任务（比如 MapReduce/Spark 产生的 Shuffle 流量）。ORION 通过 <strong>Flow Manager</strong>（流量管理器，图左侧红圈）进行端到端的流调度（如 CoFlow 算法）。它能根据业务的 SLA（服务等级协议，右侧红圈的 <code>Contracts SLAs</code>），确保高优先级的业务不卡顿，大数据搬运任务有序进行，最大化拓扑带宽利用率。</li>
+</ul>
+<h3 id="3-分布式管理与底座-management">3️⃣ 分布式管理与底座（Management）</h3>
+<ul>
+<li><strong>课件称</strong>：<code>management: pub-sub distributed microservices in Orion core, OpenFlow for switch signaling/monitoring</code></li>
+<li><strong>如何理解</strong>：<strong>Orion Core</strong> 内部是一个基于 <strong>发布-订阅（Pub-Sub）</strong> 模式的分布式微服务系统，围绕着 <strong>NIB（Network Information Base，网络信息库）</strong> 运转。</li>
+<li>核心层通过 <strong>OpenFlow 前端（OFE）</strong> 与底层的物理数据平面（Data Plane）通信。</li>
+<li>底层的 <strong>SDN Switch</strong> 上运行着 <strong>OFA（OpenFlow Agent）</strong>，它们不运行复杂的路由协议，只负责听从 Orion 的 OpenFlow 指令去刷转发表，并把自身的链路状态、拥塞情况上报给控制层。</li>
+</ul>
+<hr>
+<h2 id="2-底部-note-的灵魂拷问-协议将死-are-protocols-dying">2. 底部 Note 的灵魂拷问：协议将死？（Are protocols dying?）</h2>
+<p>课件底部的 Note 提出了一个极具颠覆性的行业趋势：</p>
+<blockquote>
+<p><strong><code>no routing protocols, congestion control (partially) also managed by SDN rather than by protocol</code></strong></p>
+</blockquote>
+<ul>
+<li><strong>消灭传统的路由协议</strong>：在 Orion 管辖的网络里，传统物理设备之间不再运行复杂的、收敛缓慢的分布式路由协议（如传统的 OSPF/IS-IS）。路径全由 Orion 算好直接下发。</li>
+<li><strong>接管拥塞控制</strong>：甚至连传统依赖 TCP 握手/滑动窗口/丢包反馈的传统拥塞控制，也被 SDN 控制器通过全局视角的流量调度机制给部分替代了。</li>
+</ul>
+<h3 id="那么-are-protocols-dying-协议要死了吗">❓ 那么，“Are protocols dying?”（协议要死了吗？）</h3>
+<p>这其实是老师留下的思考题。<strong>答案是：没有死，而是重构/集中化了。</strong></p>
+<ul>
+<li>传统的<strong>分布式网络协议</strong>在大规模单一实体（如 Google、Meta 的私有云）内部确实在被削弱或取代，取而代之的是由集中式控制器直接下发流表（Flow Table）。</li>
+<li>但是，控制器内部、控制器与交换机之间（如 OpenFlow、gRPC、P4）、以及不同自治域（AS）之间的跨界互联（公网 BGP），依然高度依赖协议。只是协议的重心从“分布式计算路径”变成了“中心化状态上报与管控指令下发”。</li>
+</ul>
+<hr>
+<h2 id="总结一句话">💡 总结一句话</h2>
+<p>Google 的 ORION 课件展示了<strong>现代超大规模数据中心网络的设计终局</strong>：把网络设备的“大脑（控制面）”完全抽离并集群化，变成运行在服务器上的分布式微服务系统；而底层的交换机彻底降级为只管干苦力、听话转发的“肢体（数据面）”。</p>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：6 链路层和局域网</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-08 06:46:13</p>
+      <p><strong>更新于</strong>：2026-08-07 23:07:52</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/6 链路层和局域网.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">6 链路层和局域网</div>
+      <ul><li class="toc-l2"><a href="#1-引论与服务">1 引论与服务</a></li><li class="toc-l3"><a href="#1-1-一些术语">1.1 一些术语</a></li><li class="toc-l3"><a href="#1-2-链路层上下文">1.2 链路层上下文</a></li><li class="toc-l3"><a href="#1-3-链路层服务">1.3 链路层服务</a></li><li class="toc-l3"><a href="#1-4-链路层实现">1.4 链路层实现</a></li><li class="toc-l3"><a href="#1-5-适配器通信">1.5 适配器通信</a></li><li class="toc-l2"><a href="#2-差错检测和纠正">2 差错检测和纠正</a></li><li class="toc-l3"><a href="#2-1-奇偶校验">2.1 奇偶校验</a></li><li class="toc-l3"><a href="#2-1-1-单-bit-奇偶校验-检测单个-bit-级错误">2.1.1 单 bit 奇偶校验：检测单个 bit 级错误</a></li><li class="toc-l3"><a href="#2-1-2-二维奇偶校验-检测和纠正单个bit错误">2.1.2 二维奇偶校验：检测和纠正单个bit错误</a></li><li class="toc-l3"><a href="#2-2-循环冗余校验-crc">2.2 循环冗余校验（CRC）</a></li><li class="toc-l2"><a href="#3-多点访问协议">3 多点访问协议</a></li><li class="toc-l3"><a href="#3-1-信道划分协议">3.1 信道划分协议</a></li><li class="toc-l3"><a href="#3-2-随机访问协议">3.2 随机访问协议</a></li><li class="toc-l3"><a href="#3-3-轮流协议">3.3 轮流协议</a></li><li class="toc-l3"><a href="#3-4-mac-协议总结">3.4 MAC 协议总结</a></li><li class="toc-l2"><a href="#4-lans">4 LANs</a></li><li class="toc-l3"><a href="#4-1-mac-地址和-arp">4.1 MAC 地址和 ARP</a></li><li class="toc-l3"><a href="#4-2-以太网">4.2 以太网</a></li><li class="toc-l3"><a href="#4-4-交换机">4.4 交换机</a></li><li class="toc-l3"><a href="#4-5-虚拟局域网-vlans">4.5 虚拟局域网 (VLANs)</a></li><li class="toc-l2"><a href="#5-链路虚拟化-mpls">5 链路虚拟化：MPLS</a></li><li class="toc-l2"><a href="#6-数据中心网络">6 数据中心网络</a></li><li class="toc-l2"><a href="#1-orion-的三大核心功能与架构映射">1. ORION 的三大核心功能与架构映射</a></li><li class="toc-l3"><a href="#1-路由与流量工程-routing-traffic-engineering">1️⃣ 路由与流量工程（Routing &amp; Traffic Engineering）</a></li><li class="toc-l3"><a href="#2-边缘到边缘的流控-edge-edge-flow-based-controls">2️⃣ 边缘到边缘的流控（Edge-edge flow-based controls）</a></li><li class="toc-l3"><a href="#3-分布式管理与底座-management">3️⃣ 分布式管理与底座（Management）</a></li><li class="toc-l2"><a href="#2-底部-note-的灵魂拷问-协议将死-are-protocols-dying">2. 底部 Note 的灵魂拷问：协议将死？（Are protocols dying?）</a></li><li class="toc-l3"><a href="#那么-are-protocols-dying-协议要死了吗">❓ 那么，“Are protocols dying?”（协议要死了吗？）</a></li><li class="toc-l2"><a href="#总结一句话">💡 总结一句话</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/5 网络层-控制平面.html">&lt; 5 网络层：控制平面</a>
+      <a class="pager-next" href="/posts/7 无线网络和移动网络.html">7 无线网络和移动网络 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
+<script src="/assets/js/main.js?v=1786162127971" defer></script>
+<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+</body>
+</html>

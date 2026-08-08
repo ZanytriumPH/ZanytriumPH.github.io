@@ -1389,7 +1389,8 @@ html.post-glass .post-wrap {
 
 /* 分类胶囊：每行两个、无 # 前缀、条目放大 */
 .category-panel { padding: 48px 32px 32px; }
-/* 两列 flex 布局：每行两个；总数为奇数时最后一项独占一行并居中 */
+/* 两列 flex 布局：每行两个；总数为奇数时最后一项保持同宽，
+   justify-content: center 自动将其居中（不再占满整行） */
 .category-cloud {
   display: flex;
   flex-wrap: wrap;
@@ -1404,7 +1405,6 @@ html.post-glass .post-wrap {
   gap: 12px;
   border-radius: 12px; /* 分类胶囊圆角改小（默认椭圆 999px） */
 }
-.category-pill:nth-child(odd):last-child { flex-basis: 100%; }
 .category-pill-name { font-size: 1.15rem; }
 
 /* 友链胶囊：双列布局（尺寸同分类页），头像占满胶囊最左侧 + 右侧昵称/签名 */

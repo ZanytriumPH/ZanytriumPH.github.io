@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DB2603 - 数据库的安装、创建、使用 · Zwing&#39;s blog</title>
+<meta name="description" content="DB2603 - 数据库的安装、创建、使用">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">DB2603 - 数据库的安装、创建、使用</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-08T10:55:00.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-08 18:55:00</time>
+            <time class="meta-item" datetime="2026-08-08T12:06:24+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-08 12:06:24</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 2338 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 8 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#数据管理基础"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>数据管理基础</a>
+              <a class="tag-chip" href="/tags.html#数据库"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>数据库</a> <a class="tag-chip" href="/tags.html#SQL"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>SQL</a> <a class="tag-chip" href="/tags.html#作业/例题"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>作业/例题</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><ul>
+<li>顾客表 customers</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>非空</th>
+<th>主键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cid</td>
+<td><code>Char(4)</code></td>
+<td>是</td>
+<td>是</td>
+<td>编号</td>
+</tr>
+<tr>
+<td>cname</td>
+<td><code>Char(20)</code></td>
+<td>是</td>
+<td></td>
+<td>名称</td>
+</tr>
+<tr>
+<td>city</td>
+<td><code>Char(20)</code></td>
+<td></td>
+<td></td>
+<td>城市</td>
+</tr>
+<tr>
+<td>disct</td>
+<td><code>real</code></td>
+<td></td>
+<td></td>
+<td>折扣</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>供应商表 agents</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>非空</th>
+<th>主键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aid</td>
+<td><code>Char(3)</code></td>
+<td>是</td>
+<td>是</td>
+<td>编号</td>
+</tr>
+<tr>
+<td>aname</td>
+<td><code>Char(20)</code></td>
+<td>是</td>
+<td></td>
+<td>名称</td>
+</tr>
+<tr>
+<td>city</td>
+<td><code>Char(20)</code></td>
+<td></td>
+<td></td>
+<td>城市</td>
+</tr>
+<tr>
+<td>percent</td>
+<td><code>smallint</code></td>
+<td></td>
+<td></td>
+<td>佣金比例</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>商品表 products</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>非空</th>
+<th>主键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pid</td>
+<td><code>Char(3)</code></td>
+<td>是</td>
+<td>是</td>
+<td>编号</td>
+</tr>
+<tr>
+<td>pname</td>
+<td><code>Char(20)</code></td>
+<td>是</td>
+<td></td>
+<td>名称</td>
+</tr>
+<tr>
+<td>city</td>
+<td><code>Char(20)</code></td>
+<td></td>
+<td></td>
+<td>城市</td>
+</tr>
+<tr>
+<td>quantity</td>
+<td><code>int</code></td>
+<td>是</td>
+<td></td>
+<td>库存数量</td>
+</tr>
+<tr>
+<td>price</td>
+<td><code>real</code></td>
+<td>是</td>
+<td></td>
+<td>单价</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>订单表 orders</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>非空</th>
+<th>主键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ordno</td>
+<td><code>int</code></td>
+<td>是</td>
+<td>是</td>
+<td>订单编号</td>
+</tr>
+<tr>
+<td>orddate</td>
+<td><code>Date</code></td>
+<td>是</td>
+<td></td>
+<td>订单日期</td>
+</tr>
+<tr>
+<td>cid</td>
+<td><code>Char(4)</code></td>
+<td>是</td>
+<td></td>
+<td>顾客编号</td>
+</tr>
+<tr>
+<td>aid</td>
+<td><code>Char(3)</code></td>
+<td>是</td>
+<td></td>
+<td>经销商编号</td>
+</tr>
+<tr>
+<td>pid</td>
+<td><code>Char(3)</code></td>
+<td>是</td>
+<td></td>
+<td>商品编号</td>
+</tr>
+<tr>
+<td>qty</td>
+<td><code>int</code></td>
+<td></td>
+<td></td>
+<td>数量</td>
+</tr>
+<tr>
+<td>dollars</td>
+<td><code>real</code></td>
+<td></td>
+<td></td>
+<td>金额</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>首先写在最前面的笔记</div><ol>
+<li>左连接判空时，通常使用<strong>右表的主键</strong></li>
+<li>子查询中的 <code>order by</code> 没有意义</li>
+<li><code>NOT EXISTS</code> 是一个用于 <code>WHERE</code> 子句的逻辑运算符，专门用来测试一个子查询是否返回空集。如果子查询没有返回任何行，<code>NOT EXISTS</code> 就会返回 <code>TRUE</code>，外层查询的当前行就会被保留</li>
+</ol>
+</div><p>(1) 查询仓库位于 Dallas 且库存数量低于 200000 的商品的编号、名称和库存数量；结果按照库存数量从小到大排序。</p>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> pid, pname, quantity
+<span class="hljs-keyword">from</span> products
+<span class="hljs-keyword">where</span> city <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;Dallas&#x27;</span> <span class="hljs-keyword">and</span> quantity <span class="hljs-operator">&lt;</span> <span class="hljs-number">200000</span>
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> quantity;
+</code></pre>
+<p>(2) 查询满足以下条件的订单的编号和销售金额：Dallas 的顾客通过位于 Duluth 的供应商购买商品；结果按照订单编号从大到小排序。</p>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> ordno, dollars
+<span class="hljs-keyword">from</span> orders
+<span class="hljs-keyword">join</span> customers <span class="hljs-keyword">on</span> orders.cid <span class="hljs-operator">=</span> customers.cid
+<span class="hljs-keyword">join</span> agents <span class="hljs-keyword">on</span> orders.aid <span class="hljs-operator">=</span> agents.aid
+<span class="hljs-keyword">where</span> customers.city <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;Dallas&#x27;</span> <span class="hljs-keyword">and</span> agents.city <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;Duluth&#x27;</span>
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> ordno <span class="hljs-keyword">desc</span>;
+</code></pre>
+<div class="callout callout-warning"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>参考答案一律没有使用 join 连接，而是全部使用 where</div><pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> o.ordno, o.dollars
+<span class="hljs-keyword">FROM</span> orders o, customers c, agents a
+<span class="hljs-keyword">WHERE</span> o.cid<span class="hljs-operator">=</span>c.cid <span class="hljs-keyword">and</span> o.aid<span class="hljs-operator">=</span>a.aid <span class="hljs-keyword">and</span>
+c.city<span class="hljs-operator">=</span><span class="hljs-string">&#x27;Dallas&#x27;</span> <span class="hljs-keyword">and</span> a.city<span class="hljs-operator">=</span><span class="hljs-string">&#x27;Duluth&#x27;</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> o.ordno <span class="hljs-keyword">DESC</span>;
+</code></pre>
+</div><p>(3) 查询满足以下条件的顾客的编号和姓名：没有购买过任何商品；结果按照顾客姓名从小到大排序。</p>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> customers.cid, cname
+<span class="hljs-keyword">from</span> customers
+<span class="hljs-keyword">left</span> <span class="hljs-keyword">join</span> orders <span class="hljs-keyword">on</span> customers.cid <span class="hljs-operator">=</span> orders.cid
+<span class="hljs-keyword">where</span> orders.cid <span class="hljs-keyword">is</span> <span class="hljs-keyword">null</span>
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> cname;
+</code></pre>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>参考答案补充</div><p>1.使用 <code>NOT EXISTS</code> 谓词</p>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> c.cid, c.cname
+<span class="hljs-keyword">FROM</span> customers c
+<span class="hljs-keyword">WHERE</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> (
+  <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> orders o <span class="hljs-keyword">WHERE</span> o.cid<span class="hljs-operator">=</span>c.cid )
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> c.cname;
+</code></pre>
+<p>2.使用 <code>NOT IN</code> 谓词</p>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> c.cid, c.cname
+<span class="hljs-keyword">FROM</span> customers c
+<span class="hljs-keyword">WHERE</span> c.cid <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">IN</span> (
+    <span class="hljs-keyword">SELECT</span> o.cid <span class="hljs-keyword">FROM</span> orders o )
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> c.cname;
+</code></pre>
+<p>3.两个子查询的差运算（缺点是无法排序）</p>
+<pre><code class="language-sql">( <span class="hljs-keyword">SELECT</span> cid, cname
+<span class="hljs-keyword">FROM</span> customers )
+    <span class="hljs-keyword">EXCEPT</span>
+( <span class="hljs-keyword">SELECT</span> c.cid, c.cname
+<span class="hljs-keyword">FROM</span> orders o , customers c
+<span class="hljs-keyword">WHERE</span> o.cid <span class="hljs-operator">=</span> c.cid );
+</code></pre>
+</div><p><mark>(4) 查询满足以下条件的供应商编号 a 和商品编号 p：编号为 a 的供应商只销售过编号为 p 的这一种商品；结果按照供应商编号从小到大排序。</mark></p>
+<ul>
+<li>初版：</li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">distinct</span> t2.aid a, orders.pid p
+<span class="hljs-keyword">from</span> (<span class="hljs-keyword">select</span> t1.aid
+      <span class="hljs-keyword">from</span> (<span class="hljs-keyword">select</span> <span class="hljs-keyword">distinct</span> agents.aid, orders.pid
+            <span class="hljs-keyword">from</span> agents
+                     <span class="hljs-keyword">join</span> orders <span class="hljs-keyword">on</span> agents.aid <span class="hljs-operator">=</span> orders.aid) t1
+      <span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> t1.aid
+      <span class="hljs-keyword">having</span> <span class="hljs-built_in">count</span>(t1.aid) <span class="hljs-operator">=</span> <span class="hljs-number">1</span>) t2
+<span class="hljs-keyword">join</span> orders <span class="hljs-keyword">on</span> t2.aid <span class="hljs-operator">=</span> orders.aid
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> t2.aid;
+</code></pre>
+<blockquote>
+<p>初版思路：</p>
+<ol>
+<li>供应商表和订单表连接，并按供应商编号 aid 和商品编号 pid <strong>去重</strong>，得到连接表 t1</li>
+<li>对连接表 t1 按供应商分组，找出其中只有一个订单（只销售过一种商品）的供应商编号，得到 t2</li>
+<li>t2 和订单表连接，为了得到商品编号 p</li>
+</ol>
+<p>改进方向：</p>
+<ol>
+<li>无需连接得到 t1，直接操作订单表即可</li>
+</ol>
+</blockquote>
+<ul>
+<li>改进版 1：</li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">distinct</span> t.aid, orders.pid # 注意要去重
+<span class="hljs-keyword">from</span> (<span class="hljs-keyword">select</span> aid
+      <span class="hljs-keyword">from</span> orders
+      <span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> aid
+      <span class="hljs-keyword">having</span> <span class="hljs-built_in">count</span>(<span class="hljs-keyword">distinct</span> pid) <span class="hljs-operator">=</span> <span class="hljs-number">1</span>) t
+<span class="hljs-keyword">join</span> orders <span class="hljs-keyword">on</span> t.aid <span class="hljs-operator">=</span> orders.aid
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> t.aid;
+</code></pre>
+<ul>
+<li>一种错解（运行时报错）：</li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> aid, pid
+<span class="hljs-keyword">from</span> orders
+<span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> aid
+<span class="hljs-keyword">having</span> <span class="hljs-built_in">count</span>(<span class="hljs-keyword">distinct</span> pid) <span class="hljs-operator">=</span> <span class="hljs-number">1</span>
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> aid;
+</code></pre>
+<blockquote>
+<p>错误原因是查询的第二个字段 pid 既不在 group by 子句中，也没有被聚合函数包裹，因此 SQL 语法不合法</p>
+<p>但从逻辑上看，<code>count(distinct pid) = 1</code> 那么 <code>pid</code> 也只有一个，查询直接使用聚合函数 <code>max(pid)</code> 或 <code>min(pid)</code> 就可以了：</p>
+</blockquote>
+<ul>
+<li>改进版 2：</li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> aid, <span class="hljs-built_in">min</span>(pid)
+<span class="hljs-keyword">from</span> orders
+<span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> aid
+<span class="hljs-keyword">having</span> <span class="hljs-built_in">count</span>(<span class="hljs-keyword">distinct</span> pid) <span class="hljs-operator">=</span> <span class="hljs-number">1</span>
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> aid;
+</code></pre>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>参考答案补充</div><p>1.使用 <code>NOT EXISTS</code></p>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DISTINCT</span> x.aid, x.pid
+<span class="hljs-keyword">FROM</span> orders x
+<span class="hljs-keyword">WHERE</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> (
+    <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> orders y <span class="hljs-keyword">WHERE</span> y.aid<span class="hljs-operator">=</span>x.aid <span class="hljs-keyword">and</span> y.pid<span class="hljs-operator">&lt;&gt;</span>x.pid)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> x.aid;
+</code></pre>
+<p>2.在 <code>FROM</code> 子句中嵌入子查询</p>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DISTINCT</span> o.aid, o.pid
+<span class="hljs-keyword">FROM</span> orders o,
+  (<span class="hljs-keyword">SELECT</span> aid, <span class="hljs-built_in">COUNT</span>(<span class="hljs-keyword">DISTINCT</span> pid) <span class="hljs-keyword">as</span> pid_num <span class="hljs-keyword">FROM</span> orders <span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> aid) x 
+<span class="hljs-keyword">WHERE</span> o.aid <span class="hljs-operator">=</span> x.aid <span class="hljs-keyword">and</span> x.pid_num <span class="hljs-operator">=</span> <span class="hljs-number">1</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> o.aid;
+</code></pre>
+</div><p><mark>(5) 查询每一个供应商的所有订单销售金额的最高值，结果返回供应商的编号及其订单金额的最高值；结果按照供应商编号从小到大排序。（不考虑没有销售订单的供应商；请分别写出：不使用统计函数、使用统计函数（使用或不使用 group by 子句）等三种不同表示方法及其返回的查询结果）</mark></p>
+<ul>
+<li><strong>不使用统计函数</strong></li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">distinct</span> o1.aid, o1.dollars # 注意去重
+<span class="hljs-keyword">from</span> orders o1
+<span class="hljs-keyword">left</span> <span class="hljs-keyword">join</span> orders o2 <span class="hljs-keyword">on</span> o1.aid <span class="hljs-operator">=</span> o2.aid <span class="hljs-keyword">and</span> o1.dollars <span class="hljs-operator">&lt;</span> o2.dollars
+<span class="hljs-keyword">where</span> o2.ordno <span class="hljs-keyword">is</span> <span class="hljs-keyword">null</span>
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> o1.aid;
+</code></pre>
+<blockquote>
+<p>不使用统计函数那么本题语义在实现上需使用<strong>关系代数的减法</strong></p>
+<p>笛卡尔积的条件 <code>o1.aid = o2.aid and o1.dollars &lt; o2.dollars</code>：</p>
+<ul>
+<li>对每个 <code>o1.aid</code>，遍历相等的 <code>o2.aid</code>，保留 <code>o1.dollars &lt; o2.dollars</code> 的记录</li>
+</ul>
+<p>而“减”的操作使用左连接和判空实现：</p>
+<ul>
+<li><strong>左连接后左表不满足 <code>o1.dollars &lt; o2.dollars</code> 的表项与右表无匹配项</strong>，使用 <code>where</code> 判空得出</li>
+</ul>
+<p>当然，关键是只需找出不满足 <code>o1.dollars &lt; o2.dollars</code> 的记录，也可使用 <code>not exists</code> 实现：</p>
+</blockquote>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">distinct</span> o1.aid, o1.dollars
+<span class="hljs-keyword">from</span> orders o1
+<span class="hljs-keyword">where</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">exists</span>(
+    <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span>
+    <span class="hljs-keyword">from</span> orders o2
+    <span class="hljs-keyword">where</span> o1.aid <span class="hljs-operator">=</span> o2.aid <span class="hljs-keyword">and</span> o1.dollars <span class="hljs-operator">&lt;</span> o2.dollars
+)
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> o1.aid;
+</code></pre>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>ALL 并非统计函数，而是用来做逻辑判断或状态修饰的关键字</div><p>1.<strong>作为子查询的比较运算符</strong>（最常见）</p>
+<ul>
+<li>当 <code>ALL</code> 与比较运算符（<code>&gt;</code>, <code>&lt;</code>, <code>=</code>, <code>&gt;=</code>, <code>&lt;=</code> 等）结合，并接一个子查询时，它的意思是 “与子查询返回的所有值都满足条件”</li>
+<li>故上题也可写为：</li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DISTINCT</span> o.aid, o.dollars
+<span class="hljs-keyword">FROM</span> orders o
+<span class="hljs-keyword">WHERE</span> o.dollars <span class="hljs-operator">&gt;=</span> <span class="hljs-keyword">ALL</span>(<span class="hljs-keyword">SELECT</span> y.dollars <span class="hljs-keyword">FROM</span> orders y <span class="hljs-keyword">WHERE</span> y.aid<span class="hljs-operator">=</span>o.aid)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> o.aid;
+</code></pre>
+<p>2.<strong>作为集合操作的修饰符</strong>（UNION ALL）</p>
+<ul>
+<li><code>UNION</code>：合并结果，并自动去重</li>
+<li><code>UNION ALL</code>：合并结果，不去重（性能更好）</li>
+</ul>
+</div><ul>
+<li><strong>使用统计函数，使用 group by 子句</strong></li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> aid, <span class="hljs-built_in">max</span>(dollars)
+<span class="hljs-keyword">from</span> orders
+<span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> aid
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> aid;
+</code></pre>
+<ul>
+<li><strong>使用统计函数，不使用 group by 子句</strong></li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">distinct</span>
+    o1.aid,
+    (<span class="hljs-keyword">select</span> <span class="hljs-built_in">max</span>(o2.dollars)
+     <span class="hljs-keyword">from</span> orders o2
+     <span class="hljs-keyword">where</span> o2.aid <span class="hljs-operator">=</span> o1.aid)
+<span class="hljs-keyword">from</span> orders o1
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> aid;
+</code></pre>
+<div class="callout callout-tip"><p>关键：<strong>把统计函数放在子查询中，并且子查询的 where 条件关联外层查询的 aid 字段</strong></p>
+</div><div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>参考答案补充</div><p>原理也类似地</p>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DISTINCT</span> o.aid, o.dollars
+<span class="hljs-keyword">FROM</span> orders o
+<span class="hljs-keyword">WHERE</span> o.dollars <span class="hljs-keyword">IN</span> (<span class="hljs-keyword">SELECT</span> <span class="hljs-built_in">MAX</span>(y.dollars) <span class="hljs-keyword">FROM</span> orders y <span class="hljs-keyword">WHERE</span> y.aid<span class="hljs-operator">=</span>o.aid)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> o.aid;
+</code></pre>
+</div><p>(6) 查询满足下述条件的供应商：该供应商每一份订单的销售金额都超过 500 元；结果返回供应商的编号及其所有订单的累计销售金额，并按照下述要求进行排序：先按照累计销售金额从大到小排序，在累计销售金额相同时再按照供应商的编号从小到大排序。（不考虑没有销售订单的供应商；请写出使用 HAVING 子句和不使用 HAVING 子句的两种不同表示方法）</p>
+<ul>
+<li><strong>使用 HAVING 子句</strong></li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> aid, <span class="hljs-built_in">sum</span>(dollars) ds
+<span class="hljs-keyword">from</span> orders
+<span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> aid
+<span class="hljs-keyword">having</span> <span class="hljs-built_in">min</span>(dollars) <span class="hljs-operator">&gt;</span> <span class="hljs-number">500</span>
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> ds <span class="hljs-keyword">desc</span>, aid;
+</code></pre>
+<ul>
+<li><strong>不使用 HAVING 子句</strong></li>
+</ul>
+<div class="callout callout-tip"><p>当环境不能使用 <code>HAVING</code> 子句时，使用 <strong>“子查询 + WHERE”</strong> 往往才是最优解</p>
+</div><ul>
+<li>改进版（采用）：</li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> aid, ds
+<span class="hljs-keyword">from</span> (<span class="hljs-keyword">select</span>
+          aid,
+          <span class="hljs-built_in">sum</span>(dollars) ds,
+          <span class="hljs-built_in">min</span>(dollars) md
+      <span class="hljs-keyword">from</span> orders
+      <span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> aid) t
+<span class="hljs-keyword">where</span> md <span class="hljs-operator">&gt;</span> <span class="hljs-number">500</span>
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> ds <span class="hljs-keyword">desc</span>, aid;
+</code></pre>
+<blockquote>
+<p>另一种解法：逆向思维，“该供应商每一份订单的销售金额都超过 500 元”，即排除掉 “存在一份订单的销售金额不超过 500 元” 的供应商</p>
+</blockquote>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> aid, <span class="hljs-built_in">sum</span>(dollars) ds
+<span class="hljs-keyword">from</span> orders
+<span class="hljs-keyword">where</span> aid <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span>(
+    <span class="hljs-keyword">select</span> aid <span class="hljs-keyword">from</span> orders <span class="hljs-keyword">where</span> dollars <span class="hljs-operator">&lt;=</span> <span class="hljs-number">500</span>
+)
+<span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> aid
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> ds <span class="hljs-keyword">desc</span>, aid;
+</code></pre>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>参考答案补充</div><p>还是使用 <code>NOT EXISTS</code></p>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> o.aid, <span class="hljs-built_in">SUM</span>(o.dollars)
+<span class="hljs-keyword">FROM</span> orders o
+<span class="hljs-keyword">WHERE</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span>(
+  <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span>
+  <span class="hljs-keyword">FROM</span> orders x
+  <span class="hljs-keyword">WHERE</span> x.aid<span class="hljs-operator">=</span>o.aid <span class="hljs-keyword">and</span> x.dollars<span class="hljs-operator">&lt;=</span><span class="hljs-number">500</span>)
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> o.aid
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-built_in">SUM</span>(o.dollars) <span class="hljs-keyword">DESC</span>, o.aid;
+</code></pre>
+</div><p>(7) 查询满足以下条件的顾客的编号：通过所有供应商都购买过商品；结果按照顾客编号从小到大排序。</p>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> cid
+<span class="hljs-keyword">from</span> customers
+<span class="hljs-keyword">where</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">exists</span>( # 不存在一个供应商
+    <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span>
+    <span class="hljs-keyword">from</span> agents
+    <span class="hljs-keyword">where</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">exists</span>( # 使得顾客没有在其那里买过商品
+        <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span>
+        <span class="hljs-keyword">from</span> orders
+        <span class="hljs-keyword">where</span> orders.cid <span class="hljs-operator">=</span> customers.cid <span class="hljs-keyword">and</span> orders.aid <span class="hljs-operator">=</span> agents.aid
+    )
+)
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> cid;
+</code></pre>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>关系代数的除法：一般使用双重否定来实现</div><p>查找 “通过所有供应商都购买过商品的顾客”，即 “对于顾客，不存在一个供应商，使得该顾客没有在该供应商那里购买过商品”</p>
+<ul>
+<li>最内存查询中：</li>
+<li>“该顾客” 即 <code>orders.cid = customers.cid</code> 关联最外层</li>
+<li>“该供应商” 即 <code>orders.aid = agents.aid</code> 关联中间层</li>
+</ul>
+</div><div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>参考答案补充</div><p>1.参考关系代数中除运算的推导公式：
+$\(目标结果 = 候选全集 - \pi_{X}(所有的理论组合 - 实际发生的组合)\)$</p>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> cid
+<span class="hljs-keyword">FROM</span> customers
+<span class="hljs-keyword">WHERE</span> cid <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">IN</span> (
+  <span class="hljs-keyword">SELECT</span> c.cid <span class="hljs-keyword">FROM</span> customers c, agents a <span class="hljs-keyword">WHERE</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> (
+      <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> orders o <span class="hljs-keyword">WHERE</span> o.cid <span class="hljs-operator">=</span> c.cid <span class="hljs-keyword">and</span> o.aid <span class="hljs-operator">=</span> a.aid ) )
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> cid;
+</code></pre>
+<p>2.<mark><strong>计数法</strong></mark></p>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> cid
+<span class="hljs-keyword">FROM</span> orders
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> cid
+<span class="hljs-keyword">HAVING</span> <span class="hljs-built_in">COUNT</span>(<span class="hljs-keyword">DISTINCT</span> aid) <span class="hljs-operator">=</span> (<span class="hljs-keyword">SELECT</span> <span class="hljs-built_in">COUNT</span>(<span class="hljs-operator">*</span>) <span class="hljs-keyword">FROM</span> agents) # 注意去重
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> cid <span class="hljs-keyword">ASC</span>;
+</code></pre>
+<ul>
+<li>推荐，分组后 <code>HAVING COUNT()</code> 等于子查询</li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> cid
+<span class="hljs-keyword">FROM</span> ( <span class="hljs-keyword">SELECT</span> cid, <span class="hljs-built_in">COUNT</span>(<span class="hljs-keyword">DISTINCT</span> aid) <span class="hljs-keyword">as</span> agent_COUNT
+       <span class="hljs-keyword">FROM</span> orders
+       <span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> cid ) <span class="hljs-keyword">AS</span> customer_agents
+<span class="hljs-keyword">WHERE</span> agent_COUNT <span class="hljs-operator">=</span> (<span class="hljs-keyword">SELECT</span> <span class="hljs-built_in">COUNT</span>(<span class="hljs-operator">*</span>) <span class="hljs-keyword">FROM</span> agents)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> cid <span class="hljs-keyword">ASC</span>;
+</code></pre>
+</div><p>(8) 查询满足以下条件的商品的编号：单价不小于 1，并且所有位于 Duluth 市的顾客都购买过；结果按照商品编号从小到大排序。</p>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> pid
+<span class="hljs-keyword">from</span> products
+<span class="hljs-keyword">where</span> price <span class="hljs-operator">&gt;=</span> <span class="hljs-number">1</span>
+  <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">exists</span>( # 不存在一个位于 Duluth 市的顾客
+      <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span>
+      <span class="hljs-keyword">from</span> customers
+      <span class="hljs-keyword">where</span> city <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;Duluth&#x27;</span>
+        <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">exists</span>( # 使得该顾客没有购买过该商品
+            <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span>
+            <span class="hljs-keyword">from</span> orders
+            <span class="hljs-keyword">where</span> orders.pid <span class="hljs-operator">=</span> products.pid <span class="hljs-keyword">and</span> orders.cid <span class="hljs-operator">=</span> customers.cid
+        )
+)
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> pid;
+</code></pre>
+<div class="callout callout-tip"><p>语义依然除法，相比上题多出的限制条件放在 <code>where</code> 中和 <code>not exists</code> 用 <code>and</code> 连接</p>
+</div><div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>参考答案补充</div><p>1.依旧使用 <code>NOT IN</code></p>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> p1.pid
+<span class="hljs-keyword">FROM</span> products p1
+<span class="hljs-keyword">WHERE</span> p1.price <span class="hljs-operator">&gt;=</span> <span class="hljs-number">1</span> <span class="hljs-keyword">and</span> p1.pid <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">IN</span> (
+  <span class="hljs-keyword">SELECT</span> p2.pid
+  <span class="hljs-keyword">FROM</span> products p2, customers c
+  <span class="hljs-keyword">WHERE</span> c.city <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;Duluth&#x27;</span> <span class="hljs-keyword">and</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> (
+      <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span>
+      <span class="hljs-keyword">FROM</span> orders o
+      <span class="hljs-keyword">WHERE</span> o.cid <span class="hljs-operator">=</span> c.cid <span class="hljs-keyword">and</span> o.pid <span class="hljs-operator">=</span> p2.pid )
+)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> p1.pid;
+</code></pre>
+<p>2.依旧计数</p>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> p.pid
+<span class="hljs-keyword">FROM</span> products p, customers c, orders o
+<span class="hljs-keyword">WHERE</span> p1.price <span class="hljs-operator">&gt;=</span> <span class="hljs-number">1</span> <span class="hljs-keyword">and</span> o.pid <span class="hljs-operator">=</span> p.pid <span class="hljs-keyword">and</span> o.cid <span class="hljs-operator">=</span> c.cid <span class="hljs-keyword">and</span> c.city <span class="hljs-operator">=</span> ‘Duluth’
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> p.pid
+<span class="hljs-keyword">HAVING</span> <span class="hljs-built_in">COUNT</span>(<span class="hljs-keyword">DISTINCT</span> o.cid) <span class="hljs-operator">=</span>
+      (<span class="hljs-keyword">SELECT</span> <span class="hljs-built_in">COUNT</span>(<span class="hljs-operator">*</span>) <span class="hljs-keyword">FROM</span> customers <span class="hljs-keyword">WHERE</span> city <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;Duluth&#x27;</span>)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> p.pid;
+</code></pre>
+</div><p>(9) 查询每一位顾客的最后一份订单，结果返回顾客编号，最后一份订单的订单编号、订购年份、订购月份、距离当前的时间差（天数）。结果按照距离当前的天数从大到小排序。（以订单编号的大小区分订单的先后，编号大的订单在后；不考虑没有订单的顾客；请使用系统内置的日期函数）</p>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span>
+    tmp.cid,
+    tmp.mo,
+    <span class="hljs-keyword">year</span>(orders.orddate) <span class="hljs-keyword">year</span>,
+    <span class="hljs-keyword">month</span>(orders.orddate) <span class="hljs-keyword">month</span>,
+    datediff(curdate(), orders.orddate) till_now
+<span class="hljs-keyword">from</span> (<span class="hljs-keyword">select</span> cid, <span class="hljs-built_in">max</span>(ordno) mo
+      <span class="hljs-keyword">from</span> orders
+      <span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> cid) tmp
+<span class="hljs-keyword">join</span> orders <span class="hljs-keyword">on</span> tmp.mo <span class="hljs-operator">=</span> orders.ordno
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> till_now <span class="hljs-keyword">desc</span>;
+</code></pre>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>留意 MYSQL 中常用的日期函数</div><table>
+<thead>
+<tr>
+<th>函数</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CURDATE()</td>
+<td>返回当前日期</td>
+</tr>
+<tr>
+<td>CURTIME()</td>
+<td>返回当前时间</td>
+</tr>
+<tr>
+<td>NOW()</td>
+<td>返回当前日期和时间</td>
+</tr>
+<tr>
+<td>YEAR(date)</td>
+<td>获取指定date的年份</td>
+</tr>
+<tr>
+<td>MONTH(date)</td>
+<td>获取指定date的月份</td>
+</tr>
+<tr>
+<td>DAY(date)</td>
+<td>获取指定date的日期</td>
+</tr>
+<tr>
+<td>DATE_ADD(date, INTERVAL expr type)</td>
+<td>返回一个日期/时间值加上一个时间间隔expr后的时间值</td>
+</tr>
+<tr>
+<td>DATEDIFF(date1, date2)</td>
+<td>返回起始时间date1和结束时间date2之间的天数</td>
+</tr>
+</tbody>
+</table>
+</div><div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>参考答案补充</div><p><mark><strong>使用 <code>all</code> + 子查询，子查询 <code>where</code> 关联外层查询</strong></mark></p>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> o.cid, o.ordno,
+  <span class="hljs-keyword">YEAR</span>(o.orddate) lastord_year, <span class="hljs-keyword">MONTH</span>(o.orddate) lastord_month,
+  DATEDIFF(CURDATE(), o.orddate) lastord_days
+<span class="hljs-keyword">FROM</span> orders o
+<span class="hljs-keyword">WHERE</span> o.ordno <span class="hljs-operator">&gt;=</span> <span class="hljs-keyword">all</span> (<span class="hljs-keyword">SELECT</span> x.ordno <span class="hljs-keyword">FROM</span> orders x <span class="hljs-keyword">WHERE</span> x.cid<span class="hljs-operator">=</span>o.cid)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> lastord_days <span class="hljs-keyword">DESC</span>;
+</code></pre>
+<p>另外如果想要含有没有订单的顾客，可使用外连接表示</p>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> c.cid, o.ordno,
+  <span class="hljs-keyword">YEAR</span>(o.orddate) lastord_year, <span class="hljs-keyword">MONTH</span>(o.orddate) lastord_month,
+  DATEDIFF(CURDATE(), o.orddate) lastord_days
+<span class="hljs-keyword">FROM</span> customers c <span class="hljs-keyword">left</span> <span class="hljs-keyword">outer</span> <span class="hljs-keyword">join</span> orders o <span class="hljs-keyword">on</span> c.cid <span class="hljs-operator">=</span> o.cid
+<span class="hljs-keyword">WHERE</span> o.ordno <span class="hljs-operator">&gt;=</span> <span class="hljs-keyword">all</span> (<span class="hljs-keyword">SELECT</span> x.ordno <span class="hljs-keyword">FROM</span> orders x <span class="hljs-keyword">WHERE</span> x.cid<span class="hljs-operator">=</span>c.cid)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> lastord_days <span class="hljs-keyword">DESC</span>;
+</code></pre>
+</div><p><mark>(10) 查询满足以下条件的商品编号 pid、供应商编号 aid、顾客所在城市 city：位于同一个城市 city 中的所有顾客，都通过供应商 aid 去购买过商品 pid；结果依次按照商品编号、供应商编号、顾客所在城市从小到大排序。</mark></p>
+<ul>
+<li>法一：集合与计数</li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">distinct</span>
+    t2.pid,
+    t2.aid,
+    t2.city
+<span class="hljs-keyword">from</span> (<span class="hljs-keyword">select</span> city, <span class="hljs-built_in">count</span>(cid) cnt
+      <span class="hljs-keyword">from</span> customers
+      <span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> city) t1
+<span class="hljs-keyword">join</span> (<span class="hljs-keyword">select</span>
+          city,
+          orders.aid,
+          orders.pid,
+          <span class="hljs-built_in">count</span>(<span class="hljs-keyword">distinct</span> orders.cid) cnt
+      <span class="hljs-keyword">from</span> orders
+               <span class="hljs-keyword">join</span> customers <span class="hljs-keyword">on</span> orders.cid <span class="hljs-operator">=</span> customers.cid
+      <span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> city, orders.aid, orders.pid) t2
+<span class="hljs-keyword">on</span> t1.city <span class="hljs-operator">=</span> t2.city <span class="hljs-keyword">and</span> t1.cnt <span class="hljs-operator">=</span> t2.cnt
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> t2.pid, t2.aid, t2.city;
+</code></pre>
+<blockquote>
+<p>本题的 “考察对象” 不再是单一的商品或单一的城市，而是一个<strong>组合</strong>：<code>(city, pid, aid)</code></p>
+<p>对于一个特定的 <code>city</code>，可以通过顾客表得到对应的顾客总数
+那么如果对订单表按 <code>(city, pid, aid)</code> 分组，只需与对应的 <code>city</code> 的顾客数量进行比较</p>
+<ol>
+<li>先从顾客表中统计每个城市的顾客数量，得到表 t1</li>
+<li>再从订单表与顾客表的连接表中，按城市、供应商编号、商品编号分组，统计每个组合的顾客数量，得到表 t2</li>
+<li>最后连接 t1 和 t2，找出顾客数量相等的记录，即满足条件的记录</li>
+</ol>
+</blockquote>
+<ul>
+<li><mark>法二：双重否定</mark></li>
+</ul>
+<pre><code class="language-sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">distinct</span>
+    o.pid,
+    o.aid,
+    c.city
+<span class="hljs-keyword">from</span> orders o
+<span class="hljs-keyword">join</span> customers c <span class="hljs-keyword">on</span> o.cid <span class="hljs-operator">=</span> c.cid
+<span class="hljs-keyword">where</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">exists</span>( # 不存在一个位于该特定（同一）城市的顾客
+    <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span>
+    <span class="hljs-keyword">from</span> customers
+    <span class="hljs-keyword">where</span> c.city <span class="hljs-operator">=</span> customers.city
+      <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">exists</span>( # 使得该顾客没有通过供应商 aid 去购买过商品 pid
+        <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span>
+        <span class="hljs-keyword">from</span> orders
+        <span class="hljs-keyword">where</span> orders.cid <span class="hljs-operator">=</span> customers.cid
+          <span class="hljs-keyword">and</span> orders.pid <span class="hljs-operator">=</span> o.pid
+          <span class="hljs-keyword">and</span> orders.aid <span class="hljs-operator">=</span> o.aid
+    )
+)
+<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> o.pid, o.aid, c.city;
+</code></pre>
+<blockquote>
+<p>“位于同一个城市 city 中的所有顾客，都通过供应商 aid 去购买过商品 pid”，即 “对于一个特定的组合 <code>(city, pid, aid)</code>，<strong>不存在一个顾客，使得该顾客位于 <code>city</code> 中，并且没有通过供应商 <code>aid</code> 去购买过商品 <code>pid</code></strong>”</p>
+<ul>
+<li>最内层子查询 <code>(cid, pid, aid)</code> 中 <code>cid</code> 关联中间层， <code>pid</code> 和 <code>aid</code> 关联最外层</li>
+<li>中间层使用 <code>c.city = customers.city</code> 来关联最外层查询实现 “同一城市” 的限制，也是对最内层通过 <code>city</code> 进行的扩大范围</li>
+</ul>
+</blockquote>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：DB2603 - 数据库的安装、创建、使用</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-08 18:55:00</p>
+      <p><strong>更新于</strong>：2026-08-08 12:06:24</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/数据库作业-3.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/数据库作业-2.html">&lt; DB2602 - 关系代数的应用</a>
+      <a class="pager-next" href="/posts/数据库作业-4.html">DB2604 - 数据定义与数据操纵 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
+<script src="/assets/js/main.js?v=1786162127971" defer></script>
+<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+</body>
+</html>

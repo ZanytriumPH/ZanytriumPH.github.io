@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第2章 关系数据库 · Zwing&#39;s blog</title>
+<meta name="description" content="第2章 关系数据库">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">第2章 关系数据库</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-08T11:05:00.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-08 19:05:00</time>
+            <time class="meta-item" datetime="2026-08-08T12:06:24+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-08 12:06:24</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 5345 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 18 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#数据管理基础"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>数据管理基础</a>
+              <a class="tag-chip" href="/tags.html#数据库"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>数据库</a> <a class="tag-chip" href="/tags.html#关系代数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>关系代数</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><h2 id="1-关系数据结构及形式化定义">1 关系数据结构及形式化定义</h2>
+<h3 id="1-1-关系">1.1 关系</h3>
+<p><strong>【定义】域</strong>：一组具有相同数据类型的值的集合（二维表的一列）</p>
+<p><strong>【定义】笛卡尔积</strong></p>
+<ul>
+<li>
+<p>给定一组域 \(D_1, D_2, \dots, D_n\)，允许其中某些域是相同的。</p>
+</li>
+<li>
+<p>\(D_1, D_2, \dots, D_n\) 的笛卡尔积可表示为：\(D_1 \times D_2 \times \cdots \times D_n\)</p>
+</li>
+<li>
+<p>笛卡尔积的运算结果也是一个集合，其中的每个元素都是一个具有如下形式的‘n元组’：\((d_1, d_2, \dots, d_n)\)，其中 \(d_i \in D_i\ (i = 1, 2, \dots, n)\)</p>
+</li>
+<li>
+<p>由所有符合上述要求的‘n元组’组成该笛卡尔积的运算结果，即：</p>
+<div class="math-block">\[D_1 \times D_2 \times \cdots \times D_n = \left\{ (d_1, d_2, \dots, d_n) \mid d_i \in D_i,\ i = 1,\ 2,\ \dots,\ n \right\}\]</div>
+</li>
+</ul>
+<p><strong>【定义】元组</strong>：笛卡尔积的一个元素 \((d_1, d_2, …, d_n)\)（二维表的一行）</p>
+<p><strong>【定义】分量</strong>：笛卡尔积元素 \((d_1, d_2, …, d_n)\) 中的每一个值 \(d_i\)</p>
+<p><strong>【定义】基数</strong>：一个域允许的不同取值个数</p>
+<blockquote>
+<p>若 \(D_i\,(i = 1, 2, \dots, n)\) 都为有限集，基数分别为 \(m_i\,(i = 1, 2, \dots, n)\)，则 \(D_1 \times D_2 \times \dots \times D_n\) 的基数 \(M\) 为：\(M = \prod_{i=1}^{n} m_i\)</p>
+</blockquote>
+<p><strong>【定义】关系</strong></p>
+<ul>
+<li>给定一个域的序列 \(D_1, D_2, ..., D_n\)，<mark>笛卡尔积 \(D_1 \times D_2 \times ... \times D_n\) 的子集</mark>叫做在域 \(D_1, D_2, ..., D_n\) 上的关系，表示为 \(R(D_1, D_2, ..., D_n)\)（或简写为关系 \(R\)）</li>
+<li>\(R\) 是关系名，用于区分不同的关系</li>
+<li>\(n\) 是关系的‘目’或‘度’（Degree）</li>
+</ul>
+<p><strong>【定义】属性</strong></p>
+<ul>
+<li>关系所对应的二维表中的每一列，被称为是该关系中的一个属性</li>
+<li>关系中的每一个属性都有一个名字，称为属性名。在同一个关系中，属性名互不相同</li>
+<li>在关系对应的二维表中，表中的第一行被称为是二维表的表头，里面填写的是各个属性的属性名</li>
+<li>\(n\) 目关系必有 \(n\) 个属性</li>
+</ul>
+<p>关系的表示</p>
+<ul>
+<li>在域 \(D_1, D_2, ..., D_n\) 上的 \(n\) 目关系 \(R\) 可以被表示为 \(R(A_1, A_2, ..., A_n)\)，\(R\) 是关系名，\(A_1, A_2, ..., A_n\) 是属性名</li>
+</ul>
+<p>元组分量的表示</p>
+<ul>
+<li>若 \(t\) 是关系 \(R\) 中的一个元组，那么用 \(t[A_i]\) 表示元组 \(t\) 在属性 \(A_i\) 上的取值，且 \(t[A_i] \in D_i\ (i = 1, 2, ..., n)\)（元组分量也被称为属性值）</li>
+<li>或者，用 \(t[i]\) 表示元组 \(t\) 在第 \(i\) 列上的取值，且 \(t[i] \in D_i\ (i = 1, ..., n)\)</li>
+</ul>
+<p><strong>【定义】码、候选码</strong></p>
+<ul>
+<li>若关系中的某一属性组的值能唯一地标识一个元组，而其所有的真子集都不能，则称该属性组为关系的候选码，简称码</li>
+</ul>
+<p><strong>【定义】主码</strong></p>
+<ul>
+<li>在一个关系中，可以选择一个候选码作为该关系的主码</li>
+<li>在关系模型理论中，只有候选码，不需要为关系定义主码</li>
+</ul>
+<p><strong>【定义】主属性 与 非主属性/非码属性</strong></p>
+<ul>
+<li>候选码中的各属性称为该关系的主属性</li>
+<li>不包含在任何侯选码中的属性称为该关系的非主属性或非码属性</li>
+</ul>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>关系模型是一种逻辑数据模型，不涉及数据的物理存储组织</div></div><p>关系数据模型中，关系的规范性限制</p>
+<ul>
+<li>属性的原子性</li>
+<li>属性的无序性</li>
+<li>元组的唯一性</li>
+<li>元组的无序性</li>
+</ul>
+<h3 id="1-2-关系模式">1.2 关系模式</h3>
+<blockquote>
+<p>关系模式是对关系的描述：元组集合的结构、完整性约束条件</p>
+</blockquote>
+<p>关系模式的形式化表示：\(R(U, D, \text{DOM}, F)\)</p>
+<ul>
+<li>\(R\)：关系名</li>
+<li>\(U\)：组成该关系的属性名集合</li>
+<li>\(D\)：\(U\) 中属性所来自的域</li>
+<li>\(\text{DOM}\)：属性向域的映象集合（描述各个属性对应的域）</li>
+<li>\(F\)：属性间数据的依赖关系的集合（关系上的完整性约束条件）</li>
+</ul>
+<p>关系模式通常可以简记为 \(R(U)\) 或 \(R(A_1, A_2, \ldots, A_n)\)</p>
+<blockquote>
+<p>\(A_1, A_2, \ldots, A_n\) 是关系中所有属性的属性名</p>
+</blockquote>
+<ul>
+<li>域名及属性向域的映象常常直接说明为属性的类型、长度等</li>
+</ul>
+<h2 id="2-关系操作">2 关系操作</h2>
+<pre class="mermaid">graph LR
+    %% --- 样式定义 ---
+    classDef centerStyle fill:#00b050,stroke:none,color:#ffffff,font-weight:bold,font-size:18px,rx:20,ry:20;
+    classDef midStyle fill:#ffffff,stroke:#555555,stroke-width:2px,font-weight:bold,rx:6,ry:6;
+    classDef leafStyle fill:none,stroke:none,font-size:14px,color:#333333;
+
+    %% --- 左侧结构：连向中间节点 ---
+    Q1[单表查询]:::leafStyle --- DQ(数据查询):::midStyle
+    Q2[多表查询]:::leafStyle --- DQ
+    Q3[复杂查询]:::leafStyle --- DQ
+
+    U1[元组插入]:::leafStyle --- DU(数据更新):::midStyle
+    U2[元组删除]:::leafStyle --- DU
+    U3[元组修改]:::leafStyle --- DU
+
+    %% --- 汇聚到中心节点 ---
+    DQ --- Root(关系操作):::centerStyle
+    DU --- Root
+
+    %% --- 右侧结构：从中心节点展开 ---
+    Root --- SO(集合操作):::midStyle
+    Root --- RO(关系操作):::midStyle
+
+    SO --- S1[并]:::leafStyle
+    SO --- S2[交]:::leafStyle
+    SO --- S3[差]:::leafStyle
+    SO --- S4[笛卡尔积]:::leafStyle
+
+    RO --- R1[选择]:::leafStyle
+    RO --- R2[投影]:::leafStyle
+    RO --- R3[连接]:::leafStyle
+    RO --- R4[除]:::leafStyle
+
+    %% --- 关系操作“连接”的子节点 ---
+    R3 --- J1[theta-连接]:::leafStyle
+    R3 --- J2[自然连接]:::leafStyle
+    R3 --- J3[外连接]:::leafStyle
+</pre>
+<blockquote>
+<ul>
+<li>选择、投影、并、差、笛卡尔积是 5 种基本操作</li>
+<li>关系操作的特点：操作的对象和结果都是关系</li>
+</ul>
+</blockquote>
+<h2 id="3-关系的完整性">3 关系的完整性</h2>
+<h3 id="3-1-实体完整性">3.1 实体完整性</h3>
+<ul>
+<li>关系中元组（二维表中的行）的唯一性</li>
+<li>隐含要求：基本关系（基表）的主码属性不能取空</li>
+</ul>
+<h3 id="3-2-参照完整性">3.2 参照完整性</h3>
+<ul>
+<li>外码要么取空要么是某个元组的主码值</li>
+</ul>
+<h3 id="3-3-用户定义的完整性">3.3 用户定义的完整性</h3>
+<ul>
+<li>唯一性约束、非空约束、取值范围约束</li>
+</ul>
+<h2 id="4-关系代数">4 关系代数</h2>
+<h3 id="4-1-关系代数概述">4.1 关系代数概述</h3>
+<div style="width: 100%; overflow-x: auto;">
+    <table style="width: 100% !important; min-width: 100%; border-collapse: collapse; text-align: center; border: 1.5px solid var(--mpe-table-border-color, black); font-family: 'Times New Roman', STSong, SimSun, serif; font-size: 18px; table-layout: fixed;">
+        <colgroup>
+            <col style="width: 20%;">
+            <col style="width: 30%;">
+            <col style="width: 50%;">
+        </colgroup>
+        <thead>
+            <tr>
+                <th colspan="2" style="border: 1px solid var(--mpe-table-border-color, black); padding: 12px; font-size: 20px;">关系运算</th>
+                <th style="border: 1px solid var(--mpe-table-border-color, black); padding: 12px; font-size: 20px;">运算符</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="background-color: rgba(144, 238, 144, 0.2);">
+                <td rowspan="5" style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">基本<br>运算</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">并</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&cup;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr style="background-color: rgba(144, 238, 144, 0.2);">
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">差</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">-</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr style="background-color: rgba(144, 238, 144, 0.2);">
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">笛卡尔积</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&times;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr style="background-color: rgba(144, 238, 144, 0.2);">
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">选择</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <span style="color: #DC143C;"><i>&sigma;</i><sub><i>F</i></sub></span><span style="color: #4169E1;">(<i>R</i>)</span>
+                </td>
+            </tr>
+            <tr style="background-color: rgba(144, 238, 144, 0.2);">
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">投影</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <span style="color: #DC143C;"><i>&pi;</i><sub><i>A</i><sub>1</sub>,<i>A</i><sub>2</sub>,...,<i>A</i><sub>n</sub></sub></span><span style="color: #4169E1;">(<i>R</i>)</span>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="7" style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">扩充<br>运算</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">交</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&cap;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;"><b>&theta;</b>-连接</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C; display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1;"><span>&#x22C8;</span><span style="font-size: 0.55em;"><i>F</i></span></span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">自然连接</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&#x22C8;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">外连接</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&#x27D7;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">左外连接</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&#x27D5;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">右外连接</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&#x27D6;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">除</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #4169E1;">&divide;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>设有一个 \(n\) 目关系 \(R(A_1, A_2, ..., A_n)\)：\(R\) 是关系名，\(A_1, A_2, ..., A_n\) 是属性名</p>
+<ul>
+<li>它的一个关系（实例）设为 \(R\)</li>
+<li>关系模式可以表示为 \(R(A_1, A_2, ..., A_n)\) 或 \(\text{head}(R) = \{A_1, A_2, ..., A_n\}\)</li>
+<li>\(t \in R\) 表示 \(t\) 是关系 \(R\) 中的一个元组</li>
+<li>\(t[A_i]\) 则表示元组 \(t\) 中相应于属性 \(A_i\) 的一个分量（元组 \(t\) 在属性 \(A_i\) 上的值）</li>
+<li>若 \(A = \{A_{i_1}, A_{i_2}, ..., A_{i_k}\}\)，其中 \(A_{i_1}, A_{i_2}, ..., A_{i_k}\) 是来自于 \(A_1, A_2, ..., A_n\) 中的属性，则 \(A\) 称为‘属性列’或‘属性组’或‘属性集’。
+<ul>
+<li>\(t[A] = (t[A_{i_1}], t[A_{i_2}], ..., t[A_{i_k}])\) 表示元组 \(t\) 在属性组 \(A\) 上诸分量的集合</li>
+<li>\(\overline{A}\) 则表示从 \(\{A_1, A_2, ..., A_n\}\) 中去掉 \(\{A_{i_1}, A_{i_2}, ..., A_{i_k}\}\) 后剩余的属性组</li>
+</ul>
+</li>
+<li>用 \((t_r,t_s)\) 来表示元组的连接</li>
+</ul>
+<p><strong>【定义】象集</strong></p>
+<p>给定一个关系 \(R(X, Z)\)</p>
+<ul>
+<li>
+<p>\(x_0\) 为属性组 \(X\) 定义域上的一个值</p>
+</li>
+<li>
+<p>\(x_0\) 在 \(R\) 中的 象集 定义如下：</p>
+<div class="math-block">\[Z_{x_0} = \{ t[Z] \mid t \in R \text{ 且 } t[X] = x_0 \}\]</div>
+</li>
+<li>
+<p>它表示 \(R\) 中属性组 \(X\) 上值为 \(x_0\) 的各元组在 \(Z\) 上分量的集合（排除自身）</p>
+</li>
+</ul>
+<p>在关系 SC 中，存在三个课程号值</p>
+<table>
+<thead>
+<tr>
+<th>学号 Sno</th>
+<th>课程号 Cno</th>
+<th>成绩 Grade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201215121</td>
+<td>1</td>
+<td>92</td>
+</tr>
+<tr>
+<td>201215121</td>
+<td>2</td>
+<td>85</td>
+</tr>
+<tr>
+<td>201215121</td>
+<td>3</td>
+<td>88</td>
+</tr>
+<tr>
+<td>201215122</td>
+<td>2</td>
+<td>90</td>
+</tr>
+<tr>
+<td>201215122</td>
+<td>3</td>
+<td>80</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>\(Z_{Cno=1} = \{ (201215121, 92) \}\)</li>
+<li>\(Z_{Cno=2} = \{ (201215121, 85), (201215122, 90) \}\)</li>
+<li>\(Z_{Cno=3} = \{ (201215121, 88), (201215122, 80) \}\)</li>
+</ul>
+<p><strong>关系模型中的命名规则：同名同义、异名异义（不同关系的属性名）</strong></p>
+<p><strong>赋值运算符 \(:=\)</strong></p>
+<ul>
+<li>方式一：\(R(A_1, A_2, ..., A_n) := \langle expression \rangle\)</li>
+<li>方式二：\(R := \langle expression \rangle\)</li>
+<li>常用于关系自连接的重命名，或保存计算中间结果方便复杂查询</li>
+</ul>
+<p><strong>不等于 \(<>\)，也可用 \(\neq\)</strong></p>
+<h3 id="4-2-关系代数的基本运算">4.2 关系代数的基本运算</h3>
+<div style="width: 100%; overflow-x: auto;">
+    <table style="width: 100% !important; min-width: 100%; border-collapse: collapse; text-align: center; border: 1.5px solid var(--mpe-table-border-color, black); font-family: 'Times New Roman', STSong, SimSun, serif; font-size: 18px; table-layout: fixed;">
+        <colgroup>
+            <col style="width: 40%;">
+            <col style="width: 60%;">
+        </colgroup>
+        <thead>
+            <tr>
+                <th style="border: 1px solid var(--mpe-table-border-color, black); padding: 12px; font-size: 20px;">关系运算</th>
+                <th style="border: 1px solid var(--mpe-table-border-color, black); padding: 12px; font-size: 20px;">运算符</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="background-color: rgba(144, 238, 144, 0.2);">
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">并</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&cup;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr style="background-color: rgba(144, 238, 144, 0.2);">
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">差</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">-</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr style="background-color: rgba(144, 238, 144, 0.2);">
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">笛卡尔积</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&times;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr style="background-color: rgba(144, 238, 144, 0.2);">
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">选择</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <span style="color: #DC143C;"><i>&sigma;</i><sub><i>F</i></sub></span><span style="color: #4169E1;">(<i>R</i>)</span>
+                </td>
+            </tr>
+            <tr style="background-color: rgba(144, 238, 144, 0.2);">
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">投影</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <span style="color: #DC143C;"><i>&pi;</i><sub><i>A</i><sub>1</sub>,<i>A</i><sub>2</sub>,...,<i>A</i><sub>n</sub></sub></span><span style="color: #4169E1;">(<i>R</i>)</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image.webp" alt="alt text" loading="lazy">
+<img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-1.webp" alt="alt text" loading="lazy"></p>
+<p><strong>选择：从行的角度计算</strong></p>
+<ul>
+<li>在关系 \(R\) 中选择满足给定条件 \(F\)（逻辑表达式）的各元组</li>
+</ul>
+<div class="math-block">\[\sigma_F(R) = \{ t \mid t \in R \land F(t) = \text{true} \}\]</div>
+<div class="math-block">\[\sigma_{Sage< 20}  \ (Student)\]</div>
+<p><strong>投影：从列的角度计算</strong></p>
+<div class="math-block">\[\pi_A(R) = \{ t[A] \mid t \in R \}\]</div>
+<div class="math-block">\[\pi_{Sname, Sdept}(Student)\]</div>
+<blockquote>
+<p>可能产生重复的投影结果元组
+可以简写：\(\pi_A \sigma_F(R)\)
+在没有括号的情况下，其运算顺序为：<strong>从右向左</strong></p>
+</blockquote>
+<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-2.webp" alt="alt text" loading="lazy"></p>
+<blockquote>
+<p><strong>5, 6, 7, 8 重点看</strong></p>
+</blockquote>
+<p>查询具有最大折扣的顾客的编号： \(S := C\)</p>
+<div class="math-block">\[ \pi_{cid}(C) - \pi_{C.cid}(\sigma_{C.discnt < S.discnt}(C \times S)) \]</div>
+<p>查询具有最大折扣的顾客的姓名</p>
+<ul>
+<li>是否可以表示如下？</li>
+</ul>
+<div class="math-block">\[ \pi_{cname}(C) - \pi_{C.cname}(\sigma_{C.discnt < S.discnt}(C \times S)) \]</div>
+<p>上述查询表示是错误的（结果语义不符），正确的查询表示如下</p>
+<div class="math-block">\[ \pi_{cname}(\pi_{cid, cname}(C) - \pi_{C.cid, C.cname}(\sigma_{C.discnt < S.discnt}(C \times S))) \]</div>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>在减数和被减数关系中，必须含目标对象的码！</div></div><div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>求第二大？</div><p>对 “非最大” 求一次最大，应该可行，但也有别的做法</p>
+<ol>
+<li>构造两个中间结果：
+<ul>
+<li>集合 A（并非最大）：找到所有折扣比至少一个人小的顾客</li>
+<li>集合 B（并非前两名）：找到所有折扣比至少两个人（且这两个人折扣不同）小的顾客</li>
+<li>A - B 即排在第二的顾客编号</li>
+</ul>
+</li>
+<li>用两个表的别名，设 \(S := C\), \(T := C\)
+$\(\pi_{C.cid}(\sigma_{C.discnt < S.discnt}(C \times S)) - \pi_{C.cid}(\sigma_{C.discnt < S.discnt \land S.discnt < T.discnt}(C \times S \times T))\)$</li>
+</ol>
+</div><h3 id="4-3-关系代数扩充运算">4.3 关系代数扩充运算</h3>
+<div style="width: 100%; overflow-x: auto;">
+    <table style="width: 100% !important; min-width: 100%; border-collapse: collapse; text-align: center; border: 1.5px solid var(--mpe-table-border-color, black); font-family: 'Times New Roman', STSong, SimSun, serif; font-size: 18px; table-layout: fixed;">
+        <colgroup>
+            <col style="width: 40%;">
+            <col style="width: 60%;">
+        </colgroup>
+        <thead>
+            <tr>
+                <th style="border: 1px solid var(--mpe-table-border-color, black); padding: 12px; font-size: 20px;">关系运算</th>
+                <th style="border: 1px solid var(--mpe-table-border-color, black); padding: 12px; font-size: 20px;">运算符</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">交</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&cap;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;"><b>&theta;</b>-连接</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C; display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1;"><span>&#x22C8;</span><span style="font-size: 0.55em;"><i>F</i></span></span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">自然连接</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&#x22C8;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">外连接</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&#x27D7;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">左外连接</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&#x27D5;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">右外连接</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #DC143C;">&#x27D6;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px;">除</td>
+                <td style="border: 1px solid var(--mpe-table-border-color, black); padding: 10px; font-size: 24px;">
+                    <i style="color: #4169E1;">R</i> <span style="color: #4169E1;">&divide;</span> <i style="color: #4169E1;">S</i>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>交不是一个基本运算符，其功能可以用差运算来实现</p>
+<div class="math-block">\[R \cap S = R - (R - S) = S - (S - R)\]</div>
+<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-3.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>并、差、交均要求为同类关系</li>
+<li>并和交满足交换律和结合律</li>
+<li>差不满足交换律和结合律</li>
+</ul>
+<p><strong>常见的连接运算</strong></p>
+<ul>
+<li>θ-连接：按照给定的条件 \(F\) 实现两个关系之间的元组连接</li>
+<li>等值连接：在连接条件 \(F\) 中，仅使用到等于比较 ‘=’ 这一种逻辑比较运算符</li>
+<li>自然连接：两个关系<strong>所有同名属性对之间的等值连接</strong>，且<strong>同名属性只保留一份</strong></li>
+<li>外连接：在结果集中同时含有自然连接结果元组和悬浮元组
+<ul>
+<li>悬浮元组：做自然连接时被丢弃的元组</li>
+</ul>
+</li>
+</ul>
+<p><strong>除运算</strong></p>
+<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-4.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>在关系 \(R\) 中，\(A\) 可以取四个值 \(\{a_1, a_2, a_3, a_4\}\)
+<ul>
+<li>\(a_1\) 的象集为 \(\{(b_1, c_2), (b_2, c_3), (b_2, c_1)\}\)</li>
+<li>\(a_2\) 的象集为 \(\{(b_3, c_7), (b_2, c_3)\}\)</li>
+<li>\(a_3\) 的象集为 \(\{(b_4, c_6)\}\)</li>
+<li>\(a_4\) 的象集为 \(\{(b_6, c_6)\}\)</li>
+</ul>
+</li>
+<li>\(S\) 在 \((B, C)\) 上的投影为：
+<ul>
+<li>\(\{(b_1, c_2), (b_2, c_1), (b_2, c_3)\}\)</li>
+</ul>
+</li>
+<li>只有 \(a_1\) 的象集包含了 \(S\) 在 \((B, C)\) 属性组上的投影
+<ul>
+<li>所以 \(R \div S = \{a_1\}\)</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>仅出现在除数关系 \(S\) 中的属性 \(D\) 及其取值，与 \(R ÷ S\) 的计算过程和计算结果都无关</p>
+</blockquote>
+<ul>
+<li>除运算的引入是为了方便此类查询：“选修过所有课程的学生学号”</li>
+</ul>
+<div class="math-block">\[\pi_{sno, cno}(SC) \div \pi_{cno}(Course)\]</div>
+<p><strong>除运算的推导公式</strong></p>
+<ul>
+<li>设关系 \(R\) 的属性集为 \(\{ A_1 , \dots , A_n , B_1 , \dots , B_m \}\) ，关系 \(S\) 的属性集为 \(\{ B_1 , \dots , B_m \}\) ，则：</li>
+</ul>
+<div class="math-block">\[R \div S = \pi_{A_1,...,A_n}(R) - \pi_{A_1,...,A_n}((\pi_{A_1,...,A_n}(R) \times S) - R)\]</div>
+<p>① \(T_{max} := \pi_{A_1,...,A_n}(R)\)</p>
+<blockquote>
+<p>\(T_{max}\) 是最大可能的结果元组集合</p>
+</blockquote>
+<p>② \(R_{max} := T_{max} \times S\)</p>
+<blockquote>
+<p>\(R_{max}\) 与关系 \(R\) 是同类关系</p>
+</blockquote>
+<p>③ \(T_1 := R_{max} - R\)
+④ \(T_2 := \pi_{A_1,...,A_n}(T_1)\)</p>
+<blockquote>
+<p>\(T_2\) 是关系 \(T_{max}\) 中不满足除运算的结果要求的那些元组，即：对于关系 \(T_2\) 中的任一个元组 \(q\)，至少能在关系 \(S\) 中找到一个元组 \(s\)，使得由元组 \(q\) 和 \(s\) 所构成的元组 \((q,s)\) 不在关系 \(R\) 中出现</p>
+</blockquote>
+<p>⑤ \(R \div S := T_{max} - T_2\)</p>
+<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-5.webp" alt="alt text" loading="lazy"></p>
+<ul>
+<li>学生关系：S (学号 sno，姓名 sn，就读院系 sd，年龄 sa)</li>
+<li>课程关系：C (课程号 cno，课程名 cn，先修课程号 pno)</li>
+<li>选课关系：SC (学号 sno，课程号 cno，成绩 g)</li>
+</ul>
+<ol>
+<li><strong>查询至少修读过 ‘学生201400101修读过的一门课’ 的学生的姓名</strong></li>
+</ol>
+<p>① 查询学生 <code>201400101</code> 修读过的课程的课程号</p>
+<div class="math-block">\[T_1 := \pi_{cno}(\sigma_{sno='201400101'}(SC))\]</div>
+<p>② 查询选修过 \(T_1\) 中课程的学生的学号</p>
+<div class="math-block">\[T_2 := \pi_{sno}(SC \bowtie T_1)\]</div>
+<p>③ 查询 \(T_2\) 中学生的姓名（即本题的查询结果）</p>
+<div class="math-block">\[\pi_{sn}(S \bowtie T_2)\]</div>
+<p>④ 上述结果依次代入得</p>
+<div class="math-block">\[\pi_{sn}(S \bowtie (\pi_{sno}(SC \bowtie \pi_{cno}(\sigma_{sno='201400101'}(SC)))))\]</div>
+<ol start="2">
+<li><strong>查询修读过 ‘学生201400101修读过的所有课程’ 的学生的姓名</strong></li>
+</ol>
+<div class="math-block">\[\pi _ { s n } ( S \bowtie ( \pi _ { s n o , c n o } ( S C ) \div \pi _ { c n o } ( \sigma _ { s n o = ' 2 0 1 4 0 0 1 0 1 ' } ( S C ) ) ) )\]</div>
+<div class="callout callout-fail"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>错解</div><p>$\(\pi_{sn, cno}(S \bowtie SC) \div \pi_{cno}(\sigma_{sno='201400101'}(SC))\)$</p>
+<ul>
+<li>原因是 \(sn\) 不是主键，可能出现重复而丢失</li>
+<li><strong>使用差、除、交时，记得一定用上主键</strong></li>
+</ul>
+</div><p><strong>【思考】不使用‘除’运算</strong>，该查询可分步表示如下：</p>
+<p>① 学生 201400101 修读过的所有课程：</p>
+<div class="math-block">\[T_1 := \pi_{cno}(\sigma_{sno='201400101'}(SC))\]</div>
+<p>② 查询符合下述条件的学生的学号：<strong>存在 \(T_1\) 中的某些课程，该同学没有修读过</strong></p>
+<div class="math-block">\[T_2 := \pi_{sno}((\pi_{sno}(S) \times T_1) - \pi_{sno, cno}(SC))\]</div>
+<p>③ 查询修读过 ‘学生 201400101 修读过的所有课程’ 的学生的学号：</p>
+<div class="math-block">\[\pi_{sno}(SC) - T_2\]</div>
+<p>④ 查询上述学生的姓名：</p>
+<div class="math-block">\[\pi_{sn}(S \bowtie (\pi_{sno}(SC) - T_2))\]</div>
+<p>代入后可得到如下的查询表达式：</p>
+<div class="math-block">\[\pi_{sn}(S \bowtie (\pi_{sno}(SC) - \pi_{sno}((\pi_{sno}(S) \times \pi_{cno}(\sigma_{sno='201400101'}(SC))) - \pi_{sno, cno}(SC))))\]</div>
+<hr>
+<p><strong>【典中典】</strong> 查询满足下述条件的顾客的编号：</p>
+<p>① 购买过 ‘p01’ 号商品：</p>
+<div class="math-block">\[\pi_{cid}(\sigma_{pid='p01'}(O))\]</div>
+<p>② 没有购买过 ‘p01’ 号商品：</p>
+<div class="math-block">\[\pi_{cid}(C) - \pi_{cid}(\sigma_{pid='p01'}(O))\]</div>
+<p>③ 只购买过 ‘p01’ 号商品：</p>
+<div class="math-block">\[\pi_{cid}(O) - \pi_{cid}(\sigma_{pid \neq 'p01'}(O))\]</div>
+<p>④ 既购买过 ‘p01’ 也购买过 ‘p02’ 号商品：</p>
+<div class="math-block">\[\pi_{cid}(\sigma_{pid='p01'}(O)) \cap \pi_{cid}(\sigma_{pid='p02'}(O))\]</div>
+<p>⑤ 既没有购买过 ‘p01’，也没有购买过 ‘p02’ 号商品：</p>
+<div class="math-block">\[\pi_{cid}(C) - (\pi_{cid}(\sigma_{pid='p01'}(O)) \cup \pi_{cid}(\sigma_{pid='p02'}(O)))\]</div>
+<blockquote>
+<p>这里是用全集减去买过 ‘p01’ 或 ‘p02’ 号商品的顾客，当然也可以使用 ② 求出二者再取交</p>
+</blockquote>
+<p>⑥ 只购买过 ‘p01’ 和 ‘p02’ 号两种商品：</p>
+<div class="math-block">\[(\pi_{cid}(\sigma_{pid='p01'}(O)) \cap \pi_{cid}(\sigma_{pid='p02'}(O))) - \pi_{cid}(\sigma_{pid \neq 'p01' \land pid \neq 'p02'}(O))\]</div>
+<blockquote>
+<p>这里是用 ④ 既购买过 ‘p01’ 也购买过 ‘p02’ 号商品，减去购买过其他商品
+但注意此题不能使用和 ⑤ 类似的方法，否则用 ③ 得出的二者交集为空！</p>
+</blockquote>
+<p>⑦ 没有购买过商品：</p>
+<div class="math-block">\[\pi_{cid}(C) - \pi_{cid}(O)\]</div>
+<p>⑧ <strong>只购买过一次商品（只有一份订单）</strong>：</p>
+<ul>
+<li>令 \(R := O\)，该查询可表示如下：</li>
+</ul>
+<div class="math-block">\[\pi_{cid}(O) - \pi_{O.cid}(\sigma_{R.cid = O.cid \land R.ordno < O.ordno}(R \times O))\]</div>
+<blockquote>
+<p>对主键 <code>ordno</code> 比大小，只有该 <code>cid</code> 下 <code>ordno</code> 唯一（不可比较）时，减数才为空</p>
+</blockquote>
+<p>⑨ <strong>只购买过同一种商品</strong>：</p>
+<div class="math-block">\[\pi_{cid}(O) - \pi_{O.cid}(\sigma_{R.cid = O.cid \land R.pid \neq O.pid}(R \times O))\]</div>
+<blockquote>
+<p>对主键 <code>pid</code> 判不等，只有该 <code>cid</code> 下 <code>pid</code> 全部相等时，减数才为空</p>
+</blockquote>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：第2章 关系数据库</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-08 19:05:00</p>
+      <p><strong>更新于</strong>：2026-08-08 12:06:24</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/关系数据库.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">第2章 关系数据库</div>
+      <ul><li class="toc-l2"><a href="#1-关系数据结构及形式化定义">1 关系数据结构及形式化定义</a></li><li class="toc-l3"><a href="#1-1-关系">1.1 关系</a></li><li class="toc-l3"><a href="#1-2-关系模式">1.2 关系模式</a></li><li class="toc-l2"><a href="#2-关系操作">2 关系操作</a></li><li class="toc-l2"><a href="#3-关系的完整性">3 关系的完整性</a></li><li class="toc-l3"><a href="#3-1-实体完整性">3.1 实体完整性</a></li><li class="toc-l3"><a href="#3-2-参照完整性">3.2 参照完整性</a></li><li class="toc-l3"><a href="#3-3-用户定义的完整性">3.3 用户定义的完整性</a></li><li class="toc-l2"><a href="#4-关系代数">4 关系代数</a></li><li class="toc-l3"><a href="#4-1-关系代数概述">4.1 关系代数概述</a></li><li class="toc-l3"><a href="#4-2-关系代数的基本运算">4.2 关系代数的基本运算</a></li><li class="toc-l3"><a href="#4-3-关系代数扩充运算">4.3 关系代数扩充运算</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/数据库绪论.html">&lt; 第1章 数据库绪论</a>
+      <a class="pager-next" href="/posts/关系数据库标准语言SQL.html">第3章 关系数据库标准语言SQL &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
+<script src="/assets/js/main.js?v=1786162127971" defer></script>
+<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+</body>
+</html>
