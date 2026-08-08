@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786197438860">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786197438860" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786197438860">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -226,7 +226,7 @@
 </li>
 </ul>
 <div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>以上 4 步让每个路由器获得拓扑和边代价</div></div><h4 id="1-3-5-通过-dijkstra-算法找出最短路径">1.3.5 通过 Dijkstra 算法找出最短路径</h4>
-<p><a href="https://zanytriumph.github.io/2025/12/01/%E5%8D%95%E6%BA%90%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/#Dijkstra-%E7%AE%97%E6%B3%95">Dijkstra算法</a></p>
+<p><a href="https://zanytriumph.github.io/2025/12/01/%E5%8D%95%E6%BA%90%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/#Dijkstra-%E7%AE%97%E6%B3%95" target="_blank" rel="noopener noreferrer">Dijkstra算法</a></p>
 <ul>
 <li>路由器获得各站点 LS 分组和整个网络的拓扑</li>
 <li>通过 Dijkstra 算法计算出到其它各路由器的最短路径 (汇集树)</li>
@@ -245,7 +245,7 @@
 <li>\(N'\): 当前已经知道最优路径的的节点集合</li>
 </ul>
 <p>节点标记: 每一个节点使用 \((D(v),p(v))\) 如：\((3,B)\) 标记</p>
-<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>全部节点都标记后，根据前序节点就可以得到汇集树</div></div><p><a href="C:/Users/36076/Desktop/%E8%AE%A1%E7%BD%91/5-%E7%BD%91%E7%BB%9C%E5%B1%82(%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2)-1.pdf">具体的例子：ppt 12 页开始看</a></p>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>全部节点都标记后，根据前序节点就可以得到汇集树</div></div><p><a href="C:/Users/36076/Desktop/%E8%AE%A1%E7%BD%91/5-%E7%BD%91%E7%BB%9C%E5%B1%82(%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2)-1.pdf" target="_blank" rel="noopener noreferrer">具体的例子：ppt 12 页开始看</a></p>
 <ol>
 <li>
 <p><strong>算法复杂度（计算层面）</strong></p>
@@ -272,7 +272,7 @@
 </ul>
 <p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-213.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="1-4-distance-vector">1.4 distance vector</h3>
-<p><a href="https://zanytriumph.github.io/2025/12/01/%E5%8D%95%E6%BA%90%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/#Bellman-Ford-%E7%AE%97%E6%B3%95">Bellman-Ford算法</a></p>
+<p><a href="https://zanytriumph.github.io/2025/12/01/%E5%8D%95%E6%BA%90%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/#Bellman-Ford-%E7%AE%97%E6%B3%95" target="_blank" rel="noopener noreferrer">Bellman-Ford算法</a></p>
 <p>距离矢量路由选择 (distance vector routing)</p>
 <ul>
 <li><mark>动态路由算法之一</mark></li>
@@ -316,7 +316,7 @@
 <li>然后邻居们在有必要的时候通知他们的邻居</li>
 <li>没有收到通知，不做动作</li>
 </ul>
-<p><a href="C:/Users/36076/Desktop/%E8%AE%A1%E7%BD%91/5-%E7%BD%91%E7%BB%9C%E5%B1%82(%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2)-1.pdf">具体的例子：ppt 32 页开始看</a></p>
+<p><a href="C:/Users/36076/Desktop/%E8%AE%A1%E7%BD%91/5-%E7%BD%91%E7%BB%9C%E5%B1%82(%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2)-1.pdf" target="_blank" rel="noopener noreferrer">具体的例子：ppt 32 页开始看</a></p>
 <p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-117.webp" alt="alt text" loading="lazy" class="center-img">{width=800}</p>
 <div class="callout callout-note"><ul>
 <li>第一列：在最开始，每个节点只知道自己到直连邻居的链路代价</li>
@@ -1383,12 +1383,12 @@ A: 无法操作（基于目标的转发，采用 LS, DV 路由）</p>
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
-<script src="/assets/js/main.js?v=1786177585384" defer></script>
-<script src="/assets/js/search.js?v=1786177585384" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786197438860"></script>
+<script src="/assets/js/main.js?v=1786197438860" defer></script>
+<script src="/assets/js/search.js?v=1786197438860" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786197438860"></script>
 </body>
 </html>

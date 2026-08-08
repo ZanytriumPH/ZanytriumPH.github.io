@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786197438860">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786197438860" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786197438860">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -100,7 +100,7 @@
         </header>
         <div class="post-body markdown-body"><h2 id="0-1-背包问题">0-1 背包问题</h2>
 <p>给定一个容量为 \(V\) 的背包和 \(n\) 个物品，每个物品有一个体积 \(w_i\) 和价值 \(val_i\)，求在不超过背包容量的情况下，背包内物品的最大价值</p>
-<p><a href="https://www.luogu.com.cn/problem/P1048">标准 0-1 背包问题</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P1048" target="_blank" rel="noopener noreferrer">标准 0-1 背包问题</a></p>
 <h3 id="状态转移方程">状态转移方程</h3>
 <p>\(dp[i][j]\) 表示前 \(i\) 个物品在容量不超过 \(j\) 的情况下，背包内物品的最大价值</p>
 <div class="math-block">\[dp[i][j] = \max(dp[i-1][j], dp[i-1][j-w_i] + val_i)\]</div>
@@ -248,7 +248,7 @@
 }
 </code></pre>
 <h3 id="方案数问题">方案数问题</h3>
-<p><a href="https://www.luogu.com.cn/problem/P1164">凑出给定值的方案数</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P1164" target="_blank" rel="noopener noreferrer">凑出给定值的方案数</a></p>
 <p>\(dp[i][j]\)：表示使用前 \(i\) 种纸币凑出金额 \(j\) 的方案总数</p>
 <p>对于第 \(i\) 种纸币（面额为 \(a_i\)），我们要凑出金额 \(j\)，方案可以分为两大类：</p>
 <ul>
@@ -327,7 +327,7 @@
 <p>当然，如果只是求能不能凑出而不是方案数，应该简单的做法就是照搬上面再返回 <code>dp &gt; 0</code>，但这种情况下 dp 数组中的值可能极大，使用 <strong>或</strong> 运算取代加法即可</p>
 </blockquote>
 <h2 id="完全背包问题">完全背包问题</h2>
-<p><a href="https://www.luogu.com.cn/problem/P1616">标准完全背包问题</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P1616" target="_blank" rel="noopener noreferrer">标准完全背包问题</a></p>
 <p>与 0-1 背包问题类似，但是每个物品可以取无限次</p>
 <h3 id="状态转移方程-2">状态转移方程</h3>
 <p>\(dp[i][j]\) 表示前 \(i\) 个物品在容量不超过 \(j\) 的情况下，背包内物品的最大价值</p>
@@ -482,7 +482,7 @@
 }
 </code></pre>
 <h3 id="最小化代价问题">最小化代价问题</h3>
-<p><a href="https://www.luogu.com.cn/problem/P2834">凑出给定值的最小张数</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P2834" target="_blank" rel="noopener noreferrer">凑出给定值的最小张数</a></p>
 <p>\(dp[i][j]\)：表示用前 \(i\) 种纸币凑出金额 \(j\) 所需的最少张数</p>
 <p>对于第 \(i\) 种纸币（面额为 \(a_i\)），在凑金额 \(j\) 时，我们有两种选择：</p>
 <ul>
@@ -576,7 +576,7 @@
 </ul>
 <hr>
 <h3 id="外层循环容量-内层循环物品-求排列">外层循环容量，内层循环物品（求排列）</h3>
-<p><a href="https://www.luogu.com.cn/problem/P2840">完全背包排列方案数</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P2840" target="_blank" rel="noopener noreferrer">完全背包排列方案数</a></p>
 <p>如果你把循环顺序反过来：</p>
 <pre><code class="language-cpp"><span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> j = <span class="hljs-number">1</span>; j &lt;= w; j++) { <span class="hljs-comment">// 外层：遍历金额</span>
     <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i++) { <span class="hljs-comment">// 内层：遍历每一种纸币</span>
@@ -673,12 +673,12 @@
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
-<script src="/assets/js/main.js?v=1786177585384" defer></script>
-<script src="/assets/js/search.js?v=1786177585384" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786197438860"></script>
+<script src="/assets/js/main.js?v=1786197438860" defer></script>
+<script src="/assets/js/search.js?v=1786197438860" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786197438860"></script>
 </body>
 </html>

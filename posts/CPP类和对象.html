@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786197438860">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786197438860" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786197438860">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -2443,7 +2443,7 @@ A <span class="hljs-keyword">operator</span> +(<span class="hljs-type">const</sp
 </code></pre>
 <p>使用上面定义的这个类，将 <code>A *p = new A;</code> 改为 <code>AWrapper  p(new A);</code> 以创建一个栈上的对象，那么即可不用手动写 delete，无论什么作用域，当 p 超出作用域时，会自动调用析构函数释放内存，确保一次释放</p>
 <p>但也有局限性，必须要符合编译器控制的生命周期</p>
-<p>当然，也可以使用真正的 <a href="../STL/5%20malloc.md">智能指针</a></p>
+<p>当然，也可以使用真正的 <a href="../STL/5%20malloc.md" target="_blank" rel="noopener noreferrer">智能指针</a></p>
 <h5 id="补充-raii">补充：RAII</h5>
 <p>Resource Acquisition Is Initialization（<strong>资源获取即初始化</strong>），是 C++ 管理资源的核心机制，其核心思想是 <mark><strong>将资源的生命周期与对象的生命周期绑定</strong></mark> —— 通过<mark>对象的创建（初始化）获取资源，通过对象的销毁（析构）自动释放资源</mark>，从而避免资源泄漏、简化资源管理</p>
 <p>原理：C++ 中栈上局部对象的生命周期是确定的：</p>
@@ -4630,12 +4630,12 @@ NewsLetter::<span class="hljs-built_in">NewsLetter</span>( <span class="hljs-typ
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
-<script src="/assets/js/main.js?v=1786177585384" defer></script>
-<script src="/assets/js/search.js?v=1786177585384" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786197438860"></script>
+<script src="/assets/js/main.js?v=1786197438860" defer></script>
+<script src="/assets/js/search.js?v=1786197438860" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786197438860"></script>
 </body>
 </html>

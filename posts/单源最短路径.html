@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786197438860">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786197438860" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786197438860">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -153,7 +153,7 @@
     <span class="hljs-keyword">return</span> path;
 }
 </code></pre>
-<p><a href="https://www.luogu.com.cn/problem/P5908">一道不完全是但有点相关的题目</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P5908" target="_blank" rel="noopener noreferrer">一道不完全是但有点相关的题目</a></p>
 <h2 id="正权图">正权图</h2>
 <p>权重的引入需要新的数据结构进行存储，这里可以修改邻接表，将边的信息从 <code>v</code> 改为 <code>pair&lt;int, int&gt;</code>，其中第一个元素为 <code>v</code>，第二个元素为 <code>w</code>，表示从 <code>u</code> 到 <code>v</code> 的权重为 <code>w</code></p>
 <pre><code class="language-cpp"><span class="hljs-keyword">typedef</span> pair&lt;<span class="hljs-type">int</span>, <span class="hljs-type">int</span>&gt; pii; <span class="hljs-comment">// 简化</span>
@@ -166,7 +166,7 @@ adj[u].<span class="hljs-built_in">emplace_back</span>(v,w);
 <p>当引入权重之后，BFS 就不再适用了，而当权重为正时可以使用 <strong>Dijkstra</strong> 算法</p>
 <h3 id="dijkstra-算法">Dijkstra 算法</h3>
 <p>Dijkstra 算法的基本思想是贪心，每次选择当前距离源点最近且未被访问的顶点，以该顶点为中介更新其邻接顶点到源点的距离，重复此过程直到所有顶点都被访问</p>
-<p><a href="https://www.luogu.com.cn/problem/P4779">模板题链接</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P4779" target="_blank" rel="noopener noreferrer">模板题链接</a></p>
 <h4 id="朴素-dijkstra">朴素 Dijkstra</h4>
 <pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">native_dijkstra</span><span class="hljs-params">(<span class="hljs-type">const</span> vector&lt;vector&lt;pii&gt;&gt; &amp;adj, vector&lt;<span class="hljs-type">int</span>&gt; &amp;dist)</span>
 </span>{
@@ -277,7 +277,7 @@ adj[u].<span class="hljs-built_in">emplace_back</span>(v,w);
 <p>在一个没有负权环的图中，任意两点间的最短路径不可能包含回路。因此，一条最短路径最多包含 \(n\) 个顶点，即最多包含 \(n-1\) 条边</p>
 <p>重复 “对所有边进行松弛” 这一操作 \(n-1\) 次，足以覆盖所有可能的最短路径：第 1 轮循环结束后，算法保证找到了所有“从源点出发，最多经过 1 条边”能到达的节点的最短路径。第 \(k\) 轮循环结束后，保证找到了 “最多经过 \(k\) 条边” 的最短路径</p>
 <p>另外的，Bellman-Ford 的核心操作是 “遍历所有边”，而邻接表的设计目标是 “按顶点快速找其关联的边”，两者的需求不匹配，故实现上一般直接使用边列表</p>
-<p><a href="https://www.luogu.com.cn/problem/P3371">模板题链接</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P3371" target="_blank" rel="noopener noreferrer">模板题链接</a></p>
 <pre><code class="language-cpp"><span class="hljs-keyword">constexpr</span> <span class="hljs-type">long</span> <span class="hljs-type">long</span> INF = <span class="hljs-number">1e18</span>; <span class="hljs-comment">// 不到顶可以防止溢出</span>
 <span class="hljs-keyword">struct</span> <span class="hljs-title class_">Edge</span> { <span class="hljs-type">int</span> u, v, w; };
 <span class="hljs-type">int</span> n, m, s;
@@ -411,7 +411,7 @@ adj[u].<span class="hljs-built_in">emplace_back</span>(v,w);
 <p>建议： 只要没有负权边，永远优先用 Dijkstra。只有在必须处理负权边或判负环时，才用 SPFA</p>
 <h2 id="特例-有向无环负权图">特例：有向无环负权图</h2>
 <p>在 DAG 中，每条路径，也就是每条最短路径，都是拓扑序中的子序列，故可以按照拓扑序进行动态规划</p>
-<p><a href="https://www.luogu.com.cn/problem/P1807">最短路题目没找到，最长路倒是有。也很自然地想到，从最短路到最长路只需将初始化 INF 改从 -INF，松弛操作的判断符号改变（即取 max）即可</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P1807" target="_blank" rel="noopener noreferrer">最短路题目没找到，最长路倒是有。也很自然地想到，从最短路到最长路只需将初始化 INF 改从 -INF，松弛操作的判断符号改变（即取 max）即可</a></p>
 <h3 id="拓扑排序-动态规划">拓扑排序 + 动态规划</h3>
 <pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">DAGSSSP</span><span class="hljs-params">(<span class="hljs-type">int</span> s, vector&lt;<span class="hljs-type">int</span>&gt; in, vector&lt;<span class="hljs-type">int</span>&gt; &amp;dist, vector&lt;vector&lt;tuple&lt;<span class="hljs-type">int</span>,<span class="hljs-type">int</span>&gt;&gt;&gt; &amp;adj)</span>
 </span>{
@@ -445,9 +445,9 @@ adj[u].<span class="hljs-built_in">emplace_back</span>(v,w);
 <li>时间复杂度：\(O(n+m)\)</li>
 </ul>
 <h2 id="其他">其他</h2>
-<p><a href="https://www.luogu.com.cn/problem/P1144">最短路计数</a></p>
-<p><a href="https://www.luogu.com.cn/problem/P2661">拓扑判环</a></p>
-<p><a href="https://www.luogu.com.cn/problem/P3387">缩点：Tarjan + topoSort + DP</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P1144" target="_blank" rel="noopener noreferrer">最短路计数</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P2661" target="_blank" rel="noopener noreferrer">拓扑判环</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P3387" target="_blank" rel="noopener noreferrer">缩点：Tarjan + topoSort + DP</a></p>
 </div>
         
     <div class="post-copyright-sep"></div>
@@ -477,12 +477,12 @@ adj[u].<span class="hljs-built_in">emplace_back</span>(v,w);
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
-<script src="/assets/js/main.js?v=1786177585384" defer></script>
-<script src="/assets/js/search.js?v=1786177585384" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786197438860"></script>
+<script src="/assets/js/main.js?v=1786197438860" defer></script>
+<script src="/assets/js/search.js?v=1786197438860" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786197438860"></script>
 </body>
 </html>

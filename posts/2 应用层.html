@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786197438860">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786197438860" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786197438860">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -577,7 +577,7 @@
 <li>下载多个对象需要多个TCP连接</li>
 <li>HTTP/1.0 使用非持久连接</li>
 </ul>
-<p>假设用户输入URL：<a href="http://www.someSchool.edu/someDept/home.index">www.someSchool.edu/someDept/home.index</a></p>
+<p>假设用户输入URL：<a href="http://www.someSchool.edu/someDept/home.index" target="_blank" rel="noopener noreferrer">www.someSchool.edu/someDept/home.index</a></p>
 <p>(包含文本和10个就jpeg图像的引用)</p>
 <p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/%E5%9B%BE%E7%89%873.webp" alt="text" loading="lazy" class="center-img"></p>
 <p>对10jpeg对象，重复以上步骤</p>
@@ -981,7 +981,7 @@ data data data data data ...
 </ul>
 <p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-175.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ol>
-<li>Alice 使用用户代理撰写邮件并发送给 <a href="mailto:bob@someschool.edu">bob@someschool.edu</a></li>
+<li>Alice 使用用户代理撰写邮件并发送给 <a href="mailto:bob@someschool.edu" target="_blank" rel="noopener noreferrer">bob@someschool.edu</a></li>
 <li>Alice 的用户代理将邮件发送到她的邮件服务器，邮件放在报文队列中</li>
 <li>SMTP 的客户端打开到 Bob 邮件服务器的 TCP 连接</li>
 <li>SMTP 客户端通过 TCP 连接发送 Alice 的邮件</li>
@@ -1135,8 +1135,8 @@ data data data data data ...
 <ul>
 <li>首部行：如
 <ul>
-<li>To: <a href="mailto:Alice@sina.com">Alice@sina.com</a></li>
-<li>From: <a href="mailto:Bob@gmail.com">Bob@gmail.com</a></li>
+<li>To: <a href="mailto:Alice@sina.com" target="_blank" rel="noopener noreferrer">Alice@sina.com</a></li>
+<li>From: <a href="mailto:Bob@gmail.com" target="_blank" rel="noopener noreferrer">Bob@gmail.com</a></li>
 <li>Subject: Dinner tonight</li>
 <li><em>与 SMTP 命令不同</em></li>
 </ul>
@@ -1265,23 +1265,23 @@ data data data data data ...
 </ul>
 </li>
 </ul>
-<div class="callout callout-note"><p>假设你正在为一个小游戏项目搭建网络架构，并且你注册了一个域的域名叫 <a href="http://mygame.com">mygame.com</a>。</p>
+<div class="callout callout-note"><p>假设你正在为一个小游戏项目搭建网络架构，并且你注册了一个域的域名叫 <a href="http://mygame.com" target="_blank" rel="noopener noreferrer">mygame.com</a>。</p>
 <ul>
-<li>域的使用：<a href="http://mygame.com">mygame.com</a> 是你拥有的整个资产的名称。</li>
+<li>域的使用：<a href="http://mygame.com" target="_blank" rel="noopener noreferrer">mygame.com</a> 是你拥有的整个资产的名称。</li>
 <li>主机的分配：
 <ul>
-<li>你配置了一台运行着 Spring Boot 后端程序的 Linux 虚拟机，你可以给这台主机分配一个域名：<a href="http://api.mygame.com">api.mygame.com</a>。</li>
-<li>你可能还有另一台专门运行 MySQL 的数据库服务器，你可以给这台主机分配域名：<a href="http://db.mygame.com">db.mygame.com</a>。</li>
-<li>前端 React 页面所在的 Web 服务器，主机域名可以是 <a href="http://www.mygame.com">www.mygame.com</a>。</li>
+<li>你配置了一台运行着 Spring Boot 后端程序的 Linux 虚拟机，你可以给这台主机分配一个域名：<a href="http://api.mygame.com" target="_blank" rel="noopener noreferrer">api.mygame.com</a>。</li>
+<li>你可能还有另一台专门运行 MySQL 的数据库服务器，你可以给这台主机分配域名：<a href="http://db.mygame.com" target="_blank" rel="noopener noreferrer">db.mygame.com</a>。</li>
+<li>前端 React 页面所在的 Web 服务器，主机域名可以是 <a href="http://www.mygame.com" target="_blank" rel="noopener noreferrer">www.mygame.com</a>。</li>
 </ul>
 </li>
 </ul>
-<p>在这个例子中，api、db、www 都是特定主机的名称，而它们共同归属于 <a href="http://mygame.com">mygame.com</a> 这个域。当客户端发起网络请求时，DNS 最终会将这些“主机的域名”解析为你那些虚拟机的具体 IP 地址。</p>
+<p>在这个例子中，api、db、www 都是特定主机的名称，而它们共同归属于 <a href="http://mygame.com" target="_blank" rel="noopener noreferrer">mygame.com</a> 这个域。当客户端发起网络请求时，DNS 最终会将这些“主机的域名”解析为你那些虚拟机的具体 IP 地址。</p>
 </div><h4 id="域名的管理">域名的管理</h4>
 <ul>
 <li>一个域管理其下的子域
-.jp 被划分为 <a href="http://ac.jp">ac.jp</a>, <a href="http://co.jp">co.jp</a>
-.cn 被划分为 <a href="http://edu.cn">edu.cn</a>, <a href="http://com.cn">com.cn</a></li>
+.jp 被划分为 <a href="http://ac.jp" target="_blank" rel="noopener noreferrer">ac.jp</a>, <a href="http://co.jp" target="_blank" rel="noopener noreferrer">co.jp</a>
+.cn 被划分为 <a href="http://edu.cn" target="_blank" rel="noopener noreferrer">edu.cn</a>, <a href="http://com.cn" target="_blank" rel="noopener noreferrer">com.cn</a></li>
 <li>创建一个新的域，必须征得它所属域的同意</li>
 </ul>
 <h4 id="域与物理网络无关">域与物理网络无关</h4>
@@ -1429,11 +1429,11 @@ data data data data data ...
 </ul>
 <p>例子：在 com 域中建立一个 “Network Utopia”</p>
 <ul>
-<li>到注册登记机构注册域名 <a href="http://networkutopia.com">networkutopia.com</a>
+<li>到注册登记机构注册域名 <a href="http://networkutopia.com" target="_blank" rel="noopener noreferrer">networkutopia.com</a>
 <ul>
 <li>需要向该机构提供权威DNS服务器（基本的、和辅助的）的名字和IP地址</li>
-<li>登记机构在com TLD服务器中插入两条RR记录: (<a href="http://networkutopia.com">networkutopia.com</a>, <a href="http://dns1.networkutopia.com">dns1.networkutopia.com</a>, NS)
-(<a href="http://dns1.networkutopia.com">dns1.networkutopia.com</a>, 212.212.212.1, A)</li>
+<li>登记机构在com TLD服务器中插入两条RR记录: (<a href="http://networkutopia.com" target="_blank" rel="noopener noreferrer">networkutopia.com</a>, <a href="http://dns1.networkutopia.com" target="_blank" rel="noopener noreferrer">dns1.networkutopia.com</a>, NS)
+(<a href="http://dns1.networkutopia.com" target="_blank" rel="noopener noreferrer">dns1.networkutopia.com</a>, 212.212.212.1, A)</li>
 </ul>
 </li>
 <li>在networkutopia.com的权威服务器中确保有
@@ -1613,7 +1613,7 @@ data data data data data ...
 </li>
 <li>URL 重写
 <ul>
-<li>将“<a href="http://www.sina.com/sports/tennis.mov%E2%80%9D%E6%9B%BF%E6%8D%A2%E4%B8%BA%E2%80%9Chttp://www.cdn.com/www.sina.com/sports/tennis.mov%E2%80%9D">http://www.sina.com/sports/tennis.mov”替换为“http://www.cdn.com/www.sina.com/sports/tennis.mov”</a></li>
+<li>将“<a href="http://www.sina.com/sports/tennis.mov%E2%80%9D%E6%9B%BF%E6%8D%A2%E4%B8%BA%E2%80%9Chttp://www.cdn.com/www.sina.com/sports/tennis.mov%E2%80%9D" target="_blank" rel="noopener noreferrer">http://www.sina.com/sports/tennis.mov”替换为“http://www.cdn.com/www.sina.com/sports/tennis.mov”</a></li>
 </ul>
 </li>
 <li>重定向策略
@@ -1673,12 +1673,12 @@ data data data data data ...
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
-<script src="/assets/js/main.js?v=1786177585384" defer></script>
-<script src="/assets/js/search.js?v=1786177585384" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786197438860"></script>
+<script src="/assets/js/main.js?v=1786197438860" defer></script>
+<script src="/assets/js/search.js?v=1786197438860" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786197438860"></script>
 </body>
 </html>
