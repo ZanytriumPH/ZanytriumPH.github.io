@@ -28,7 +28,7 @@ function esc(s) {
 }
 
 /** 布局骨架：导航 + 内容 + 页脚 + 暗色模式初始化（防闪烁） */
-function layout({ config, url, title, description, body, isPost = false, isHome = false, current = '', heroBg = false, wide = false, heroBgHidden = false }) {
+function layout({ config, url, title, description, body, isPost = false, isHome = false, current = '', heroBg = false, wide = false, heroBgHidden = false, footerStats = '' }) {
   // 导航项：current 命中时加 active 类，样式为标签下方横线；
   // 带 dropdown 的项点击展开子菜单（关于 → 我 / GitHub / 友链）
   const navItems = [
@@ -157,7 +157,7 @@ ${nav}
 ${body}
 </main>
 <footer class="site-footer">
-  <div class="footer-inner">${esc(config.footer)}</div>
+  <div class="footer-inner">${esc(config.footer)}${footerStats}</div>
 </footer>
 ${isPost ? `<script defer src="${versioned(url('assets/vendor/mermaid/mermaid.min.js'))}"></script>` : ''}
 <script src="${versioned(url('assets/js/main.js'))}" defer></script>
@@ -229,7 +229,6 @@ function indexPage({ config, url, posts, page = 1, pageSize = 10, totalPages = 1
     for (const t of p.tags) tagCounts[t] = (tagCounts[t] || 0) + 1;
     for (const c of p.categories) catCounts[c] = (catCounts[c] || 0) + 1;
   }
-  const gh = config.social && config.social.github;
   const totalWords = posts.reduce((s, p) => s + (p.words || 0), 0);
   // 访问人数 / 总访问量由不蒜子 busuanzi 统计（config.busuanzi.enabled 关闭时显示 0）；
   // siteUvBase / sitePvBase 为旧博客累计基数：初始即显示基数，实时值由 main.js 累加上去
@@ -238,10 +237,21 @@ function indexPage({ config, url, posts, page = 1, pageSize = 10, totalPages = 1
   const pvBase = (config.busuanzi && config.busuanzi.sitePvBase) || 0;
   const statCard = `
     <div class="side-card side-stats-card">
-      <div class="stat-row"><span class="stat-label">文章总字数</span><span class="stat-value">${totalWords.toLocaleString('zh-CN')}</span></div>
-      <div class="stat-row"><span class="stat-label">访问人数</span><span class="stat-value">${bsz ? `<span id="busuanzi_value_site_uv" data-base="${uvBase}"${uvBase ? ' class="busuanzi-hide"' : ''}>${uvBase}</span>` : '0'}</span></div>
-      <div class="stat-row"><span class="stat-label">总访问量</span><span class="stat-value">${bsz ? `<span id="busuanzi_value_site_pv" data-base="${pvBase}"${pvBase ? ' class="busuanzi-hide"' : ''}>${pvBase}</span>` : '0'}</span></div>
-      <div class="stat-row"><span class="stat-label">已运行天数</span><span class="stat-value uptime" id="uptime" data-start="${esc(config.siteStart || '')}">--</span></div>
+      <div class="stat-announcement">
+        <div class="announcement-title">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <span>公告</span>
+        </div>
+        <p class="announcement-text">1. 首次进入本站时图片可能加载较慢。<br>2. 目前 Edge 对本站的支持较不友好，推荐使用 Chrome 或夸克等进行访问。</p>
+      </div>
+    </div>`;
+  // 统计数据行：从统计卡片移到页脚展示（首页专属；id 与 main.js / busuanzi 脚本绑定，全站每页唯一）
+  const footerStats = `
+    <div class="footer-stats">
+      <span class="footer-stat">文章总字数 <b>${totalWords.toLocaleString('zh-CN')}</b></span>
+      <span class="footer-stat">访问人数 <b>${bsz ? `<span id="busuanzi_value_site_uv" data-base="${uvBase}"${uvBase ? ' class="busuanzi-hide"' : ''}>${uvBase}</span>` : '0'}</b></span>
+      <span class="footer-stat">总访问量 <b>${bsz ? `<span id="busuanzi_value_site_pv" data-base="${pvBase}"${pvBase ? ' class="busuanzi-hide"' : ''}>${pvBase}</span>` : '0'}</b></span>
+      <span class="footer-stat">已运行天数 <b class="uptime" id="uptime" data-start="${esc(config.siteStart || '')}">--</b></span>
     </div>`;
   const stats = `
     <div class="side-stats">
@@ -265,7 +275,6 @@ function indexPage({ config, url, posts, page = 1, pageSize = 10, totalPages = 1
         <div class="side-name">${esc(config.author)}</div>
         <p class="side-announcement">${esc(announcement)}</p>
         ${stats}
-        ${gh ? `<a class="side-link" href="${esc(gh)}" target="_blank" rel="noopener">GitHub ↗</a>` : ''}
       </div>
       ${statCard}
     </aside>`;
@@ -293,7 +302,7 @@ function indexPage({ config, url, posts, page = 1, pageSize = 10, totalPages = 1
       </div>
     </div>`;
   const title = page === 1 ? config.siteName : `第 ${page} 页 · ${config.siteName}`;
-  return layout({ config, url, title, description: config.description, body, isHome: true, current: 'home', heroBg: true });
+  return layout({ config, url, title, description: config.description, body, isHome: true, current: 'home', heroBg: true, footerStats });
 }
 
 /** 文章页：标题、元信息、TOC、正文、上下篇、评论 */
