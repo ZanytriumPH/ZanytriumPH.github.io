@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -160,13 +160,13 @@
 <li>控制平面与数据平面紧耦合</li>
 <li>每个路由器中各自的路由算法组件在控制平面中相互作用</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-100.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-100.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="sdn方式">SDN方式</h4>
 <ul>
 <li>一个不同的（通常是远程的）控制器与本地控制代理（CAs）交互</li>
 <li>远程控制器计算并下发转发表到路由器</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-80.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-80.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>分组交换机根据流表对分组做匹配，再做相应的动作，即将不同的逻辑行为编程到网络设备中</li>
 </ul>
@@ -253,12 +253,12 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-81.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-81.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>实际上不区分输入端口和输出端口，端口是双向的</li>
 </ul>
 <h3 id="2-1-输入端口">2.1 输入端口</h3>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-82.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-82.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>为什么输入端口需要缓存（队列）？</strong></p>
 <ul>
 <li><mark>当交换结构的速率小于输入端口的汇聚速率时，在输入端口可能要排队</mark>
@@ -268,7 +268,7 @@
 </li>
 <li>Head-of-the-Line (HOL) blocking: 排在队头的数据报阻止了队列中其他数据报向前移动</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-83.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-83.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>输出端口竞争
 <ul>
@@ -329,7 +329,7 @@
 <li>在遍历过程中，如果在第3层有一个匹配（如 <code>11*</code>），记录端口；如果在第5层还有一个更长的匹配（如 <code>11001*</code>），则覆盖之前的记录。</li>
 <li>最终到达叶子节点或无法继续时，使用的端口就是最后记录的那个。</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-199.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-199.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="总结">总结</h4>
 <p>这部分内容描述了路由器输入端口的“大脑”工作原理：</p>
 <ol>
@@ -349,7 +349,7 @@
 </li>
 <li>3 种典型的交换机构</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-84.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-84.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="通过内存交换">通过内存交换</h4>
 <p>第一代路由器（软件的方式）:</p>
 <ul>
@@ -371,7 +371,7 @@
 <li>高级设计：将数据报分片为固定长度的信元，通过交换网络交换</li>
 </ul>
 <h3 id="2-3-输出端口">2.3 输出端口</h3>
-<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>输出端口功能</div><p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-200.webp" alt="alt text" loading="lazy"></p>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>输出端口功能</div><p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-200.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li><strong>分组分类</strong>：将分组映射到流</li>
 <li><strong>缓存管理</strong>：决定何时丢弃哪个分组</li>
@@ -398,7 +398,7 @@
 </ul>
 </li>
 </ul>
-</div><p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-85.webp" alt="alt text" loading="lazy"></p>
+</div><p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-85.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="2-3-1-缓存管理">2.3.1 缓存管理</h4>
 <ul>
 <li>当数据报从交换结构的到达速度比传输速率快就需要输出端口缓存
@@ -408,7 +408,7 @@
 </li>
 <li>由<strong>调度规则</strong>选择排队的数据报进行传输</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-86.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-86.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>假设交换速率 \(R_{switch}\) 是 \(R_{line}\) 的 N 倍（N：输入端口的数量）</li>
 <li>当多个输入端口同时向输出端口发送时，缓冲该分组（当通过交换网络到达的速率超过输出速率则缓存）</li>
@@ -475,27 +475,27 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-201.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-201.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>Round Robin (RR) scheduling</strong>:</p>
 <ul>
 <li>多类</li>
 <li>循环扫描不同类型的队列，发送完一类的一个分组，再发送下一个类的一个分组，循环所有类</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-202.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-202.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>Weighted Fair Queuing (WFQ)</strong>:</p>
 <ul>
 <li>一般化的 Round Robin</li>
 <li>在一段时间内，每个队列得到的服务时间是：\(W_i / (\sum(W_i)) \times t\)，和权重成正比</li>
 <li>每个类在每一个循环中获得不同权重的服务量</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-203.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-203.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h2 id="3-ip-internet-protocol">3 IP: Internet Protocol</h2>
 <h3 id="3-1-ip-数据报格式">3.1 IP 数据报格式</h3>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-87.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-87.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>type of service: 指定数据报的优先级和服务质量要求，实则已弃用</li>
 </ul>
-<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>IPv4 头部</div><p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-204.webp" alt="alt text" loading="lazy"></p>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>IPv4 头部</div><p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-204.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>版本号 (4 bits)
 <ul>
@@ -581,7 +581,7 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-88.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-88.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>例子</p>
 <ul>
 <li>4000 字节数据报
@@ -657,9 +657,9 @@
 </ul>
 </li>
 </ul>
-<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>下图有 6 个子网</div></div><p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-89.webp" alt="alt text" loading="lazy"></p>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>下图有 6 个子网</div></div><p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-89.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="ip-地址分类">IP 地址分类</h4>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-205.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-205.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>A 类地址：
 <ul>
@@ -680,7 +680,7 @@
 </li>
 <li>特殊 IP 地址</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-91.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-91.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>回路地址：TCP/UDP 发下来的分组到 IP 会反转回去</li>
 </ul>
@@ -719,7 +719,7 @@
 <li>子网部分可以在任意的位置</li>
 <li><mark>地址格式: a.b.c.d/x，其中 <strong>x 是 子网号的长度</strong></mark></li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-92.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-92.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>子网掩码：11111111 11111111 11111110 00000000</li>
 </ul>
@@ -817,8 +817,8 @@
 <li>主机请求 IP 地址：发送 <code>DHCP request</code> 报文</li>
 <li>DHCP 服务器发送地址：<code>DHCP ack</code> 报文</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-206.webp" alt="alt text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-94.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-206.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-94.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>DHCP 返回</strong>:</p>
 <ul>
 <li><mark>IP 地址</mark></li>
@@ -882,9 +882,9 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-95.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-95.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="3-4-nat-网络地址转换">3.4 NAT：网络地址转换</h3>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-96.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-96.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="动机-本地网络只有一个有效-ip-地址">动机: 本地网络只有一个有效 IP 地址</h4>
 <ul>
 <li>不需要从 ISP 分配一块地址，可用一个 IP 地址用于所有的（局域网）设备</li>
@@ -944,7 +944,7 @@
 </li>
 <li><strong>进入数据包</strong>：替换目标 IP 地址和端口号，采用存储在 NAT 表中的 mapping 表项，用（源 IP，端口）</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-97.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-97.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>对 NAT 是有争议的</strong>:</p>
 <ul>
 <li><mark>路由器只应该对第 3 层做信息处理，而这里对端口号（4 层）作了处理</mark></li>
@@ -964,7 +964,7 @@
 <li>外部的客户端链接到中继</li>
 <li>中继在 2 个连接之间桥接</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-207.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-207.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="3-5-ipv6">3.5 IPv6</h3>
 <ul>
 <li>初始动机: 32-bit 地址空间将会被很快用完</li>
@@ -1114,15 +1114,15 @@
 </li>
 </ul>
 <p><strong>双栈</strong>：</p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-208.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-208.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>IPv4 到 IPv6 的地址转换是需要的</li>
 <li>一些 IPv6 特性会丢失</li>
 </ul>
 <p><strong>隧道</strong>：</p>
 <p>IPv6 数据报被封装在 IPv4 数据报中，IPv4 路由器只需要转发 IPv4 数据报即可</p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-98.webp" alt="alt text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-99.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-98.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-99.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h2 id="4-通用转发">4 通用转发</h2>
 <p>每个路由器包含一个<strong>流表（被逻辑上集中的控制器计算和分发）</strong></p>
 <ul>
@@ -1136,14 +1136,14 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-209.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-209.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="4-1-openflow">4.1 OpenFlow</h3>
 <div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>OpenFlow 是一种网络通信协议，它是 SDN 中最著名的一种“南向接口协议”</div><p>OpenFlow 是通用转发在 SDN 架构中最具代表性的实现方式。它通过流表和 “匹配 + 动作” 模型，将通用转发的灵活性转化为可编程、可集中管理的网络能力。</p>
 </div><p><mark>路由器中的流表定义了路由器的匹配+行动规则（流表由控制器计算并下发）</mark></p>
 <ul>
 <li>流表的表项结构</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-210.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-210.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>匹配 + 动作</strong>: 统一化各种网络设备提供的功能</p>
 <ul>
 <li><strong>路由器</strong>
@@ -1173,7 +1173,7 @@
 </ul>
 <div class="callout callout-note"><p>目前几乎所有的网络设备都可以在这个 <strong>匹配+行动</strong> 模式框架进行描述，具体化为各种网络设备包括未来的网络设备</p>
 </div><p>例子: 来自 H5 和 H6 的数据报应该通过 s1 然后经由 s2 再发向 H3 或者 H4</p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-109.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-109.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="4-2-中间盒">4.2 中间盒</h3>
 <p><em>在<strong>源主机和目的主机之间的数据路径上</strong>，除 IP 路由器的正常、标准功能外，执行其他功能的任何中间设备</em></p>
 <ul>
@@ -1203,7 +1203,7 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-211.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2/image-211.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>最初：专有（封闭）的硬件解决方案</li>
 <li>转向采用开放 API 的 “白盒” 硬件
@@ -1245,12 +1245,12 @@
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
-<script src="/assets/js/main.js?v=1786162127971" defer></script>
-<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
 </body>
 </html>

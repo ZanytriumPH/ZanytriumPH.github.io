@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -274,9 +274,9 @@
 <li>SAP: <code>dao</code> 包对外暴露的是<strong>接口</strong>（抽象），实现类放在 <code>dao.impl</code> 中</li>
 </ul>
 <p><strong>ADP 修复方案</strong></p>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-16.webp" alt="alt text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-17.webp" alt="alt text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-18.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-16.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-17.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-18.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>SDP 稳定依赖原则</strong></p>
 <ul>
 <li><strong>稳定</strong> = 很多包依赖它（被需要） → 改动代价大 → 不容易变</li>
@@ -512,14 +512,14 @@
 <li><strong>代码耦合与扩展性差</strong>：如果客户端直接通过复杂的 <code>if-else</code> 或 <code>switch</code> 逻辑来决定实例化哪个具体子类，会导致 Client 严重依赖具体类。一旦子类发生改变或增加新类，都需要大量修改 Client 代码</li>
 <li><strong>简单工厂的解决方案</strong>：引入一个专门的 “工厂” 类，为对象的创建提供一个统一接口，将  “具体如何创建对象” 的实现逻辑封装并隐藏起来。这样就降低了客户端与具体产品类之间的耦合</li>
 </ul>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-23.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-23.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="二-进阶考点-抽象工厂模式">二、进阶考点：抽象工厂模式</h3>
 <p>当系统面临更复杂的对象组合时，简单的工厂模式就不够用了，这时通常会考查<strong>抽象工厂模式</strong></p>
 <ul>
 <li><strong>面临的 “组合爆炸” 挑战</strong>：当我们需要创建多种有着组合关系的对象时（例如：一个汽车装配车间需要组合不同类型的引擎、轮胎、车身），如果为每一种型号的车都建一个工厂，就会遇到 “组合爆炸” 问题，导致工厂类泛滥</li>
 <li><strong>核心定义</strong>：抽象工厂模式定义了一个创建对象的接口，由子类决定要实例化哪一个类，将类的实例化延迟到子类</li>
 </ul>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-24.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-24.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li><strong>设计原则体现（重点考点）</strong>：
 <ul>
@@ -1301,7 +1301,7 @@ levelArray = { <span class="hljs-number">1</span>, <span class="hljs-number">2</
 <li>每个迭代的增量需求相对独立，被开发为产品的独立部分交付给用户</li>
 <li>需求驱动</li>
 </ul>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-26.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-26.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>优点</strong>：</p>
 <ul>
 <li><mark>迭代式开发具有更好的适用性</mark></li>
@@ -1321,7 +1321,7 @@ levelArray = { <span class="hljs-number">1</span>, <span class="hljs-number">2</
 <div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>演化模型 vs 增量迭代模型</div><p>都是<strong>迭代、并行开发和渐进交付</strong>，都适合大规模软件开发
 演化模型更适用于<mark>需求变更比较频繁或不确定性较多</mark>的领域
 演化模糊了维护与新开发的界限</p>
-</div><p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-27.webp" alt="alt text" loading="lazy"></p>
+</div><p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E5%A4%8D%E4%B9%A0%E5%A4%A7%E7%BA%B2-fcr/image-27.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>优点（和增量迭代模型一致）</strong>：</p>
 <ul>
 <li>迭代式开发具有更好的适用性</li>
@@ -1444,12 +1444,12 @@ levelArray = { <span class="hljs-number">1</span>, <span class="hljs-number">2</
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
-<script src="/assets/js/main.js?v=1786162127971" defer></script>
-<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
 </body>
 </html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>并发问题 · Zwing&#39;s blog</title>
+<meta name="description" content="并发编程常见缺陷：原子性与顺序性 bug 的成因与修正">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">并发问题</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-08T16:11:00.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-09 00:11:00</time>
+            <time class="meta-item" datetime="2026-08-08T16:25:54+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-08 16:25:54</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 3959 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 14 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#操作系统"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>操作系统</a>
+              <a class="tag-chip" href="/tags.html#操作系统"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>操作系统</a> <a class="tag-chip" href="/tags.html#并发"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>并发</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><h2 id="1-原子性和顺序性-bug">1 原子性和顺序性 bug</h2>
+<p>除了死锁之外，大部分（97%）并发错误都可归类为如下两种</p>
+<ol>
+<li><strong>原子性违背</strong>(Atomicity Violation, AV)：忘记上锁</li>
+</ol>
+<ul>
+<li>“ABA”：代码被别人 “强势插入”
+<ul>
+<li>有时即使你意识到了需要上锁，并且也加锁了，也会犯错</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98/image-18.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>从 check-&gt;operation 整体都应该是原子的，部分分别原子并不能保证安全</div></div><ol start="2">
+<li><strong>顺序性违背</strong>(Order Violation, OV)：忘记同步，或者同步条件写错</li>
+</ol>
+<ul>
+<li>“BA”: 事件未按预定的顺序发生</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98/image-19.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<blockquote>
+<p>实线为正确顺序，虚线为错误顺序</p>
+<ul>
+<li>线程 1 <code>PBReadAsync(&amp;p);</code> 会回调线程 2，同时线程 1 把 <code>io_pending</code> 置为 <code>TRUE</code> 以挂起自己，等线程 2 处理完修改 <code>io_pending</code> 为 <code>False</code> 唤醒</li>
+<li>但若线程 1 <code>PBReadAsync(&amp;p);</code> 回调线程 2 后，线程 2 先把 <code>io_pending</code> 置为 <code>False</code>，则线程 1 接下来将无限忙等</li>
+</ul>
+<p><em>没有环形等待，没有持有并等待，不是死锁</em></p>
+</blockquote>
+<h2 id="2-死锁">2 死锁</h2>
+<h3 id="2-1-死锁的样例">2.1 死锁的样例</h3>
+<p>在并发计算中，死锁是指某个小组中的成员因为每个成员都在等待另一个成员（包括自己）采取行动，因此无法继续执行的状态</p>
+<ul>
+<li>A-A 型死锁：线程在已经持有一把锁的情况下再次尝试获得这把锁</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">foo</span><span class="hljs-params">()</span>{
+    lock();
+    foo();
+    unlock();
+}
+
+<span class="hljs-comment">// 解决方案：xv6 防御性编程</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">acquire</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> spinlock *lk)</span> {
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">if</span>(holding(lk)) panic(“acquire”); <span class="hljs-comment">// 自爆</span>
+    <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>更一般的死锁：一个涉及多个线程以及多个锁的情形，每个线程都在等待其他线程所持有的
+锁，从而没有一个可以行进</p>
+<ul>
+<li>一个典型案例就是 ABBA 型死锁：线程 1 拿到了锁 A，需要锁 B，线程 2 拿到了锁 B，需要锁 A，这时两个线程都无法行进</li>
+<li>哲学家进餐问题的第一尝试就是这种类型的死锁</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">T1</span><span class="hljs-params">()</span> {
+    lock(&amp;A);
+    lock(&amp;B);
+    dosomething();
+    unlock(&amp;B);
+    unlock(&amp;A);
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">T2</span><span class="hljs-params">()</span> {
+    lock(&amp;B);
+    lock(&amp;A);
+    dosomething();
+    unlock(&amp;A);
+    unlock(&amp;B);
+}
+</code></pre>
+<p>条件变量和锁的使用也会产生死锁：等待某个条件变量看成是等待某个资源，而释放的那个线程看成是持有某个资源</p>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">T1</span><span class="hljs-params">()</span>{
+    lock(&amp;A);
+    lock(&amp;B);
+    <span class="hljs-keyword">while</span> (need-to-wait)
+        wait(&amp;cv, &amp;B); <span class="hljs-comment">// 释放了 B 但仍持有 A</span>
+    unlock(&amp;B);
+    unlock(&amp;A);
+}
+
+oid <span class="hljs-title function_">T2</span><span class="hljs-params">()</span>{
+    lock(&amp;A); <span class="hljs-comment">// 卡在这里无法到 signal 唤醒 T1</span>
+    lock(&amp;B);
+    signal(&amp;cv);
+    unlock(&amp;B);
+    unlock(&amp;A);
+}
+</code></pre>
+<h3 id="2-2-死锁产生的必要条件">2.2 死锁产生的必要条件</h3>
+<ul>
+<li><strong>互斥（Mutual-exclusion）</strong>：所需要的资源是互斥的
+<ul>
+<li>互斥也可改为资源有限，即能够共享的线程数有限</li>
+</ul>
+</li>
+<li><strong>持有并等待（Hold and wait）</strong>：持有某个资源并等待更多资源</li>
+<li><strong>非抢占性（No-preemption）</strong>：不可直接 “抢” 别人持有的资源，只有等持有的人主动释放</li>
+<li><strong>环形等待（Circular wait condition）</strong>：形成循环等待的环</li>
+</ul>
+<blockquote>
+<p><em>哲学家问题尝试 1 即满足上述所有条件</em></p>
+</blockquote>
+<ul>
+<li>注意这是 “必要条件”：达成条件也不一定就一定死锁
+<ul>
+<li>比如对于同一种类型的多个筷子</li>
+<li>环之外的线程可以释放资源解开这个环等待状态</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-info"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>处理死锁</div><ul>
+<li><strong>忽略问题</strong>：问题的发生频率很低且发生后代价很小</li>
+<li><strong>从源头避免死锁发生</strong></li>
+<li><strong>检测并修复</strong></li>
+</ul>
+</div><h2 id="3-死锁避免-必要条件的破坏">3 死锁避免：必要条件的破坏</h2>
+<p>死锁的四个必要条件，破坏其一即可</p>
+<ol>
+<li><strong>互斥</strong></li>
+</ol>
+<ul>
+<li><strong>不太容易，互斥是并发能够保证安全性的重要机制，易出错</strong></li>
+<li>但仍有无锁算法：如 RCU、一些基于硬件支持的数据结构和算法</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">AtomicIncrement</span><span class="hljs-params">(<span class="hljs-type">int</span> *value, <span class="hljs-type">int</span> amount)</span> { <span class="hljs-comment">// 无锁的加某个值</span>
+    <span class="hljs-keyword">do</span> {
+        <span class="hljs-type">int</span> old = *value;
+    } <span class="hljs-keyword">while</span> (CompareAndSwap(value, old, old + amount) == <span class="hljs-number">0</span>);
+}
+</code></pre>
+<ol start="2">
+<li><strong>持有并等待</strong></li>
+</ol>
+<ul>
+<li><strong>要么能一次得到所有锁，要么什么锁也不获取：不现实</strong>
+<ul>
+<li>因为需要线程提前就知道需要哪些锁</li>
+<li>减少了一些并发度</li>
+</ul>
+</li>
+<li><strong>如果此刻无法获得想要的锁，就释放其所有持有的锁</strong>
+<ul>
+<li>参考哲学家问题的尝试 2</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li><strong>非抢占性</strong></li>
+</ol>
+<ul>
+<li>允许系统直接去 “抢” 别的线程所持有的资源
+<ul>
+<li>一个线程需要更多的内存，但此时没有更多的空闲内存了，那么它可以去 “抢” 别的线程的内存：将别的线程先暂时移出内存到磁盘上，然后再去得到这些内存</li>
+<li>CPU 的使用也是可以被抢占，利用 context-switch 机制</li>
+</ul>
+</li>
+<li><strong>问题是不是每种资源都可以直接 “抢” 的</strong>
+<ul>
+<li><em>打印机资源</em></li>
+<li>一个合理的 “抢” 需要被抢走资源的线程能够恢复到被抢前的状态</li>
+</ul>
+</li>
+</ul>
+<ol start="4">
+<li><strong>环形等待</strong></li>
+</ol>
+<ul>
+<li><strong>强制在锁在申请时按照规定的顺序来</strong>
+<ul>
+<li>比如按照锁在内存中的位置进行编号排序</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>为什么按照一个全局的顺序就不会产生死锁？</div></div><ul>
+<li>锁的申请过程就是构造一个关于锁的有向图 \(G\) 的过程</li>
+<li>图中的每条边都是 “小” 一点的锁指向 “大” 一点的锁</li>
+<li>箭头只能单向流动，构成了拓扑序</li>
+<li>有拓扑序意味着这个锁申请有向图是无环的
+<ul>
+<li>锁的编号不一定需要全序，有偏序即可（可能同时被持有的锁之间规定先后顺序）</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>然而即使是 lock ordering 仍然有其局限性</p>
+<ul>
+<li>不可扩展：新增一个锁时，不可能完全理解整个内核的上下文，不可能准确判断这个新锁应该插入到哪个位置，且一旦放错就会埋下死锁隐患</li>
+<li>核心解决方案：锁的封装</li>
+</ul>
+</blockquote>
+<h2 id="4-死锁避免-避免陷入不可挽回状态">4 死锁避免：避免陷入不可挽回状态</h2>
+<p>死锁关乎程序的活性性质</p>
+<ul>
+<li>活性: “好事终将发生”</li>
+<li>活性要求只要在最终能满足要求即可，一个隐含的要求是执行中不能发生 “不可挽回” 的步骤</li>
+</ul>
+<h3 id="4-1-导致死锁的-不可挽回-事件">4.1 导致死锁的 “不可挽回” 事件</h3>
+<ul>
+<li>有两个线程 A 和 B，每个线程都需要用到需要如下的两个互斥的资源：打印机和绘图仪</li>
+<li>线程 A 从指令 \(I_1\) 到 \(I_3\) 之间需要打印机，从指令 \(I_2\) 到 \(I_4\) 之间需要绘图仪</li>
+<li>线程 B 从指令 \(I_5\) 到 \(I_7\) 之间需要绘图仪，从指令 \(I_6\) 到 \(I_8\) 之间需要打印机</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98/image-20.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<ul>
+<li>考察下图红点处 \((I_2, I_6)\)，试问如果系统状态处于该点（即线程 A 得到了打印机，请求绘图仪，线程 B 得到了打印机，请求绘图仪）</li>
+<li>典型的 ABBA 型死锁，系统无法再行进</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98/image-21.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<ul>
+<li>紫色区域已经是 “不可挽回” 了，处在这个区域的系统，随着整体能够行进的方向（向上向右）最终都会无可避免的走向死锁状态</li>
+<li>只要能避免进入该不可挽回的区域就不会发生死锁</li>
+<li>这需要在系统尝试进入该区域时，调度系统直接拒绝相应的线程得到想要的资源</li>
+</ul>
+<p>如果要按照上述的情形来给出不可挽回区域，必须提前知道每个线程在未来哪段指令间需要什么锁或其他互斥资源：不现实</p>
+<h3 id="4-2-银行家算法">4.2 银行家算法</h3>
+<ul>
+<li>每个线程 \(i\) 有一个最大需求向量 \(M_i\)，所有线程的最大需求向量为矩阵 \(M\)</li>
+<li>每个线程 \(i\) 有一个当前持有资源向量 \(C_i\)，所有线程的当前持有资源为矩阵 \(C\)</li>
+<li>系统初始每个资源数向量 \(E\)</li>
+<li>系统的行进伴随着线程对互斥资源的申请和释放，释放资源是平凡的事件，因为释放资源不会让系统进入 “不可挽回” 状态，但申请资源会</li>
+<li>每个线程 \(i\) 有一个当前资源申请向量 \(R_i\)，所有线程的当前申请资源为矩阵 \(R\)</li>
+</ul>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>什么样的资源申请矩阵会导致系统进入 “不可挽回” 的状态呢？</div><p>如果接受了这个申请，导致无法满足未来的 “最大” 申请，即不可挽回（“不安全”）</p>
+<ul>
+<li>即目前虽然没有死锁，可以满足，但既定的未来不可满足</li>
+</ul>
+<p>正确的决策：如果当前申请矩阵会导致系统进入 “不可挽回” 状态，拒绝，否则接受申请，更新系统状态 —— <strong>银行家算法</strong></p>
+</div><ul>
+<li><strong>Step 1</strong>: 找一个线程 \(i\)，看看其未来<strong>还</strong>需要的最大资源数（最大资源需求数 - 目前持有资源数）是否能够被目前系统<strong>尚存</strong>的资源数所满足（系统初始资源数 - 被所有线程所持有的资源数），如果所有线程都不能被满足，就是一个 “不可挽回” 的状态，最终会进入死锁</li>
+<li><strong>Step 2</strong>: 对满足需求的线程 \(i\)，标记其为未来可满足状态，即其可以在目前状态下存在一个分配方式（立即全部分配其所有资源）终止。那么<strong>也就存在这样的一个好的局面：我们可以将其资源都收回</strong></li>
+<li><strong>Step 3</strong>: 在步骤 2 的更好的局面上，重复之前的步骤，一直到所有线程都可以终止，那么该系统状态就是 “可挽回” 的状态</li>
+</ul>
+<blockquote>
+<p>然而，银行家算法是不实用的，<strong>但考试爱考</strong></p>
+<ul>
+<li>没法知道 “最大” 需求矩阵</li>
+<li>系统的资源是动态变化的
+<ul>
+<li>线程数会变化</li>
+<li>资源数可能会变化（线程可以自己释放所持有的锁）</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h2 id="5-死锁的动态侦测">5 死锁的动态侦测</h2>
+<p>锁的持有和申请就是一个有向图，核心就是检测锁申请环</p>
+<ul>
+<li>有向图的环检测
+<ul>
+<li>深度优先算法，出现回边就是出现了环</li>
+<li>入度表拓扑排序</li>
+</ul>
+</li>
+</ul>
+<p>一个更加具体的实现(<code>lockdep</code>的简单原理)：</p>
+<ul>
+<li>每次锁的 acquire/release 都记录 <code>tid</code> 和 <code>lock name</code>，动态构建锁的有向图 \(G(V, E)\)，并 Assert 该图没有环</li>
+<li>\(V\)：为每把锁的名字</li>
+<li>\(E\)：每个线程持有某把锁 \(u\) 之后再去尝试获得某把锁 \(v\)，就加入边 \((u, v)\)</li>
+<li>锁的名字可以用地址来唯一绑定（也可以是锁所在的文件和行，这是一种近似，因为可能同一个行是 <code>malloc</code> 不同的锁，相应地，代价低）</li>
+</ul>
+<ul>
+<li>如果是一类的互斥资源有多个资源数呢？单纯的环已不足来检测死锁</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98/image-22.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<ul>
+<li>所有线程的当前持有资源为矩阵 \(C\)、所有线程的当前申请资源为矩阵 \(R\)、以及系统资源总数向量 \(E\)</li>
+<li>按照和之前银行家算法类似的思路
+<ul>
+<li>找到可以满足要求的线程，先假定分配给其资源，然后释放其所有资源（创造更好的局面）</li>
+<li>不断重复上述步骤，直到所有线程都可满足即没有死锁</li>
+<li>否则就是出现死锁</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98/image-23.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<h2 id="6-并发-bugs-的一些动态分析方法">6 并发 Bugs 的一些动态分析方法</h2>
+<div class="callout callout-info"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>动态分析</div><p>给定一次状态机（程序）的执行历史信息 \(\tau\)（比如日志 log、covering lines、memory access、execution time、lock acquires/releases…）</p>
+<ul>
+<li>当然这种记录往往需要额外的运行成本（比如插桩）</li>
+</ul>
+<p>动态分析即为根据这个信息的分析函数 \(f(\tau): \tau \to \{0,1\}\)，\(0\) 代表关心问题的答案为否（比如没有 bug），\(1\) 代表关心问题的答案为是（比如有 bug），当然答案还可以有更多可能，那么这个值域会增大</p>
+<p><em>本质上，只要你定义了什么是正确、什么是错误，并知道这种错误会在运行时产生有什么后果，就能检测出来</em></p>
+</div><h3 id="6-1-addresssanitizer-非法内存访问">6.1 AddressSanitizer: 非法内存访问</h3>
+<ul>
+<li>通过编译器自动插入和内存相关的断言比如每次分配内存时，额外分配一些不可写的内存 “投毒”，一旦访问到这些被投毒的内存，就知道越界了），实现代码正确性的检查。可以检测如 Buffer (heap/stack/global) overflow, use-after-free, use-after-return, double-free, …</li>
+</ul>
+<h3 id="6-2-threadsanitizer-运行时的竞态条件检测">6.2 ThreadSanitizer: 运行时的竞态条件检测</h3>
+<p>回顾竞态条件(数据竞争)：不同的线程同时访问同一内存，且至少有一个是写</p>
+<ul>
+<li>不同线程是容易观察到的（Thread id）</li>
+<li>同一内存也是容易观察到的（内存的地址），</li>
+<li>至少一个是写是容易观察到的（<code>load</code> 和 <code>store</code> 指令）</li>
+<li>关键问题是，什么是同时？</li>
+<li>让我们问一个反向的问题：什么不是同时？happens-before 关系！</li>
+</ul>
+<p>ThreadSanitize r可以为所有事件建立 happens-before 关系图</p>
+<ul>
+<li>比如对于下面两个事件
+<ul>
+<li>\(x\): <code>mutex_lock(A); load(v); mutex_unlock(A);</code></li>
+<li>\(y\): <code>mutex_lock(A); store(v); mutex_unlock(A);</code></li>
+<li>推出：\(x ≺ y ∨ y ≺ x\)</li>
+</ul>
+</li>
+<li>比如对于 <code>wait</code> 和 <code>signal</code> 有显著的先后顺序</li>
+<li>对于发生在不同线程且至少有一个是写的检查，若没有出现在上述的关系中，便是一个潜在的竞态条件
+<ul>
+<li>“同时” 的反向</li>
+<li>如 \(x ≺ y ∨ y ≺ x\) 没有出现，则为竞态条件</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-info"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Sanitizer（消毒器）：现代复杂软件系统必备的支撑工具</div><ul>
+<li>AddressSanitizer (asan): 非法内存访问</li>
+<li>ThreadSanitizer (tsan): 数据竞争</li>
+<li>MemorySanitizer (未初始化的读取)</li>
+<li>UBSanitizer (undefined behavior，如整数溢出、对象越界、溢出等一系列问题)</li>
+</ul>
+</div><h3 id="6-3-一些低配版实现">6.3 一些低配版实现</h3>
+<h4 id="canary-牺牲-内存单元-预警-memory-error">Canary：“牺牲” 内存单元，预警 memory error</h4>
+<ul>
+<li>比如 stack guard</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> MAGIC 0x55555555 <span class="hljs-comment">// 魔法数字</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> BOTTOM (STK_SZ / sizeof(u32) - 1)</span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">stack</span> {</span> <span class="hljs-type">char</span> data[STK_SZ]; };
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">canary_init</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> <span class="hljs-built_in">stack</span> *s)</span> {
+    u32 *ptr = (u32 *)s;
+    <span class="hljs-comment">// 往这块连续内存的最前面和最后面写入 MAGIC</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; CANARY_SZ; i++) {
+        ptr[BOTTOM - i] = ptr[i] = MAGIC;
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">canary_check</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> <span class="hljs-built_in">stack</span> *s)</span> {
+    u32 *ptr = (u32 *)s;
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; CANARY_SZ; i++) {
+        panic_on(ptr[BOTTOM - i] != MAGIC, <span class="hljs-string">&quot;underflow&quot;</span>);
+        panic_on(ptr[i] != MAGIC, <span class="hljs-string">&quot;overflow&quot;</span>);
+    }
+}
+</code></pre>
+<ul>
+<li>比如 buffer overflow</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">int</span> <span class="hljs-title function_">foo</span><span class="hljs-params">()</span> {
+    <span class="hljs-comment">// 一段连续内存；位于局部变量和返回地址之前</span>
+    u32 canary = SOME_VALUE;
+    ... <span class="hljs-comment">// 实际函数</span>
+    canary ^= SOME_VALUE; <span class="hljs-comment">// 如果程序被攻击或出错，canary 就不会归零了</span>
+    assert(canary == <span class="hljs-number">0</span>);
+    <span class="hljs-keyword">return</span> ret;
+}
+</code></pre>
+<blockquote>
+<p>在函数调用时，局部变量和该函数的返回地址是挨着存放在函数调用栈里的。黑客经常利用局部变量数组越界（Buffer Overflow），一路往高地址写数据，把真实的返回地址覆盖成恶意代码的地址，从而劫持程序控制流</p>
+<p>检测：如果黑客想通过局部变量越界去覆盖后面的返回地址，他必定会先踩过 Canary 所在的内存，导致 Canary 的值被篡改</p>
+</blockquote>
+<h4 id="低配版-lockdep-死锁检测子系统">低配版 lockdep（死锁检测子系统）</h4>
+<ul>
+<li>统计当前的 spin count</li>
+<li>如果超过某个明显不正常的数值就报告</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">int</span> spin_cnt = <span class="hljs-number">0</span>;
+<span class="hljs-comment">// 注意 xchg(&amp;lk, 1) 中的 1：把 1 写入 lk 并返回旧值</span>
+<span class="hljs-keyword">while</span>(xchg(&amp;lk, <span class="hljs-number">1</span>) == <span class="hljs-number">1</span>) { 
+    <span class="hljs-comment">// 单纯自旋锁中加了这个计数和判断</span>
+    <span class="hljs-keyword">if</span> (spin_cnt++ &gt; SPIN_LIMIT) { 
+        panic(<span class="hljs-string">&quot;Spin limit exceeded @ %s:%d\n&quot;</span>, __FILE__, __LINE__);
+    }
+}
+</code></pre>
+<h4 id="低配版-addresssanitizer">低配版 AddressSanitizer</h4>
+<p>内存分配器的 specification（规范）：</p>
+<ul>
+<li>已分配内存 $ S = [l_0, r_0) \cup [l_1, r_1) \cup \ldots $
+<ul>
+<li>并发的分配很可能破坏这个 specification</li>
+</ul>
+</li>
+<li><code>kalloc(s)</code> 返回的 \([l, r)\) 必须满足 \([l, r) \cap S = \varnothing\)</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-comment">// allocation</span>
+<span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; (i + <span class="hljs-number">1</span>) * <span class="hljs-keyword">sizeof</span>(u32) &lt;= size; i++) {
+    panic_on(((u32 *)ptr)[i] == MAGIC, <span class="hljs-string">&quot;double-allocation&quot;</span>); <span class="hljs-comment">// 有毒</span>
+    arr[i] = MAGIC; <span class="hljs-comment">// 投毒</span>
+}
+
+<span class="hljs-comment">// free</span>
+<span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; (i + <span class="hljs-number">1</span>) * <span class="hljs-keyword">sizeof</span>(u32) &lt;= alloc_size(ptr); i++) {
+    panic_on(((u32 *)ptr)[i] == <span class="hljs-number">0</span>, <span class="hljs-string">&quot;double-free&quot;</span>);
+    arr[i] = <span class="hljs-number">0</span>;
+}
+</code></pre>
+<h4 id="低配版-threadsanitizer">低配版 ThreadSanitizer</h4>
+<p>线程的读写一个共享数据不是原子的，即在中间可能被其他线程插入</p>
+<ul>
+<li>但是这个错误一般很难观测，因为指令的读写太快了</li>
+<li>想法：通过拖慢线程读写速度，放大原子性破坏的可能性（执行时间越长，被其他线程干涉的可能性越大）</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-comment">// Suppose x is lock-protected</span>
+...
+<span class="hljs-type">int</span> observe1 = x;
+delay();
+<span class="hljs-type">int</span> observe2 = x;
+assert(observe1 == observe2);
+...
+</code></pre>
+<blockquote>
+<p><em>极低的成本换取极高检测率的调试技巧</em></p>
+</blockquote>
+<div class="callout callout-info"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>低配版的意义</div><p>给定一个程序正确运行的 specification，原则上我们能够写出动态分析的方法验证程序运行时有没有破坏这个 specification</p>
+<ul>
+<li>但有时候验证一个完整的 specification 过于复杂或者条件不允许</li>
+<li>此时如果能够从这个 full specification 推出一些弱化的 specification，从而更加容易的实现一些 Sanitizer，那么即使精度可能没那么高，但实际中会有很好的效果</li>
+<li>比如：你能给出图像识别软件的 full specification 吗？
+<ul>
+<li>图像识别是概率模型，它的 “正确” 是模糊的，写不出 Full Spec，但对于弱化规范：
+<ul>
+<li>鲁棒性：给图片加一点点噪点，分类结果不应该改变。</li>
+<li>公平性：换一张肤色不同的人脸，识别出的情绪不应该突变。</li>
+<li>边界检查：输出的概率之和必须等于 1，不能出现 NaN 或负数。</li>
+</ul>
+</li>
+<li>这些都不是 “完整的图像识别规范”，但它们作为 Sanitizer 跑在运行时，能极其有效地抓出 AI 模型的严重 Bug，且计算开销极低</li>
+</ul>
+</li>
+</ul>
+</div><div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>即使已经学了很多并发控制的工具，人类依然会犯错</div><p>死锁就是其中一大类</p>
+<ul>
+<li>死锁可以通过破坏其必要条件来避免</li>
+<li>也可以通过动态的合理分配来避免</li>
+<li>也可以通过动态分析来检测</li>
+</ul>
+<p>并发的其他 Bugs 也有一些非常实用的动态分析技术来检测</p>
+<ul>
+<li>各种 Sanitizer</li>
+</ul>
+</div></div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：并发问题</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-09 00:11:00</p>
+      <p><strong>更新于</strong>：2026-08-08 16:25:54</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/并发-并发问题.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">并发问题</div>
+      <ul><li class="toc-l2"><a href="#1-原子性和顺序性-bug">1 原子性和顺序性 bug</a></li><li class="toc-l2"><a href="#2-死锁">2 死锁</a></li><li class="toc-l3"><a href="#2-1-死锁的样例">2.1 死锁的样例</a></li><li class="toc-l3"><a href="#2-2-死锁产生的必要条件">2.2 死锁产生的必要条件</a></li><li class="toc-l2"><a href="#3-死锁避免-必要条件的破坏">3 死锁避免：必要条件的破坏</a></li><li class="toc-l2"><a href="#4-死锁避免-避免陷入不可挽回状态">4 死锁避免：避免陷入不可挽回状态</a></li><li class="toc-l3"><a href="#4-1-导致死锁的-不可挽回-事件">4.1 导致死锁的 “不可挽回” 事件</a></li><li class="toc-l3"><a href="#4-2-银行家算法">4.2 银行家算法</a></li><li class="toc-l2"><a href="#5-死锁的动态侦测">5 死锁的动态侦测</a></li><li class="toc-l2"><a href="#6-并发-bugs-的一些动态分析方法">6 并发 Bugs 的一些动态分析方法</a></li><li class="toc-l3"><a href="#6-1-addresssanitizer-非法内存访问">6.1 AddressSanitizer: 非法内存访问</a></li><li class="toc-l3"><a href="#6-2-threadsanitizer-运行时的竞态条件检测">6.2 ThreadSanitizer: 运行时的竞态条件检测</a></li><li class="toc-l3"><a href="#6-3-一些低配版实现">6.3 一些低配版实现</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/并发-同步.html">&lt; 同步</a>
+      <a class="pager-next" href="/posts/虚拟化-进程.html">进程 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
+</body>
+</html>

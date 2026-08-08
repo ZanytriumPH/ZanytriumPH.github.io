@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -113,7 +113,7 @@
 <blockquote>
 <p>三个核心概念：<strong>实体（矩形），属性（椭圆），联系（菱形）</strong></p>
 </blockquote>
-<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-7.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-7.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="3-2-eer-图">3.2 EER 图</h3>
 <h4 id="3-2-1-isa-联系">3.2.1 ISA 联系</h4>
 <p>父类-子类联系称为 ISA 联系，表示 “is a” 语义，用 △ 表示</p>
@@ -132,7 +132,7 @@
 <li>允许父类中的一个实体能同时属于多个子类中的实体集</li>
 <li>△ 中没有叉号</li>
 </ul>
-<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-8.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-8.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>④ 完全特化</p>
 <ul>
 <li>父类中的每一个实体，必须是某一个子类中的实体（父类本身不能单独存在）</li>
@@ -143,7 +143,7 @@
 <li>允许父类中的某些实体不属于任何一个子类</li>
 <li>部分特化用父类到子类的单线连接来表示</li>
 </ul>
-<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-9.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-9.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="3-2-2-part_of-联系-弱实体">3.2.2 part_of 联系（弱实体）</h4>
 <p>弱实体型的存在依赖于其它实体型的存在</p>
 <p>表示：双框矩形实体 有向箭头 双框菱形联系</p>
@@ -155,7 +155,7 @@
 <li>max=1 的约束叫做‘单值参与’约束，即被施加基数约束的实体型中的每个实体在联系中至多出现一次</li>
 <li>max = * 的约束叫做‘多值参与’约束，即被施加基数约束的实体型中的每个实体在联系中可以出现多次</li>
 </ul>
-<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-10.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-10.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="3-2-4-属性划分">3.2.4 属性划分</h4>
 <p>在一个实体集中，可能存在多个标识符，只能从中选择一个作为主标识符并用下划线在 ER 图中将其标识出来</p>
 <p>属性分为组合属性（一个属性中包含多个属性）、多值属性（与实体间用双横线表示）</p>
@@ -197,20 +197,20 @@
 <li>多值属性：每个多值属性，都被分解出去，和原实体集的主标识符属性联合起来单独组成一个新的关系</li>
 </ul>
 <p>❑ 2. 多值属性向关系的转换</p>
-<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-11.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-11.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>❑ 3．联系的转换</p>
 <ul>
 <li>min=1：‘全参与’，min=0：‘非全参与’</li>
 </ul>
-<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-12.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-13.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-14.webp" alt="alt text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-15.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-16.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-17.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-18.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-19.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-20.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-12.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-13.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-14.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-15.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-16.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-17.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-18.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-19.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/image-20.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li><strong>多元联系</strong>
 <ul>
@@ -261,12 +261,12 @@
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
-<script src="/assets/js/main.js?v=1786162127971" defer></script>
-<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
 </body>
 </html>

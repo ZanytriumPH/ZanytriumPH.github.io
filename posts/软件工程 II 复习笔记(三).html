@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -579,7 +579,7 @@ BDD 场景集（Given-When-Then）
 <h2 id="3-2-体系结构风格与设计过程">3.2 体系结构风格与设计过程</h2>
 <h3 id="体系结构风格">体系结构风格</h3>
 <h4 id="5-管道-过滤器风格">5 管道-过滤器风格</h4>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-12.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-12.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="6-客户端-服务器-rest-风格">6 客户端-服务器 + REST 风格</h4>
 <ul>
 <li>无状态：每次请求包含所有信息</li>
@@ -587,7 +587,7 @@ BDD 场景集（Given-When-Then）
 <li>分层系统：客户端不知道是否直连服务器</li>
 </ul>
 <h4 id="7-微服务风格">7 微服务风格</h4>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-13.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-13.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>每个服务独立部署、独立数据库</li>
 <li>通过 REST/消息队列通信</li>
@@ -716,12 +716,12 @@ BDD 场景集（Given-When-Then）
 </tr>
 </tbody>
 </table>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-14.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-14.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <blockquote>
 <p>改进：三层均按功能域拆分为独立子包，每层约 5 个包，粒度合理，支持团队并行开发</p>
 </blockquote>
 <p><strong>初步设计方案三 — 接口独立层与依赖倒置</strong></p>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-15.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-15.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="核心改进">核心改进</h4>
 <table>
 <thead>
@@ -864,11 +864,11 @@ BDD 场景集（Given-When-Then）
 </tbody>
 </table>
 <p>案例：在线书店 — <strong>逻辑视图（包图）</strong></p>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-20.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-20.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>案例：在线书店 — <strong>物理视图（部署图）</strong></p>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-21.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-21.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>案例：在线书店 — <strong>开发视图（组件图）</strong></p>
-<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-22.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8BII%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/image-22.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>接口的三大好处</strong></p>
 <ol>
 <li>解耦：上层不依赖下层实现</li>
@@ -1353,12 +1353,12 @@ BDD 场景集（Given-When-Then）
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
-<script src="/assets/js/main.js?v=1786162127971" defer></script>
-<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
 </body>
 </html>

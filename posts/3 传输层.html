@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -197,7 +197,7 @@
 </tbody>
 </table>
 <h2 id="2-多路复用-解复用">2 多路复用/解复用</h2>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-31.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-31.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>通俗例子：</p>
 <ul>
 <li><strong>主机（Host/IP地址）：</strong> 就像一栋公寓楼。</li>
@@ -300,12 +300,12 @@
 <ul>
 <li>注意：求和时，在最高位的<strong>进位要回卷</strong>，再加到结果上</li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-32.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-32.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li><mark>校验和是<strong>对和的取反</strong></mark></li>
 <li><mark>目标端：校验范围 + 校验和 = 1111111111111111 则通过校验</mark></li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-178.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-178.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>对分组内容进行可选的差错校验
 <ul>
@@ -403,7 +403,7 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-42.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-42.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>接收方不知道它最后发送的 ACK/NAK 是否被正确地收到</p>
 <ul>
 <li>发送方不对收到的 ack/nak 给确认，没有所谓的确认的确认</li>
@@ -432,8 +432,8 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-43.webp" alt="alt text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-44.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-43.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-44.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="rdt3-0-具有比特差错和分组丢失的信道">rdt3.0：具有比特差错和分组丢失的信道</h3>
 <p>新的假设：下层信道可能会丢失分组（数据或ACK）</p>
 <ul>
@@ -460,8 +460,8 @@
 </ul>
 <div class="callout callout-note"><p>链路层的 timeout 时间确定的，传输层 timeout 时间是适应式的</p>
 </div><p>发送方：</p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-47.webp" alt="alt text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-48.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-47.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-48.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li><mark>过早超时（延迟的ACK）也能够正常工作</mark>
 <ul>
@@ -491,9 +491,9 @@ U_{\text{sender}} = \frac{L/R}{\text{RTT} + L/R} = \frac{0.008}{30.008} = 0.0002
 <li>瓶颈在于：网络协议限制了物理资源的利用</li>
 </ul>
 <p><strong>停 - 等操作</strong>：</p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-49.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-49.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>流水线：提高链路利用率</p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-50.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-50.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>增加 n，能提高链路利用率</li>
 <li>但当达到某个 n，其 u=100% 时，无法再通过增加n，提高利用率</li>
@@ -565,7 +565,7 @@ U_{\text{sender}} = \frac{L/R}{\text{RTT} + L/R} = \frac{0.008}{30.008} = 0.0002
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-51.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-51.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="接收窗口-接收缓冲区">接收窗口 = 接收缓冲区</h4>
 <ul>
 <li><strong>接收窗口用于控制哪些分组可以接收</strong>
@@ -600,7 +600,7 @@ U_{\text{sender}} = \frac{L/R}{\text{RTT} + L/R} = \frac{0.008}{30.008} = 0.0002
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-52.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-52.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <hr>
 <p>滑动窗口的吞吐量</p>
 <ul>
@@ -671,8 +671,8 @@ U_{\text{sender}} = \frac{L/R}{\text{RTT} + L/R} = \frac{0.008}{30.008} = 0.0002
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-56.webp" alt="alt text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-57.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-56.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-57.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="selective-repeat">Selective Repeat</h4>
 <ul>
 <li><mark>接收方对每个正确接收的分组，分别发送 ACKn（非累积确认）</mark>
@@ -692,7 +692,7 @@ U_{\text{sender}} = \frac{L/R}{\text{RTT} + L/R} = \frac{0.008}{30.008} = 0.0002
 </li>
 <li>发送窗口的最大值（发送缓冲区）限制发送未确认分组的个数</li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-58.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-58.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <table>
 <thead>
 <tr>
@@ -738,7 +738,7 @@ U_{\text{sender}} = \frac{L/R}{\text{RTT} + L/R} = \frac{0.008}{30.008} = 0.0002
 <li>SR：\(2^{n-1}\)（即序列号空间的一半）</li>
 </ul>
 <p>例：\(n=2\)，序列号为 0, 1, 2, 3，若 SP 窗口为 3（超过限制2）</p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-53.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-53.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>接收方收到重传的旧 pkt0 后，误以为这是全新的数据并接受它</li>
 </ul>
@@ -784,7 +784,7 @@ U_{\text{sender}} = \frac{L/R}{\text{RTT} + L/R} = \frac{0.008}{30.008} = 0.0002
 </li>
 </ul>
 <h3 id="5-1-段结构">5.1 段结构</h3>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-180.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-180.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>IP 分组
 <ul>
@@ -806,7 +806,7 @@ U_{\text{sender}} = \frac{L/R}{\text{RTT} + L/R} = \frac{0.008}{30.008} = 0.0002
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-59.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-59.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><em>首部长度：Number of 4-byte words in the header</em></p>
 <h4 id="序号-确认号">序号，确认号</h4>
 <ul>
@@ -824,8 +824,8 @@ U_{\text{sender}} = \frac{L/R}{\text{RTT} + L/R} = \frac{0.008}{30.008} = 0.0002
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-179.webp" alt="alt text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-60.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-179.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-60.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><mark>下一个要发送的数据包的<strong>序列号（Seqno）</strong>，等于上一次接收到的 <strong>ACK 字段（确认号）</strong> 的值</mark></p>
 <h5 id="1-发送方的行为">1. 发送方的行为</h5>
 <ul>
@@ -1034,7 +1034,7 @@ loop (forever) {
 } <span class="hljs-comment">/* end of loop forever */</span>
 </code></pre>
 <h5 id="重传">重传</h5>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-62.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-62.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="接收方产生tcp-ack的建议">接收方产生TCP ACK的建议</h4>
 <table>
 <thead>
@@ -1076,7 +1076,7 @@ loop (forever) {
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-63.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-63.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li><mark>如果发送方收到同一数据的 3 个冗余ACK，重传最小序号的段</mark>
 <ul>
@@ -1134,13 +1134,13 @@ loop (forever) {
 <li>报文乱序</li>
 <li>相互看不到对方</li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-65.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-65.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>半连接即虚假连接，浪费服务器资源</li>
 </ul>
 <h4 id="3-次握手">3 次握手</h4>
 <p>2 次握手缺陷的解决方案：<mark><strong>变化的初始序号 + 双方确认对方的序号（3次握手）</strong></mark></p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-67.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-67.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h5 id="初始状态">初始状态</h5>
 <ul>
 <li><strong>客户端 (Client) 和 服务器 (Server)</strong> 一开始都处于 <code>LISTEN</code>（监听）状态，准备接收或发起连接。</li>
@@ -1175,7 +1175,7 @@ loop (forever) {
 <li><strong>状态变化：</strong> 客户端发送完确认后，立刻进入 <code>ESTAB</code>（Established，已建立连接）状态。服务器在收到这个确认报文后，也进入 <code>ESTAB</code> 状态。</li>
 <li><em>目的：告诉服务器，“我收到了你的确认和你的初始序号（确认号 \(y+1\)），我们可以开始正式传输数据了”。</em></li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-68.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-68.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>注意接收老数据问题中有两种情况：</p>
 <ul>
 <li>连接不存在，没建立起来，丢弃</li>
@@ -1189,11 +1189,11 @@ loop (forever) {
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-181.webp" alt="alt text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-182.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-183.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-184.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-185.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-181.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-182.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-183.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-184.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-185.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>SYN 丢失与 Web 下载</strong></p>
 <ul>
 <li>用户点击超链接
@@ -1229,11 +1229,11 @@ loop (forever) {
 </li>
 <li>可以处理同时的 FIN 交换</li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-69.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-69.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>但关闭实则不完美，参考“山谷白军3000人，两边红军2000人，放通讯兵”</li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-186.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-186.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>A 向 B 发送 RESET（RST）
 <ul>
@@ -1250,15 +1250,15 @@ loop (forever) {
 </ul>
 <p><em>FIN 是礼貌的告别，而 RST 是粗暴的断交</em></p>
 <p><strong>TCP client lifecycle</strong></p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-187.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-187.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>TCP server lifecycle</strong></p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-188.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-188.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <blockquote>
 <p>上图 TCP server lifecycle 有误，底部 FIN_WAIT_1 应改为 ESTABLISHED</p>
 </blockquote>
 <h3 id="5-4-流量控制">5.4 流量控制</h3>
 <p><mark><strong>接收方控制发送方</strong>，不让发送方发送的太多、太快以至于让<strong>接收方的缓冲区溢出</strong></mark></p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-64.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-64.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li><mark>接收方在其向发送方的 <strong>TCP 段头部的 RWND 字段</strong> “通告” 其空闲 buffer 大小</mark>
 <ul>
@@ -1291,8 +1291,8 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 = RcvWindow
 = RcvBuffer-[LastByteRcvd - LastByteRead]</p>
 <p><strong>发送方滑动窗口</strong></p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-189.webp" alt="alt text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-190.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-189.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-190.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>信用分配流量控制机制</strong></p>
 <ul>
 <li>
@@ -1342,7 +1342,7 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 </ul>
 <h3 id="6-1-拥塞的原因-代价">6.1 拥塞的原因/代价</h3>
 <h4 id="场景-1">场景 1</h4>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-70.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-70.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="场景-2">场景 2</h4>
 <ul>
 <li>一个路由器，有限的缓冲</li>
@@ -1353,7 +1353,7 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-71.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-71.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>理想化: 发送端有完美的信息</p>
 <ul>
 <li>发送端知道什么时候路由器的缓冲是可用的
@@ -1368,7 +1368,7 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 <li>分组可能丢失，由于缓冲器满而被丢弃</li>
 <li>发送端最终超时，发送第2个拷贝，2个分组都被传出</li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-72.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-72.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>拥塞的“代价”</strong>：</p>
 <ul>
 <li>为了达到一个有效输出，网络需要做更多的工作（重传）</li>
@@ -1386,7 +1386,7 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 </ul>
 <h4 id="场景-3">场景 3</h4>
 <p>4个发送端、多重路径、超时/重传</p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-73.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-73.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>当红色的 \(\lambda^{'}_{in}\) 增加时，所有到来的蓝色分组都在最上方的队列中丢弃了，蓝色吞吐 -&gt; 0</p>
 <p>蓝色受阻，又不断重传，导致蓝色第一跳的路由器缓冲区溢出，形成“死锁”</p>
 <p><strong>又一个拥塞的代价</strong>:</p>
@@ -1474,7 +1474,7 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-74.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-74.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>上图中的 4 个确认，1 个正常确认，3 个重复确认</li>
 </ul>
@@ -1488,7 +1488,7 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 <ul>
 <li>从而粗略地控制发送方的往网络中注入的速率</li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-75.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-75.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <div class="math-block">\[rate \approx \dfrac {\text{CongWin}}{\text{RTT}} bytes/sec\]</div>
 <p>CongWin 是动态的，是感知到的网络拥塞程度的函数</p>
 <ul>
@@ -1535,7 +1535,7 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-76.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-76.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="aimd-超时之后的保守策略">AIMD/超时之后的保守策略</h4>
 <p>AIMD (Additive Increase Multiplicative Decrease): 加性增，乘性减</p>
 <ul>
@@ -1565,8 +1565,8 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 </li>
 </ul>
 <div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>什么时候应该将指数性增长变成线性？</div><p>在超时之前，当 CongWin 变成上次发生超时的窗口的一半</p>
-</div><p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-191.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-192.webp" alt="alt text" loading="lazy"></p>
+</div><p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-191.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-192.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="总结-tcp发送端拥塞控制">总结: TCP发送端拥塞控制</h4>
 <ul>
 <li>当<code>CongWin &lt; Threshold</code>，发送端处于慢启动阶段（<code>slow-start</code>），窗口指数性增长</li>
@@ -1630,11 +1630,11 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-77.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-77.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="7-5-tcp-公平性">7.5 TCP 公平性</h3>
 <p><strong>公平性目标</strong>: 如果 K 个 TCP 会话分享一个链路带宽为 R 的瓶颈，每一个会话的有效带宽为 R/K</p>
 <p>为什么TCP是公平的？2个竞争的TCP会话:</p>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-78.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-78.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>会收敛至 x = y</li>
 </ul>
@@ -1663,10 +1663,10 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-193.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-195.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-194.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-196.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-193.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-195.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-194.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-196.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="7-6-tcp-快速恢复">7.6 TCP 快速恢复</h3>
 <p><strong>TCP协议拥塞控制</strong> 的一个核心机制：<strong>快速恢复 (Fast Recovery)</strong>。它通常与“快速重传”配合使用。</p>
 <p>简单来说，当网络出现轻微拥塞（表现为丢包）时，快速恢复机制允许发送方不要像遇到“超时”那样直接把发送窗口降到1，而是利用一种“临时信用”机制继续发送数据，保持网络的吞吐量。</p>
@@ -1797,13 +1797,13 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 <li><strong>状态更新</strong>：此时 TCP 已经退出了快速恢复，处于<strong>拥塞避免阶段</strong>。在这个阶段，每收到一个 ACK，窗口不再呈指数增长，而是线性增长：\(cwnd = cwnd + 1/cwnd\)。所以 \(cwnd\) 变成了 \(5 + 1/5\)。（每个 RTT 才是 + 1）</li>
 </ul>
 <h3 id="7-7-tcp-state-machine">7.7 TCP state machine</h3>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-197.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-197.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>Timeouts ➔ Slow Start</li>
 <li>dupACKs ➔ Fast Recovery</li>
 <li>New ACK changes state ONLY from Fast Recovery</li>
 </ul>
-<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-198.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%BC%A0%E8%BE%93%E5%B1%82/image-198.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="7-8-tcp-flavors">7.8 TCP flavors</h3>
 <ul>
 <li><strong>TCP-Tahoe</strong><br>
@@ -1881,12 +1881,12 @@ LastByteRcvd -&gt; +-----------------+ ----      |
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
-<script src="/assets/js/main.js?v=1786162127971" defer></script>
-<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
 </body>
 </html>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多处理器编程 · Zwing&#39;s blog</title>
+<meta name="description" content="多处理器环境下的线程编程入门：共享内存模型与并发基础">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">多处理器编程</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-08T16:14:00.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-09 00:14:00</time>
+            <time class="meta-item" datetime="2026-08-08T16:25:54+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-08 16:25:54</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 3251 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 11 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#操作系统"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>操作系统</a>
+              <a class="tag-chip" href="/tags.html#操作系统"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>操作系统</a> <a class="tag-chip" href="/tags.html#并发"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>并发</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><ul>
+<li>并发就是操作系统的核心之一
+<ul>
+<li>操作系统的很多内部数据结构（如进程列表、页表、文件系统结构）都得考虑数据竞争的可能。</li>
+</ul>
+</li>
+<li>并发的很多技术都是源自于操作系统的设计需求和其相应的解决方案</li>
+</ul>
+<div class="callout callout-info"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Amdahl’s Law</div><p>定义并行加速比：</p>
+<div class="math-block">\[\text{speedup} = \frac{1 - \text{thread execution time}}{n - \text{thread execution time}}\]</div>
+<ul>
+<li>让程序中可以被并行化的指令部分的比例为 \(p\)，而程序不可并行化的部分为 \(1 - p\)（注：不是所有逻辑都是可以并行化，如果存在前后依赖的话就难以并行化）。</li>
+<li>那么在有 \(n\) 个并行执行流的情况下，程序的加速比（相比于单个执行流）为</li>
+</ul>
+<div class="math-block">\[\text{speedup} = \frac{1}{1 - p + \frac{p}{n}}\]</div>
+</div><h2 id="1-多线程编程入门">1 多线程编程入门</h2>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>并发的基本单位是线程（Thread）</div></div><ul>
+<li>什么是线程: 共享内存的执行流</li>
+<li>拥有独立的 “上下文” 和栈帧列表，共享全局变量、堆空间</li>
+<li>线程就是代表着程序的 “执行” 单位，操作系统可以随时运行、暂停、和恢复执行它</li>
+<li>有了线程，我们可以 “线性的” 写多个执行流，然后他们可以 “并发” 的执行</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%85%A5%E9%97%A8/image-2.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<ul>
+<li>从状态机的角度来看，多个线程就是多个共享内存的状态机
+<ul>
+<li>初始状态为线程创建时刻的状态，状态迁移为调度器任意选择一个线程执行一步</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%85%A5%E9%97%A8/image.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<blockquote>
+<p>值得注意的是：虽然这里是 <code>thread2</code> 执行一步 \(s_2 \to s_2'\)，然而这个状态变化可能包括共享状态，因此可能顺着带着改变了 <code>thread1</code> 的状态 \(s_1 \to s_1'\)。这里和以往地方不同的地方在于，<code>thread1</code> 并没有主动“求变”，而是其不知道的情况下发生了改变！</p>
+</blockquote>
+<ul>
+<li>Posix 基本线程 API：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Thread call</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pthread_create(pthread_t * thread, const pthread_attr_t * attr, void * (*start_routine) (void*), void * arg)</code></td>
+<td>创建一个线程<code>thread</code>，其将以实参（<code>arg</code>）运行函数（<code>start_routine</code>）。<code>attr</code>是这个线程的属性，默认为<code>NULL</code>，可以通过<code>pthread_attr_init</code>函数来初始化属性如栈大小、优先级等。</td>
+</tr>
+<tr>
+<td><code>pthread_exit(void *retval)</code></td>
+<td>在线程调用这个函数时，结束自己这个线程，并向<code>pthread_join</code>自己的线程返回值<code>retval</code>。（注：即使不调用该函数，<code>start_routine</code>结束时该线程也结束，并向<code>pthread_join</code>自己的线程返回<code>return</code>语句的值）</td>
+</tr>
+<tr>
+<td><code>pthread_join(pthread_t thread, void **retval)</code></td>
+<td>（阻塞自己）等待线程<code>thread</code>结束，<code>thread</code>返回的值将被放到<code>retval</code>所指定的内存</td>
+</tr>
+<tr>
+<td><code>pthread_yield</code></td>
+<td>放弃当前CPU的使用 （现在已经Deprecated了，推荐使用<code>sched_yield</code>）</td>
+</tr>
+<tr>
+<td><code>pthread_detach(pthread_t thread)</code></td>
+<td>使线程<code>thread</code>不被别的进程<code>join</code>，即使主进程结束也不被杀死，例子：<code>pthread_detach(pthread_self());</code> → 使自己“脱缰”</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>线程的一生经历初始化、就绪、运行、等待和结束的周期</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%85%A5%E9%97%A8/image-1.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<ul>
+<li>只有在运行阶段，其 Context 才会在 CPU 上，其余都在内核栈上，当线程处于就绪阶段时其 TCB 在 OS 维护的 ready 列表上等待调度，当线程处于等待阶段时，其 TCB 在 OS 维护的同步等待列表上等待同步事件发生</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;pthread.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> NUMBER_OF_THREADS 10</span>
+<span class="hljs-type">void</span> *<span class="hljs-title function_">print_hello_world</span><span class="hljs-params">(<span class="hljs-type">void</span> *tid)</span>{
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Hello World. Greetings from thread %d\n&quot;</span>, tid);
+    pthread_exit(<span class="hljs-literal">NULL</span>);
+}
+
+<span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span> {
+    <span class="hljs-type">pthread_t</span> threads[NUMBER_OF_THREADS];
+    <span class="hljs-type">int</span> status, i;
+    <span class="hljs-keyword">for</span>(i=<span class="hljs-number">0</span>; i &lt; NUMBER_OF_THREADS; i++){
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Main here. Creating thread %d\n&quot;</span>, i);
+        status = pthread_create(&amp;threads[i], <span class="hljs-literal">NULL</span>, print_hello_world, (<span class="hljs-type">void</span> *)i);
+        <span class="hljs-keyword">if</span> (status != <span class="hljs-number">0</span>) {
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Oops. pthread_create returned error code %d\n&quot;</span>, status);
+            <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);
+        }
+    }
+    <span class="hljs-comment">// 如果主线程不调用 pthread_join 等待子线程</span>
+    <span class="hljs-comment">// 主线程很可能会在子线程完成打印之前就执行完毕并退出</span>
+    <span class="hljs-comment">// 操作系统会销毁该进程的整个地址空间，未运行完毕的子线程就会被直接 “强制抹杀”</span>
+    <span class="hljs-keyword">for</span>(i=<span class="hljs-number">0</span>; i &lt; NUMBER_OF_THREADS; i++){
+        pthread_join(threads[i], <span class="hljs-literal">NULL</span>);
+    }
+}
+<span class="hljs-comment">// 输出极大概率是乱序的</span>
+</code></pre>
+<div class="callout callout-info"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Heisenbug</div><p>不确定的线程调度，以及可能 “被迫” 改变的线程状态（由于共享内存），会使得程序非常容易出现 BUG，并且这些 BUG 往往很微妙、难以捉摸（不是每一次执行都能确定捕捉）</p>
+<p>Heisenbugs 的三个根因：</p>
+<ul>
+<li>原子化丧失</li>
+<li>顺序化丧失</li>
+<li>全局一致性丧失</li>
+</ul>
+</div><h2 id="2-原子性丧失">2 原子性丧失</h2>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>原子性(atomicity)</div><p>一个原子性的操作即是一个在其 “更高” 的层面上无法感知到它的实现是由多个部分组成的，一般来说，其具有两个属性：</p>
+<ul>
+<li><strong>[All or nothing]</strong>：一个原子性操作要么会按照预想那样一次全部执行完毕，要么一点也不做，不会给外界暴露中间态</li>
+<li><strong>[Isolation]</strong>：一个原子性的操作共享变量时中途不会被其他操作干扰，其他所有关于这个共享变量的操作要么在这个原子性操作之前，要么在其之后</li>
+</ul>
+</div><pre><code class="language-c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> N 100000000</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> NUMBER_OF_THREADS 2</span>
+
+<span class="hljs-type">long</span> sum = <span class="hljs-number">0</span>;
+
+<span class="hljs-type">void</span> *<span class="hljs-title function_">T_sum</span><span class="hljs-params">(<span class="hljs-type">void</span>* nothing)</span> {
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; N; i++) {
+        sum++;
+        <span class="hljs-comment">// mov  $sum, %rax</span>
+        <span class="hljs-comment">// add  1, %rax</span>
+        <span class="hljs-comment">// mov  %rax, $sum</span>
+    }
+}
+
+<span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+    <span class="hljs-type">pthread_t</span> threads[NUMBER_OF_THREADS];
+
+    pthread_create(&amp;threads[<span class="hljs-number">0</span>], <span class="hljs-literal">NULL</span>, T_sum,  <span class="hljs-literal">NULL</span>);
+    pthread_create(&amp;threads[<span class="hljs-number">1</span>], <span class="hljs-literal">NULL</span>, T_sum,  <span class="hljs-literal">NULL</span>);
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i=<span class="hljs-number">0</span>; i &lt; NUMBER_OF_THREADS; i++){ pthread_join(threads[i], <span class="hljs-literal">NULL</span>);}
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;sum = %ld\n&quot;</span>, sum);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;2*n = %ld\n&quot;</span>, <span class="hljs-number">2L</span> * N);
+}
+<span class="hljs-comment">// 输出 sum 会远小于 2 亿</span>
+</code></pre>
+<ul>
+<li><strong>原子性丧失：[All or nothing] 违背</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>线程1操作</th>
+<th>线程2操作</th>
+<th>sum内存值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>mov $sum, %rax</td>
+<td>-</td>
+<td>0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>-</td>
+<td>mov $sum, %rax</td>
+<td>0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>add 1, %rax</td>
+<td>-</td>
+<td>0</td>
+</tr>
+<tr>
+<td>4</td>
+<td>-</td>
+<td>add 1, %rax</td>
+<td>0</td>
+</tr>
+<tr>
+<td>5</td>
+<td>mov %rax, $sum</td>
+<td>-</td>
+<td>1</td>
+</tr>
+<tr>
+<td>6</td>
+<td>-</td>
+<td>mov %rax, $sum</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-info"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>绝对最小值</div><p>我们知道 <code>sum++</code> 分为三步：<strong>读 (Read)</strong> -&gt; <strong>加 (Add)</strong> -&gt; <strong>写 (Write)</strong>。</p>
+<ul>
+<li>
+<p><strong>第 1 步：线程 A 读取并被挂起</strong>
+线程 A 开始它的第 1 次循环，从内存中读取 <code>sum</code> 的初始值 <code>0</code> 到 CPU 的寄存器中。就在这时，操作系统剥夺了线程 A 的 CPU 时间片，<strong>线程 A 被挂起</strong>。
+<em>(当前状态：内存 sum=0；线程 A 寄存器=0，剩余 99,999,999 次循环)</em></p>
+</li>
+<li>
+<p><strong>第 2 步：线程 B 疯狂狂奔</strong>
+线程 B 获得 CPU，并且调度器极其偏心，让线程 B 一口气疯狂执行完了前 <code>N-1</code>（即 99,999,999）次完整的循环。
+<em>(当前状态：内存 sum=99,999,999；线程 B 剩余 1 次循环)</em></p>
+</li>
+<li>
+<p><strong>第 3 步：线程 A 苏醒，造成“一血”覆盖</strong>
+线程 A 被唤醒，继续它被打断的动作：把寄存器里的 <code>0</code> 加 <code>1</code>，然后把 <code>1</code> 写回内存。
+<strong>灾难发生：</strong> 线程 B 辛辛苦苦算出来的 99,999,999 瞬间被线程 A 强行覆盖成了 <code>1</code>。
+<em>(当前状态：内存 sum=1；线程 A 完成了 1 次循环，剩余 99,999,999 次)</em></p>
+</li>
+<li>
+<p><strong>第 4 步：线程 B 读取最后一次并被挂起</strong>
+线程 B 开始它的最后 1 次循环。它从内存中读取 <code>sum</code> 的当前值 <code>1</code> 到自己的寄存器中。紧接着，<strong>线程 B 再次被挂起</strong>。
+<em>(当前状态：内存 sum=1；线程 B 寄存器=1，剩余 0 次读取，仅剩最后的加和写)</em></p>
+</li>
+<li>
+<p><strong>第 5 步：线程 A 完成所有剩余工作</strong>
+线程 A 再次苏醒，这次没有被打断，一口气完成了它剩下的 99,999,999 次完整循环。它在 <code>sum=1</code> 的基础上不断累加，最终把内存里的 <code>sum</code> 变成了 <code>100,000,000</code>。此时，线程 A 彻底运行结束。
+<em>(当前状态：内存 sum=100,000,000；线程 A 已结束)</em></p>
+</li>
+<li>
+<p><strong>第 6 步：线程 B 的“终极绝杀”</strong>
+线程 B 苏醒，完成它生命中的最后一个动作。它将自己寄存器中保存的 <code>1</code> 加上 <code>1</code> 得到 <code>2</code>，然后将 <strong><code>2</code></strong> 强势写回内存，覆盖掉了线程 A 留下的 1 亿。线程 B 运行结束。</p>
+</li>
+</ul>
+<p><strong>全剧终，最终内存中 <code>sum</code> 的定格值为：2。</strong></p>
+</div><div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>为什么不可能是 1？</div><p>如果要让最后的结果为 1，那么执行最后一次写入操作的线程，必须在它的最后一次循环中读到 <code>0</code>。</p>
+<p>然而，全局只有在程序最开始的那一瞬间 <code>sum</code> 才是 <code>0</code>。如果一个线程在最开始读到了 <code>0</code>，哪怕它拖延到世界末日再把 <code>1</code> 写回内存，写完之后，它自己<strong>必定还剩下 N-1 次循环没有执行</strong>。等它把剩下的循环执行完，最终结果必然会被推高到 1 亿以上。</p>
+<p>因此，2 是在两个线程互相踩踏下能达到的理论数学下界。</p>
+<p><strong>结论拓展</strong></p>
+<p>在这个剧本中，无论你增加多少个线程，只要把它们全部安排在第 5 步去疯狂输出并正常死亡，最后由一直潜伏在第 4 步的线程 B 醒来完成最后一次写入，所有其他线程的计算成果都会被降维打击，最终结果牢牢钉死在 2。</p>
+</div><ul>
+<li>即使我们强制让 <code>sum++</code> 变成一个 “单个指令” 结果仍然不对</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> N 100000000</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> NUMBER_OF_THREADS 2</span>
+
+<span class="hljs-type">long</span> sum = <span class="hljs-number">0</span>;
+
+<span class="hljs-type">void</span> *<span class="hljs-title function_">T_sum</span><span class="hljs-params">(<span class="hljs-type">void</span>* nothing)</span> {
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; N; i++) {
+        <span class="hljs-keyword">asm</span> <span class="hljs-title function_">volatile</span><span class="hljs-params">(<span class="hljs-string">&quot;incq %0&quot;</span>: <span class="hljs-string">&quot;+m&quot;</span>(sum))</span>; <span class="hljs-comment">// 单个指令</span>
+    }
+}
+
+<span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+    <span class="hljs-type">pthread_t</span> threads[NUMBER_OF_THREADS];
+    pthread_create(&amp;threads[<span class="hljs-number">0</span>], <span class="hljs-literal">NULL</span>, T_sum, <span class="hljs-literal">NULL</span>);
+    pthread_join(threads[<span class="hljs-number">0</span>], <span class="hljs-literal">NULL</span>);
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;sum = %ld\n&quot;</span>, sum);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;2*n = %ld\n&quot;</span>, <span class="hljs-number">2L</span> * N);
+}
+</code></pre>
+<ul>
+<li><strong>原子性丧失：[Isolation] 违背</strong>
+<ul>
+<li>竞争同一个 data（data race）</li>
+<li>可能发生一个线程先做这个指令，但中途（thread1 还没做完）另一个线程也做这个指令，最终导致 sum 的增加不对</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%85%A5%E9%97%A8/image-3.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>实现原子性</div><p>原子性的丧失：</p>
+<ul>
+<li>单处理器多线程
+<ul>
+<li>线程在运行时可能被中断，切换到另一个线程执行([All or nothing]无法保证)</li>
+</ul>
+</li>
+<li>多处理器多线程
+<ul>
+<li>线程根本就是并行执行的（[All or nothing] 和 [Isolate] 都无法保证）</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>互斥和原子性是本学期的重要主题
+<ul>
+<li><code>lock(&amp;lk)</code></li>
+<li><code>unlock(&amp;lk)</code>
+<ul>
+<li>实现临界区之间的绝对串行化</li>
+<li>程序的其他部分依然可以并行执行
+此外，操作系统需要维护一个 “并发” 队列，worker thread 选择队列中的进程进入临界区</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div><h2 id="3-顺序性丧失">3 顺序性丧失</h2>
+<ul>
+<li>顺序性：
+<ul>
+<li>程序语句按照既定的顺序执行！</li>
+</ul>
+</li>
+<li>然而，只要不影响语义，其实指令是否按照顺序执行并不重要
+<ul>
+<li>编译器就会通过 reorder instructions 来优化程序</li>
+<li>这些优化在单线程下往往没有问题，但一旦到了多线程，很多逻辑就错了</li>
+</ul>
+</li>
+</ul>
+<p>控制执行顺序：</p>
+<ul>
+<li>方法 1: 在代码中插入 “优化不能穿越” 的 barrier
+<ul>
+<li>asm volatile (“” ::: “memory”);</li>
+<li>Barrier 的含义是告诉编译器这里 “可以读写任何内存”</li>
+</ul>
+</li>
+<li>方法2: 使用volatile变量，标记其每次load/store为不可优化
+<ul>
+<li>bool volatile flag;</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>真正的解决方案是：锁</div></div><h2 id="4-全局一致性丧失">4 全局一致性丧失</h2>
+<h3 id="4-1-内存一致性模型">4.1 内存一致性模型*</h3>
+<ul>
+<li>现代处理器往往允许指令乱序执行（编译器是将原始执行语句打乱，处理器本身面对指令序列进行乱序执行）
+<ul>
+<li>比如对于高时延的访存指令（如cache miss），处理器可以选择调度后续其他指令执行，从而隐藏访存操作的时延</li>
+</ul>
+</li>
+<li>然而这种乱序会导致多个处理器看到不一致的访存顺序！</li>
+<li>内存一致性模型（简称内存模型）明确定义了不同核心对于共享内存操作需要遵循的顺序</li>
+</ul>
+<h3 id="4-2-顺序一致性模型">4.2 顺序一致性模型</h3>
+<p>顺序一致性模型提供了以下保证:</p>
+<ul>
+<li>首先，不同核心看到的访存操作顺序完全一致，这个顺序称为<strong>全局顺序</strong></li>
+<li>其次，在这个全局顺序中，每个核心自己的读写操作可见顺序必须与其程序顺序保持一致</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%85%A5%E9%97%A8/image-4.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<blockquote>
+<p>可以看成一个 “时间单位” 上只能选择一个线程读或写共享内存一次，最终形成一个统一的全局的访问内存的顺序</p>
+</blockquote>
+<pre><code class="language-c"><span class="hljs-type">int</span> x = <span class="hljs-number">0</span>, y = <span class="hljs-number">0</span>;
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">T1</span><span class="hljs-params">()</span> {
+    x = <span class="hljs-number">1</span>;  <span class="hljs-comment">// Store(x); </span>
+    __sync_synchronize(); <span class="hljs-comment">// a barrier</span>
+    <span class="hljs-type">int</span> t = y; <span class="hljs-comment">// Load(y)</span>
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d&quot;</span>, t);
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">T2</span><span class="hljs-params">()</span> {
+    y = <span class="hljs-number">1</span>;
+    __sync_synchronize();
+    <span class="hljs-type">int</span> t = x;
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d&quot;</span>, t);
+}
+</code></pre>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%85%A5%E9%97%A8/image-5.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p>事实上，目前市面上已经没有支持顺序一致性模型的 CPU 了</p>
+<h3 id="4-3-tso-total-store-ordering-内存模型">4.3 TSO(Total Store Ordering)内存模型*</h3>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%85%A5%E9%97%A8/image-6.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<blockquote>
+<p>线程 1 看到线程 2 是先读 x，然后写 y，但对于线程 2 而言，其是先执行写 y，然后再读 x（虽然这个顺序被处理器打乱了，因为处理器觉得两个顺序不重要，x 和 y 不存在依赖），因此不再一致</p>
+</blockquote>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E5%85%A5%E9%97%A8/image-7.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<ul>
+<li>图中每个 Thread 下面都有一个写缓冲区
+<ul>
+<li>直接把数据写回到主存太慢了</li>
+<li>当 CPU 执行写操作 时，它只是把数据丢进自己的 Store Buffer，然后立刻去执行下一条指令</li>
+</ul>
+</li>
+<li><strong>破解 0,0 谜题的根源：</strong>
+<ul>
+<li>当线程 1 把 <code>x=1</code> 放到自己的 Store Buffer 时，这个值对<strong>其他线程是不可见的</strong>，主存里 x 依然是 0。</li>
+<li>此时，线程 1 继续往下执行 <code>t=y</code>。它去主存里读 y，读到了 0。</li>
+<li>同理，线程 2 把 <code>y=1</code> 放到自己的缓冲，去主存读 x，也读到了 0。</li>
+<li>只有在未来的某个时刻，Store Buffer 里的数据才会被“刷”（Flush）到主存中。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><strong>“一个处理器会比其他处理器更早看到自己的写”</strong>
+这叫 Store Forwarding。如果线程 1 写了 <code>x=1</code> 到缓冲区，紧接着它自己又去读 <code>x</code>，它会先查自己的缓冲区，发现有 1，就直接用。但如果是线程 2 来读 <code>x</code>，它只能看主存，看到的还是 0。</li>
+</ul>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>总结</div><p><strong>保证</strong> 读-读、读-写、写-写 的顺序不乱
+<strong>唯一不保证的，就是“写-读”的全局可见顺序</strong></p>
+</div><h3 id="4-4-宽松内存模型-relaxed-memory-model">4.4 宽松内存模型(Relaxed Memory Model)</h3>
+<ul>
+<li>不保证任何不同地址且无依赖的访存操作之间的顺序，也即读读，读写，写读与写写操作之间都可以乱序全局可见</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> NOT_READY 0;</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> READY 1;</span>
+<span class="hljs-type">int</span> data = <span class="hljs-number">0</span>;
+<span class="hljs-type">int</span> flag = NOT_READY;
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">thread_A</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>{
+    data = <span class="hljs-number">123</span>;
+    <span class="hljs-comment">// __sync_synchronize() // 插入这个才能使得宽松内存模型正确</span>
+    flag = READY;
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">thread_B</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>
+{
+    <span class="hljs-keyword">while</span>(flag != READY) ; <span class="hljs-comment">/* 循环忙等 */</span>
+    handle(data);
+}
+</code></pre>
+<p>基于共享内存的消息传递机制</p>
+<ul>
+<li>在 TSO 下：完美运行
+<ul>
+<li>因为 x86 保证 “写-写” 不乱序。<code>data = 123</code> 一定会比 <code>flag = READY</code> 先写入主存。只要 Thread_B 看到了旗帜升起，主存里的 <code>data</code> 就必定已经是 123 了。。</li>
+</ul>
+</li>
+<li>宽松模型下：灾难发生
+<ul>
+<li>由于允许 “写-写” 乱序，CPU 或者内存系统可能会觉得 <code>flag = READY</code> 这条指令更容易执行，于是<strong>把它插队到了 <code>data = 123</code> 前面</strong>。</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>多处理器编程</div><ul>
+<li>并发的基本单位是线程
+<ul>
+<li>即共享部分内存的状态机（有自己的私有状态）</li>
+<li>其状态的变化可以随着另外的进程的 “步进” 而被动改变</li>
+</ul>
+</li>
+<li>Posix 提供的标准多线程编程库 Pthread</li>
+<li>多处理器编程充满挑战，数据竞争下难以保障正确
+<ul>
+<li>原子性、顺序性和全局一致性都会丧失</li>
+</ul>
+</li>
+</ul>
+</div></div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：多处理器编程</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-09 00:14:00</p>
+      <p><strong>更新于</strong>：2026-08-08 16:25:54</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/并发-多线程编程入门.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">多处理器编程</div>
+      <ul><li class="toc-l2"><a href="#1-多线程编程入门">1 多线程编程入门</a></li><li class="toc-l2"><a href="#2-原子性丧失">2 原子性丧失</a></li><li class="toc-l2"><a href="#3-顺序性丧失">3 顺序性丧失</a></li><li class="toc-l2"><a href="#4-全局一致性丧失">4 全局一致性丧失</a></li><li class="toc-l3"><a href="#4-1-内存一致性模型">4.1 内存一致性模型*</a></li><li class="toc-l3"><a href="#4-2-顺序一致性模型">4.2 顺序一致性模型</a></li><li class="toc-l3"><a href="#4-3-tso-total-store-ordering-内存模型">4.3 TSO(Total Store Ordering)内存模型*</a></li><li class="toc-l3"><a href="#4-4-宽松内存模型-relaxed-memory-model">4.4 宽松内存模型(Relaxed Memory Model)</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/操作系统绪论.html">&lt; 操作系统绪论</a>
+      <a class="pager-next" href="/posts/并发-互斥.html">互斥 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
+</body>
+</html>

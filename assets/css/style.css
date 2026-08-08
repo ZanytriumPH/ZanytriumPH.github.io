@@ -870,6 +870,11 @@ html.post-glass .container-post { max-width: 924px; }
   border-radius: var(--radius-sm);
 }
 
+.markdown-body img.center-img {
+  display: block;
+  margin: 0 auto;
+}
+
 .markdown-body table {
   width: 100%;
   border-collapse: collapse;

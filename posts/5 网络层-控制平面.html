@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -136,7 +136,7 @@
 </ul>
 <h3 id="1-2-路由选择算法引入">1.2 路由选择算法引入</h3>
 <h4 id="网络的图抽象">网络的图抽象</h4>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-110.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-110.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>图: \(G = (N,E)\)</li>
 <li>\(N =\) 路由器集合 \(= \{ u, v, w, x, y, z \}\)</li>
@@ -194,7 +194,7 @@
 <li>其它路由器收到 HELLO 分组，回送应答，在应答分组中，告知自己的名字(全局唯一)</li>
 <li>在 LAN 中，通过广播 HELLO 分组，获得其它路由器的信息，可以认为引入一个人工节点</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-112.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-112.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="1-3-2-测量到相邻节点的代价">1.3.2 测量到相邻节点的代价*</h4>
 <ul>
 <li>实测法，发送一个分组要求对方立即响应</li>
@@ -270,7 +270,7 @@
 <li>链路代价 = 链路承载的流量</li>
 <li>一开始计算出最轻载的路径，但由于各个分组均使用这个路径，导致这个路径变为重载，于是又计算出一个新的路径，而这个路径又变为重载，如此循环</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-213.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-213.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="1-4-distance-vector">1.4 distance vector</h3>
 <p><a href="https://zanytriumph.github.io/2025/12/01/%E5%8D%95%E6%BA%90%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/#Bellman-Ford-%E7%AE%97%E6%B3%95">Bellman-Ford算法</a></p>
 <p>距离矢量路由选择 (distance vector routing)</p>
@@ -299,7 +299,7 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-115.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-115.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>每个节点</strong>：</p>
 <ul>
 <li><strong>等待</strong> (本地链路代价变化或者从邻居传送新的 DV 报文)</li>
@@ -317,7 +317,7 @@
 <li>没有收到通知，不做动作</li>
 </ul>
 <p><a href="C:/Users/36076/Desktop/%E8%AE%A1%E7%BD%91/5-%E7%BD%91%E7%BB%9C%E5%B1%82(%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2)-1.pdf">具体的例子：ppt 32 页开始看</a></p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-117.webp" alt="alt text" loading="lazy">{width=800}</p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-117.webp" alt="alt text" loading="lazy" class="center-img">{width=800}</p>
 <div class="callout callout-note"><ul>
 <li>第一列：在最开始，每个节点只知道自己到直连邻居的链路代价</li>
 <li>第二列：
@@ -425,7 +425,7 @@
 <li>详细解释： 采用了水平分裂算法后，“坏消息（链路断开）”不再像之前那样在两个节点之间来回踢皮球（无穷计算），而是像“好消息”一样，非常干脆、迅速地向后方传递。每一个交换周期，就有一个路由器更新为INF，网络迅速收敛到了正确的状态。</li>
 </ul>
 <p>水平分裂的问题: 在某些拓扑形式下会失败（存在环路）</p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-116.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-116.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>A，B到D的距离为2，C到D的距离为1</li>
 <li>如果C-D路径失败</li>
@@ -650,7 +650,7 @@
 </li>
 </ol>
 <h4 id="层次化的-ospf-路由">层次化的 OSPF 路由</h4>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-214.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-214.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li><mark>2 个级别的层次性: 本地，骨干</mark>
 <ul>
@@ -688,7 +688,7 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-122.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-122.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>均不是实际链路，而是 AS 的逻辑连接</div><p><strong>网关路由器（Gateway Router）</strong> 是连接两个不同网络的 “关口” 设备，最常见的作用是将局域网（LAN，例如你家里的Wi-Fi网络或公司内部网络）连接到广域网（WAN，通常就是互联网）。</p>
 <p>为了方便理解，你可以把它想象成一个封闭小区的<strong>大门保安室</strong>。小区内的居民（你的手机、电脑等设备）相互之间可以自由串门交流（局域网内部通信），但如果居民想要出小区（访问互联网），或者外面的人要送快递进来（从互联网下载数据），都必须经过这个大门保安室。</p>
 <p><strong>网关路由器的核心功能</strong>:</p>
@@ -711,7 +711,7 @@
 </li>
 </ul>
 <h4 id="bgp-路由">BGP 路由</h4>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-123.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-123.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li><mark>当通告一个子网前缀（destination）时，通告包括 BGP 属性</mark>
 <ul>
@@ -742,7 +742,7 @@
 </li>
 </ul>
 <h4 id="bgp-路径通告">BGP 路径通告</h4>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-124.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-124.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>路由器 AS2.2c 从 AS3.3a 接收到的 AS3.X 路由通告 (通过 eBGP)</li>
 <li>基于 AS2 的输入策略，AS2.2c 决定接收 AS3.X 的通告，而且通过 iBGP 向 AS2 的所有路由器进行通告</li>
@@ -752,7 +752,7 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-125.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-125.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>网关路由器可能获取有关一个子网 X 的多条路径，从多个 eBGP 会话上：</p>
 <ul>
 <li>AS1 网关路由器 1c 从 2a 学习到路径：AS2,AS3,X</li>
@@ -772,8 +772,8 @@
 </li>
 </ul>
 <h4 id="bgp-ospf-转发表表项">BGP，OSPF，转发表表项</h4>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-126.webp" alt="alt text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-127.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-126.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-127.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="bgp-路径选择">BGP 路径选择</h4>
 <ul>
 <li><mark>路由器可能获得一个网络前缀的多个路径，路由器必须进行路径的选择</mark>，路由选择可以基于：
@@ -786,7 +786,7 @@
 </li>
 <li>一个前缀对应着多种路径，采用消除规则直到留下一条路径</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-128.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-128.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>2d 通过 iBGP 获知，它可以通过 2a 或者 2c 到达 X</li>
 <li><strong>热土豆策略</strong>：<mark>选择具备<strong>最小内部区域代价</strong>的网关作为往 X 的出口</mark>（如：2d 选择 2a，即使往 X 可能有比较多的 AS 跳数）：不要操心域间的代价！</li>
@@ -795,7 +795,7 @@
 <p>热土豆策略：最小<strong>内部</strong>区域代价</p>
 </blockquote>
 <h4 id="bgp-通过路径通告执行策略">BGP: 通过路径通告执行策略</h4>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-129.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-129.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>假设一个 ISP 只想 路由流量 到/去往它的客户网络 (不想承载其他 ISPs 之间的流量，即不通告：不是去往我的客户，也不是来自我的客户)</p>
 <ul>
 <li>A 向 B 和 C 通告路径 Aw</li>
@@ -860,11 +860,11 @@
 <ul>
 <li><mark>在每一个路由器中的单独路由器算法元件，在控制平面进行交互</mark></li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-79.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-79.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>SDN方式</strong>：逻辑上集中的控制平面</p>
 <p><mark>一个不同的（通常是远程的）控制器与本地控制代理（CAs）交互</mark>
 <mark><strong>远程控制器负责计算</strong>，<strong>在路由器上安装转发表</strong></mark></p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-80.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-80.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>为什么需要一个逻辑上集中的控制平面？</div><ul>
 <li>网络管理更加容易：避免路由器的错误配置，对于通信流的弹性更好</li>
 <li>基于流表的转发（OpenFlow API），允许 “可编程” 的路由器
@@ -880,21 +880,21 @@
 </li>
 </ul>
 </div><p>类比: 主框架到 PC 的演变</p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-102.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-102.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>垂直集成：封闭，私有，创新缓慢，产业规模小 -&gt; 水平集成：开放接口，快速创新，产业巨大</p>
 <h3 id="4-2-流量工程-传统路由实现比较困难">4.2 流量工程：传统路由实现比较困难</h3>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-103.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-103.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>Q: 网管如果需要 u 到 z 的流量走 uvwz，x 到 z 的流量走 xwyz，怎么办？
 A: 需要定义链路的代价，流量路由算法以此运算（IP 路由面向目标，无法操作）（或者需要新的路由算法）!</p>
 <div class="callout callout-note"><p>只是链路权重控制旋钮，错！
 不仅仅链路代价是控制旋钮，控制平面的策略也是</p>
 </div><p>Q: 如果网管需要将 u 到 z 的流量分成 2 路：uvwz 和 uxyz (负载均衡)，怎么办?
 A: 无法完成（在原有体系下只有使用新的路由选择算法，而在全网部署新的路由算法是个大的事情）</p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-104.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-104.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>Q: 如果需要 w 对蓝色的和红色的流量采用不同的路由，怎么办？
 A: 无法操作（基于目标的转发，采用 LS, DV 路由）</p>
 <div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>We learned in Chapter 4 that generalized forwarding and SDN can be used to achieve any routing desired</div></div><p><strong>SDN 特点</strong>：</p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-105.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-105.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="4-2-sdn-架构">4.2 SDN 架构</h3>
 <div align="center">
   <img src="/assets/img/posts/网络层-控制平面/image-106.webp" alt="alt text" width="400">
@@ -934,7 +934,7 @@ A: 无法操作（基于目标的转发，采用 LS, DV 路由）</p>
 <li>非绑定：可以被第三方提供，与控制器厂商以通常上不同，与分组交换机厂商也可以不同</li>
 </ul>
 <p><strong>SDN 控制器里的元件</strong>：</p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-130.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-130.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="4-3-openflow-协议">4.3 OpenFlow 协议</h3>
 <ul>
 <li><mark><strong>控制器和 SDN 交换机交互的协议</strong></mark></li>
@@ -985,11 +985,11 @@ A: 无法操作（基于目标的转发，采用 LS, DV 路由）</p>
 <ul>
 <li>OpenDaylight (ODL) 控制器</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-216.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-216.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>ONOS 控制器</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-217.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-217.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="4-3-sdn-面临的挑战">4.3 SDN 面临的挑战</h3>
 <ul>
 <li>强化控制平面：可信、可靠、性能可扩展性、安全的分布式系统
@@ -1125,7 +1125,7 @@ A: 无法操作（基于目标的转发，采用 LS, DV 路由）</p>
 </tbody>
 </table>
 <h3 id="5-2-路由追踪与-icmp">5.2 路由追踪与 ICMP</h3>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-218.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-218.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>源向目的地发送多组 UDP 报文段
 <ul>
@@ -1179,7 +1179,7 @@ A: 无法操作（基于目标的转发，采用 LS, DV 路由）</p>
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-219.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-219.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="网络运营商的管理方法">网络运营商的管理方法</h4>
 <ul>
 <li><strong>CLI (Command Line Interface):</strong>
@@ -1201,7 +1201,7 @@ A: 无法操作（基于目标的转发，采用 LS, DV 路由）</p>
 </ul>
 <h3 id="6-2-snmp-协议">6.2 SNMP 协议</h3>
 <p>传递 MIB 信息和命令的两种方式：</p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-220.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-220.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>Message types (消息类型):</strong></p>
 <table>
 <thead>
@@ -1229,7 +1229,7 @@ A: 无法操作（基于目标的转发，采用 LS, DV 路由）</p>
 </tr>
 </tbody>
 </table>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-221.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-221.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>管理信息库 (MIB)</strong></p>
 <ul>
 <li><mark>管理设备的运行（和部分配置）数据</mark></li>
@@ -1292,7 +1292,7 @@ A: 无法操作（基于目标的转发，采用 LS, DV 路由）</p>
 *   通过安全、可靠的传输（例如，TLS）协议交换</li>
 </ul>
 <p>NETCONF 初始化、交换、关闭</p>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-222.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-222.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>选定的 NETCONF 操作</p>
 <table>
 <thead>
@@ -1353,7 +1353,7 @@ A: 无法操作（基于目标的转发，采用 LS, DV 路由）</p>
 <li>可以表达数据之间的约束，这些约束必须由有效的 NETCONF 配置满足</li>
 <li>确保 NETCONF 配置满足正确性、一致性约束</li>
 </ul>
-<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-223.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E7%BD%91%E7%BB%9C%E5%B1%82-%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2/image-223.webp" alt="alt text" loading="lazy" class="center-img"></p>
 </div>
         
     <div class="post-copyright-sep"></div>
@@ -1383,12 +1383,12 @@ A: 无法操作（基于目标的转发，采用 LS, DV 路由）</p>
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
-<script src="/assets/js/main.js?v=1786162127971" defer></script>
-<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
 </body>
 </html>

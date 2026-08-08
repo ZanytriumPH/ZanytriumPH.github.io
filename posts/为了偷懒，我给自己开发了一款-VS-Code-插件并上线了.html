@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -105,28 +105,28 @@
 </blockquote>
 <h3 id="背景-vs-code写文档的插入图片问题">背景：VS Code写文档的插入图片问题</h3>
 <p>Obsidian 在笔记圈可谓是小有名气，但我依然选择在万能的 VS Code 中以 Markdown 格式来做笔记、写作业等。首先它足够轻量且全能，安装插件后可支持 Latex 公式、Mermaid 图表、预览分离且热更新、导出为 PDF、甚至 AI 自动补全，基本覆盖了我的所有场景；其次关于归类的问题，部分较为完善的笔记已上传至个人博客由标签和类别分类，而本地的以文件夹分类对我个人来说也足够方便；最后是每写下一部分内容即可 `ctrl + `` 快捷打开终端推送到远程仓库，安全感满满。</p>
-<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions1.webp" alt="alt-text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions1.webp" alt="alt-text" loading="lazy" class="center-img"></p>
 <p>但其中令我比较不爽的是插入图片的存储问题。当然可以通过配置 VS Code 的 markdown.copyFiles.destination，让粘贴的图片统一保存到指定文件夹，但即使只多出一个文件夹对我这种极简主义也如鲠在喉。因此每次写文档时非必要不直接插图片，图片内容能转 Markdown 表格或者 Mermaid 图表的就都先转换再写入。这样还有另一方面的好处：不仅让排版更干净，阅读体验也更连贯。</p>
 <p>但图片转文本的过程也涉及到要向 AI 客户端粘贴图片进行提问，再等待结果，再复制结果，最后到相应位置进行粘贴。虽然也不是很耗时，但就是少了点极致的方便，于是我突然萌生出一个想法：自己开发一个解决这个应用场景的  VS Code 插件。</p>
 <h3 id="关于开发体验和插件本身">关于开发体验和插件本身</h3>
-<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions2.webp" alt="alt-text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions2.webp" alt="alt-text" loading="lazy" class="center-img"></p>
 <p>换做以往做这类开发，多半要先啃官方文档的硬骨头，但有了 AI 的加持让学习成本极度压缩。从安装脚手架（不用人工找），到脚手架结构分析（知道怎么用），再到核心功能的编码（解决实际问题），都通过 AI 光速上手。就好比在游戏里要干掉一个BOSS，AI 能给你找来最锋利的剑，再告诉你这个剑怎么用，最终 BOSS 怎么打。</p>
 <p>但我也没有放任 AI 自由发挥，即使目前我还不会写 JS，但至少能读懂和考虑优化。</p>
 <p>最开始 AI 推荐使用传统的 OCR（光学字符识别）API 来处理文字识别提取，但编码繁杂且实测效果非常不好。所以又立刻想到不如改用视觉大模型的 API，开箱即用，且额度充足。</p>
 <p>另一方面是 AI 给的实现方案居然将秘钥直接硬编码进代码中，即使初衷也只是本地使用，但潜在的安全性问题摆在那令人极度不适，而且后续如果想更换 API 也异常麻烦。</p>
 <p>后面再经过一番折腾也很快就把这个插件弄出来了，甚至实际上修改说明文档、设计绘制插件 Logo 所用的时间还远大于开发核心功能的时间。插件功能也确实单一，但至少完美解决了我的实际需求。并且自定义性很高，启动快捷键和默认提示词都可以修改。</p>
-<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions3.gif" alt="alt-text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions3.gif" alt="alt-text" loading="lazy" class="center-img"></p>
 <blockquote>
 <p>先截图到剪贴板，再按快捷键启动视觉大模型进行解析</p>
 </blockquote>
-<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions4.gif" alt="alt-text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions4.gif" alt="alt-text" loading="lazy" class="center-img"></p>
 <blockquote>
 <p>等待模型解析完毕，结果自动插入到光标处</p>
 </blockquote>
-<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions5.gif" alt="alt-text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions5.gif" alt="alt-text" loading="lazy" class="center-img"></p>
 <p>而其实到这一步本地可用就可以停止了，最后插件上线完全是出于个人的新鲜感。为了上线还与微软鏖战了一番：它强迫开发者订阅它的云服务，但好在有宽松的学生认证可以白嫖。感兴趣者可前往插件市场搜索 “<a href="https://marketplace.visualstudio.com/items?itemName=Zwing.ai-image-paste">AI Image Paste</a>” 查看相关信息与安装使用，但也千万不要有太大的期待，不喜勿喷…</p>
-<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions6.webp" alt="alt-text" loading="lazy"></p>
-<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions7.webp" alt="alt-text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions6.webp" alt="alt-text" loading="lazy" class="center-img"></p>
+<p><img src="/assets/img/posts/%E4%B8%BA%E4%BA%86%E5%81%B7%E6%87%92%EF%BC%8C%E6%88%91%E7%BB%99%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E4%BA%86%E4%B8%80%E6%AC%BE-VS-Code-%E6%8F%92%E4%BB%B6%E5%B9%B6%E4%B8%8A%E7%BA%BF%E4%BA%86/VScodeExtentions7.webp" alt="alt-text" loading="lazy" class="center-img"></p>
 <h3 id="最后谈一点个人感悟">最后谈一点个人感悟</h3>
 <p>首先是对于万能的 VS Code，插件开发极为方便，且个人开发的本地插件也能正常使用，不得不佩服其高度自定义化的强大。</p>
 <p>但更想谈的还是关于 AI 。本次开发并未给我带来 AI 在编码能力上的震撼，这种震撼在大一的暑期课程 “Web 开发” 的课程项目中就感受到了：在前后端、数据库几乎零基础的情况下，靠 “提需求 -&gt; AI 生成 -&gt; 人工审阅 -&gt; 现学现用 -&gt; 反思优化” 的方式，搓出了一个像模像样的全栈项目。</p>
@@ -165,12 +165,12 @@
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
-<script src="/assets/js/main.js?v=1786162127971" defer></script>
-<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
 </body>
 </html>

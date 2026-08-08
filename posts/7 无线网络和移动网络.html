@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -422,7 +422,7 @@ $\(D_i^1 = d_i^1 \cdot 1 + d_i^2 \cdot 0 = d_i^1\)$
 </ul>
 <p>无法 CD 的两个例子：</p>
 <div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>“隐藏终端” 问题</div><p>站点 A、C 都能和 B 通信，但 A 和 C 之间无法通信，导致 A 和 C 可能同时发送（实际上有冲突），B 接收失败
-<img src="/assets/img/posts/%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/image-143.webp" alt="alt text" loading="lazy"></p>
+<img src="/assets/img/posts/%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/image-143.webp" alt="alt text" loading="lazy" class="center-img"></p>
 </div><div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>“暴露终端” 问题</div><p>假设有四个无线节点，在地理位置上排成一排：A —— B —— C —— D</p>
 <p>假设它们的无线电波覆盖范围只能到达相邻的节点（即：B 能听到 A 和 C；C 能听到 B 和 D；但 A 听不到 C，B 也听不到 D）</p>
 <ul>
@@ -495,7 +495,7 @@ $\(D_i^1 = d_i^1 \cdot 1 + d_i^2 \cdot 0 = d_i^1\)$
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/image-146.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/image-146.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>补充：DIFS 与 SIFS</div><p><strong>DIFS</strong> 和 <strong>SIFS</strong> 是两个非常关键的 “等待时间”（专业术语叫<strong>帧间间隔</strong>，InterFrame Space）</p>
 <p>它们的核心设计逻辑就是：<strong>通过设置不同长短的等待时间，来硬性规定谁有优先发言权</strong></p>
 <p>1 SIFS（Short InterFrame Space）—— 短帧间间隔</p>
@@ -580,7 +580,7 @@ $\(D_i^1 = d_i^1 \cdot 1 + d_i^2 \cdot 0 = d_i^1\)$
 </ul>
 </li>
 </ul>
-<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>采用小的预约分组，可以完全避免数据帧的冲突</div></div><p><img src="/assets/img/posts/%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/image-147.webp" alt="alt text" loading="lazy"></p>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>采用小的预约分组，可以完全避免数据帧的冲突</div></div><p><img src="/assets/img/posts/%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/image-147.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ol>
 <li>
 <p><strong>预约冲突</strong></p>
@@ -616,7 +616,7 @@ $\(D_i^1 = d_i^1 \cdot 1 + d_i^2 \cdot 0 = d_i^1\)$
 </ul>
 </li>
 </ol>
-<p><img src="/assets/img/posts/%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/20260510-0803-28.8792520-anim.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/20260510-0803-28.8792520-anim.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <hr>
 <h4 id="rts-cts-预留机制-解决隐藏终端冲突">RTS/CTS 预留机制（解决隐藏终端冲突）</h4>
 <p>为了防止隐藏终端同时发送数据导致长数据帧冲突，802.11 引入了可选的信道预留机制：</p>
@@ -780,12 +780,12 @@ $\(D_i^1 = d_i^1 \cdot 1 + d_i^2 \cdot 0 = d_i^1\)$
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
-<script src="/assets/js/main.js?v=1786162127971" defer></script>
-<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
 </body>
 </html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>操作系统绪论 · Zwing&#39;s blog</title>
+<meta name="description" content="操作系统课程绪论：计算机系统结构、操作系统的定义与核心功能">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">操作系统绪论</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-08T16:15:00.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-09 00:15:00</time>
+            <time class="meta-item" datetime="2026-08-08T16:25:54+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-08 16:25:54</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 1598 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 6 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#操作系统"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>操作系统</a>
+              <a class="tag-chip" href="/tags.html#操作系统"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>操作系统</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><h2 id="1-操作系统概述">1 操作系统概述</h2>
+<p>操作系统是<mark>对硬件进行管理和抽象</mark>并<mark>为应用提供服务并进行管理的程序</mark></p>
+<p>操作系统的功能：</p>
+<ul>
+<li>提供简洁、易用的物理层抽象
+<ul>
+<li>拥有无限的内存，专属的机器</li>
+<li>高级的对象：文件、进程、信号…</li>
+<li>屏蔽限制</li>
+</ul>
+</li>
+<li>资源的管理
+<ul>
+<li>分配</li>
+<li>保护</li>
+<li>分享</li>
+</ul>
+</li>
+<li>操作系统的底线是支持应用程序的运行
+<ul>
+<li>自身反而次要</li>
+<li>理想情况下操作系统自身的资源开支应该不大</li>
+<li>应用程序运行应该尽可能快</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-各种视角下的操作系统">2 各种视角下的操作系统</h2>
+<p>操作系统有三条主线：</p>
+<ul>
+<li>“软件 (应用)”</li>
+<li>“硬件 (计算机)”</li>
+<li>“操作系统 (软件直接访问硬件带来麻烦太多而引入的中间件)”</li>
+</ul>
+<h3 id="2-1-应用视角下的操作系统">2.1 应用视角下的操作系统</h3>
+<h4 id="2-1-1-程序的状态机模型">2.1.1 程序的状态机模型</h4>
+<ul>
+<li>一个理论模型：<strong>程序就是状态机</strong></li>
+<li>对于（二进制）程序而言
+<ul>
+<li>状态 = \(M\)（内存）+ \(E\)（寄存器）</li>
+<li>初始状态 = 程序启动时操作系统给安排的状态</li>
+<li>状态转移 = 执行一条指令</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>假设当前状态是 \((M, R)\)
+<ul>
+<li>从 \(R[PC]\) 取一条指令</li>
+<li>解析指令，取出指令所必要的数据</li>
+<li>计算结果（可能有非确定性，例如 <code>rdrand</code>）</li>
+<li>更新得到 \((M', R)\)</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>调用操作系统 syscall
+<ul>
+<li>把 \((M, R)\) 完全交给操作系统，任其修改</li>
+</ul>
+</li>
+<li>实现与操作系统中的其他对象交互
+<ul>
+<li>读写文件/操作系统状态（例如把文件内容写入 \(M\)）</li>
+<li>改变进程（运行中状态机）的状态，例如创建进程/销毁自己</li>
+</ul>
+</li>
+</ul>
+<pre class="mermaid">flowchart LR
+    A(["M, R"])
+    B(["M', R'"])
+    OS(["OS<br/>(M, R)"])
+    OS_dots["......"]
+    C(["M'', R''"])
+    End_dots["......"]
+
+    A -->|"执行PC指向的指令<br/>更新PC等寄存器、更新M的数据"| B
+    B -.->|"指令如果是syscall<br/>把权限交给操作系统"| OS
+    OS -.->|"操作系统掌控一切"| OS_dots
+    OS_dots -.->|"操作系统处理完了syscall该做的事情，返回到进程"| C
+    B -->|"对于程序而言，其感知不到这一切，<br/>就好像是执行了一条指令进入下个状态"| C
+    C --> End_dots
+
+    %% 节点样式设置
+    classDef blueNode fill:#107c9b,stroke:#fff,stroke-width:1px,color:#fff
+    classDef orangeNode fill:#df8e1d,stroke:#fff,stroke-width:1px,color:#fff
+    classDef invisible fill:none,stroke:none
+
+    class A,B,C blueNode
+    class OS orangeNode
+    class OS_dots,End_dots invisible
+
+    %% 设置第5条连线（B直接到C的线）为黄色高亮加粗
+    linkStyle 4 stroke:#fadb14,stroke-width:2px
+</pre>
+<ul>
+<li>从这个角度看，<mark>程序 = 计算 + syscall，而操作系统就像是 syscall 的解释器</mark>！
+<ul>
+<li>普通的指令由cpu解释</li>
+<li>syscall 则由操作系统解释（当然，最终操作系统还是要借助 cpu 解释）</li>
+<li>这也是为什么操作系统可以看成是更加高级的机器</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>C 程序的状态机模型
+<ul>
+<li>状态 = 堆 + 栈 + 全局变量
+<ul>
+<li>寄存器呢？C 是更高的抽象！</li>
+</ul>
+</li>
+<li>初始状态 = 仅有一个 frame main(argc, argv); 全局变量为初始值</li>
+<li>迁移 = 执行一条简单语句
+<ul>
+<li>执行当前调用栈栈顶的那个栈指针 (frames.top.PC处) 的简单语句</li>
+<li>如果是函数调用的话，本质上就是压入一个新的栈帧 (stack frame)，并设置这个新的 frame.PC  = 所调用函数的入口</li>
+<li>函数返回 = pop frame</li>
+</ul>
+</li>
+<li>编译器即为汇编指令序列与 C 程序的桥梁：.s = compile(.c)</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-1-2-操作系统上的软件-应用程序">2.1.2 操作系统上的软件（应用程序）</h4>
+<ul>
+<li>操作系统中的任何程序本质上即为包含 syscall 的状态机</li>
+<li>操作系统管理着所有的硬件/软件资源
+<ul>
+<li>只能用操作系统允许的方式访问操作系统中的对象 (syscall)
+<ul>
+<li>这种集中管理有助于解决资源抢占和冲突</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>为什么我们能够 “追踪” 进程（System call trace）
+<ul>
+<li>因为所有进程都在 “操作系统” 的监控之下！
+<ul>
+<li>进程某种意义上是运行在 “操作系统” 这样的一个虚拟机中，而不是直面硬件，所以操作系统清楚进程的一切，也能修改其一切！</li>
+</ul>
+</li>
+<li>操作系统为进程提供了 ptrace 系统调用，其可以帮助一个进程去查看另外一个进程，甚至是修改另外进程的运行时的寄存器，以至于植入代码！
+<ul>
+<li>Strace、GDB 背后都是 ptrace 系统调用！</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>操作系统中 “任何程序” 的一生
+<ul>
+<li>初始状态
+<ul>
+<li>执行 <code>execve</code> 加载到内存，设置初始状态</li>
+</ul>
+</li>
+<li>状态机执行
+<ul>
+<li>进程管理 (<code>-e trace=%process</code>)：<code>fork</code>, <code>execve</code>, <code>exit</code>, …</li>
+<li>文件/设备管理 (<code>-e trace=%file</code>)：<code>open</code>, <code>close</code>, <code>read</code>, <code>write</code>, …</li>
+<li>存储管理 (<code>-e trace=%memory</code>)：<code>mmap</code>, <code>brk</code>, …</li>
+<li>调用 <code>exit</code> 或者 <code>exit_group</code> 退出</li>
+</ul>
+</li>
+<li>所有的这些程序都是在操作系统 API (syscall) 和操作系统中的对象上构建
+<ul>
+<li>本质都是调用 syscall 的状态机</li>
+<li>对于这些应用而言，操作系统就是一个帮助解释这些 syscall 的存在而已，其和能够帮他们解释普通计算指令的 CPU 无异</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>简而言之，在应用眼中，操作系统就是 syscall 的解释器！</div></div><h3 id="2-2-硬件视角下的操作系统">2.2 硬件视角下的操作系统</h3>
+<h4 id="2-2-1-计算机硬件的状态机模型">2.2.1 计算机硬件的状态机模型</h4>
+<ul>
+<li>硬件的核心是一堆数字电路
+<ul>
+<li>状态 = 寄存器保存的值（flip-flop）</li>
+<li>初始状态 = REST</li>
+<li>迁移 = 组合逻辑电路 (<code>NAND</code>, <code>NOT</code>, <code>AND</code>, <code>OR</code>, <code>NOR</code>)计算寄存器下一时钟周期的值</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>整个计算机系统也是一个状态机
+<ul>
+<li>状态：内存和寄存器数值</li>
+<li>初始状态：CPU Reset</li>
+<li>状态迁移：
+<ul>
+<li>任意选择一个处理器 CPU</li>
+<li>响应处理器外部中断</li>
+<li>从 CPU 的 PC 取指令执行</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-2-2-硬件与程序员的约定">2.2.2 硬件与程序员的约定</h4>
+<ul>
+<li>
+<p>为了让 “操作系统” 这个程序能够正确启动，计算机硬件系统必定和程序员之间存在约定：</p>
+<ul>
+<li>首先就是 Reset 的状态。</li>
+<li>然后是 Reset 以后执行的程序应该做什么。</li>
+</ul>
+</li>
+<li>
+<p>这么想，计算机硬件和操作系统就一点也不神秘了</p>
+</li>
+<li>
+<p>计算机系统的一切行为都是可观测、可理解的</p>
+<ul>
+<li>处理器的任务就是重复着进行着取指令和执行指令</li>
+<li>厂商配置好处理器 Reset 后的行为：先运行 Firmware，再加载操作系统</li>
+<li>操作系统就是一个 C 程序！
+<ul>
+<li>只不过其拥有完整计算机的控制权限，包括中断和 I/O 设备</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-3-抽象视角下的操作系统">2.3 抽象视角下的操作系统</h3>
+<ul>
+<li>操作系统本身就是状态机
+<ul>
+<li>内部状态为用户进程的元信息、内核栈、内核堆、操作系统代码区</li>
+<li>操作系统在硬件加载完毕和初始化之后就变成了就成为了 interrupt/trap/fault handler</li>
+<li>操作系统的状态是被动迁移的，用户程序执行 syscall 才会改变操作系统状态、硬件中断事件发生后（如时钟中断）才会改变操作系统状态</li>
+</ul>
+</li>
+</ul>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>各种视角下的操作系统</div><p>本身是状态机 (内部的状态为操作系统管理的资源状态，被动进行状态迁移)</p>
+<p>为在其之上的应用程序服务：应用程序的解释器</p>
+<p>直接跑在硬件之上的C程序：为硬件中断处理程序</p>
+</div></div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：操作系统绪论</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-09 00:15:00</p>
+      <p><strong>更新于</strong>：2026-08-08 16:25:54</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/操作系统绪论.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">操作系统绪论</div>
+      <ul><li class="toc-l2"><a href="#1-操作系统概述">1 操作系统概述</a></li><li class="toc-l2"><a href="#2-各种视角下的操作系统">2 各种视角下的操作系统</a></li><li class="toc-l3"><a href="#2-1-应用视角下的操作系统">2.1 应用视角下的操作系统</a></li><li class="toc-l3"><a href="#2-2-硬件视角下的操作系统">2.2 硬件视角下的操作系统</a></li><li class="toc-l3"><a href="#2-3-抽象视角下的操作系统">2.3 抽象视角下的操作系统</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <span></span>
+      <a class="pager-next" href="/posts/并发-多线程编程入门.html">多处理器编程 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
+</body>
+</html>

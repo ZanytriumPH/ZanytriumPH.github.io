@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -462,8 +462,8 @@
         </tbody>
     </table>
 </div>
-<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-1.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-1.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><strong>选择：从行的角度计算</strong></p>
 <ul>
 <li>在关系 \(R\) 中选择满足给定条件 \(F\)（逻辑表达式）的各元组</li>
@@ -478,7 +478,7 @@
 可以简写：\(\pi_A \sigma_F(R)\)
 在没有括号的情况下，其运算顺序为：<strong>从右向左</strong></p>
 </blockquote>
-<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-2.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-2.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <blockquote>
 <p><strong>5, 6, 7, 8 重点看</strong></p>
 </blockquote>
@@ -564,7 +564,7 @@ $\(\pi_{C.cid}(\sigma_{C.discnt < S.discnt}(C \times S)) - \pi_{C.cid}(\sigma_{C
 </div>
 <p>交不是一个基本运算符，其功能可以用差运算来实现</p>
 <div class="math-block">\[R \cap S = R - (R - S) = S - (S - R)\]</div>
-<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-3.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-3.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>并、差、交均要求为同类关系</li>
 <li>并和交满足交换律和结合律</li>
@@ -582,7 +582,7 @@ $\(\pi_{C.cid}(\sigma_{C.discnt < S.discnt}(C \times S)) - \pi_{C.cid}(\sigma_{C
 </li>
 </ul>
 <p><strong>除运算</strong></p>
-<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-4.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-4.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>在关系 \(R\) 中，\(A\) 可以取四个值 \(\{a_1, a_2, a_3, a_4\}\)
 <ul>
@@ -629,7 +629,7 @@ $\(\pi_{C.cid}(\sigma_{C.discnt < S.discnt}(C \times S)) - \pi_{C.cid}(\sigma_{C
 <p>\(T_2\) 是关系 \(T_{max}\) 中不满足除运算的结果要求的那些元组，即：对于关系 \(T_2\) 中的任一个元组 \(q\)，至少能在关系 \(S\) 中找到一个元组 \(s\)，使得由元组 \(q\) 和 \(s\) 所构成的元组 \((q,s)\) 不在关系 \(R\) 中出现</p>
 </blockquote>
 <p>⑤ \(R \div S := T_{max} - T_2\)</p>
-<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-5.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/image-5.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>学生关系：S (学号 sno，姓名 sn，就读院系 sd，年龄 sa)</li>
 <li>课程关系：C (课程号 cno，课程名 cn，先修课程号 pno)</li>
@@ -731,12 +731,12 @@ $\(\pi_{C.cid}(\sigma_{C.discnt < S.discnt}(C \times S)) - \pi_{C.cid}(\sigma_{C
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
-<script src="/assets/js/main.js?v=1786162127971" defer></script>
-<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
 </body>
 </html>

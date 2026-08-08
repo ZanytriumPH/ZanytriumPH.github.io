@@ -29,9 +29,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786162127971">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786162127971" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786162127971">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -287,8 +287,8 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-0.webp" alt="alt text" loading="lazy">
-<img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-1.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-0.webp" alt="alt text" loading="lazy" class="center-img">
+<img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-1.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h5 id="udp之上的套接字-socket">UDP之上的套接字（socket）</h5>
 <ul>
 <li>对于使用无连接服务（UDP）的应用而言，套接字是 2 元组的一个具有本地意义的标示
@@ -300,7 +300,7 @@
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-2.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-2.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h5 id="套接字-socket">套接字（Socket）</h5>
 <ul>
 <li><mark>进程向套接字发送报文或从套接字接收报文</mark></li>
@@ -579,7 +579,7 @@
 </ul>
 <p>假设用户输入URL：<a href="http://www.someSchool.edu/someDept/home.index">www.someSchool.edu/someDept/home.index</a></p>
 <p>(包含文本和10个就jpeg图像的引用)</p>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/%E5%9B%BE%E7%89%873.webp" alt="text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/%E5%9B%BE%E7%89%873.webp" alt="text" loading="lazy" class="center-img"></p>
 <p>对10jpeg对象，重复以上步骤</p>
 <h4 id="2-4-2-响应时间模型">2.4.2 响应时间模型</h4>
 <p><mark>往返时间 RTT</mark>（round-trip time）：</p>
@@ -592,7 +592,7 @@
 <li>一个 RTT 用来 HTTP 请求并等待 HTTP 响应</li>
 <li>文件传输时间</li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-3.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-3.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="2-4-3-持久-http">2.4.3 持久 HTTP</h4>
 <ul>
 <li>多个对象可以在一个（在客户端和服务器之间的）TCP连接上传输</li>
@@ -753,7 +753,7 @@ data data data data data ...
 <li><mark>在用户端系统中保留有一个 cookie 文件，由用户的浏览器管理</mark></li>
 <li><mark>在Web站点有一个后端数据库</mark></li>
 </ol>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-4.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-4.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>Cookies 能带来什么：用户验证、购物车、推荐、用户状态(Web email)</p>
 <p>如何维持状态：</p>
 <ul>
@@ -801,7 +801,7 @@ data data data data data ...
 <li>机构内部路由器到原始服务器再返回到路由器的的延时（Internet 延时）= 2s</li>
 <li>接入链路带宽：1.54Mbps</li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-5.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-5.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>结果</p>
 <ul>
 <li>LAN 的流量强度 = 15%</li>
@@ -837,7 +837,7 @@ data data data data data ...
 <h4 id="条件get方法">条件GET方法</h4>
 <p>目标：如果缓存器中的对象拷贝是最新的，就不发送对象</p>
 <p>缓存器: 在HTTP请求中指定缓存拷贝的日期 <code>If-modified-since:&lt;date&gt;</code></p>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-6.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-6.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <hr>
 <h4 id="caching-where">Caching: Where?</h4>
 <ul>
@@ -857,9 +857,9 @@ data data data data data ...
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-7.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-7.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="控制连接与数据连接分开">控制连接与数据连接分开</h3>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-8.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-8.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ul>
 <li>
 <p><mark>FTP 客户端与 FTP 服务器通过<strong>端口 21</strong> 联系，并使用 TCP 为传输协议</mark></p>
@@ -886,7 +886,7 @@ data data data data data ...
 <p><strong>有状态</strong></p>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-174.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-174.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <table>
 <thead>
 <tr>
@@ -956,7 +956,7 @@ data data data data data ...
 </li>
 <li>简单邮件传输协议：SMTP</li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-9.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-9.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="4-1-邮件传递的阶段">4.1 邮件传递的阶段</h3>
 <ul>
 <li>第一阶段
@@ -979,7 +979,7 @@ data data data data data ...
 </ul>
 </li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-175.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-175.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <ol>
 <li>Alice 使用用户代理撰写邮件并发送给 <a href="mailto:bob@someschool.edu">bob@someschool.edu</a></li>
 <li>Alice 的用户代理将邮件发送到她的邮件服务器，邮件放在报文队列中</li>
@@ -988,7 +988,7 @@ data data data data data ...
 <li>Bob 的邮件服务器将邮件放到Bob的邮箱</li>
 <li>Bob 调用他的用户代理阅读邮件</li>
 </ol>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-10.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-10.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h3 id="4-2-smtp">4.2 SMTP</h3>
 <ul>
 <li><mark>使用 TCP 在客户端和服务器之间传送报文，<strong>端口号为 25</strong></mark></li>
@@ -1041,7 +1041,7 @@ data data data data data ...
 <li>SMTP：多个对象包含在一个报文中</li>
 </ul>
 <h3 id="4-3-邮件访问协议">4.3 邮件访问协议</h3>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-176.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-176.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p><em>前两跳是“推”，最后一跳是“拉”</em></p>
 <p>SMTP: 传送到接收方的邮件服务器
 邮件访问协议：从服务器访问邮件（Mail access protocol）</p>
@@ -1193,7 +1193,7 @@ data data data data data ...
 </ul>
 <p>• Number of content formats defined
 • Transfer encoding defined</p>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-11.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-11.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h2 id="5-dns">5 DNS</h2>
 <p>DNS 域名系统(Domain Name System)，用于实现域名到IP地址的转换</p>
 <p>DNS 的必要性</p>
@@ -1254,7 +1254,7 @@ data data data data data ...
 <li>每个(子)域下面可划分为若干子域</li>
 <li>树叶是主机</li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-13.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-13.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="域名-domain-name">域名(Domain Name)</h4>
 <ul>
 <li>从本域往上，直到树根</li>
@@ -1339,7 +1339,7 @@ data data data data data ...
 <li>解析器作为客户向Name Server发出查询报文（封装在UDP段中）</li>
 <li>Name Server返回响应报文(name/ip)</li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-14.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-14.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>本地名字服务器（Local Name Server）:</p>
 <ul>
 <li>并不严格属于层次结构</li>
@@ -1371,14 +1371,14 @@ data data data data data ...
 <li>问题：根服务器的负担太重</li>
 <li>解决办法：迭代查询</li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-15.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-15.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="迭代查询">迭代查询</h4>
 <ul>
 <li><mark>根（及各级域名）服务器返回的不是查询结果，而是下一个NS的地址</mark></li>
 <li>最后由权威名字服务器给出解析结果</li>
 <li>当前联络的服务器给出可以联系的服务器的名字</li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-16.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-16.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="dns协议-报文">DNS协议、报文*</h4>
 <p>DNS协议：<strong>查询</strong>和<strong>响应</strong>报文的<strong>报文格式</strong>相同</p>
 <pre><code class="language-planetext">|&lt;--- 2 bytes ----&gt;|&lt;--- 2 bytes ----&gt;|
@@ -1458,7 +1458,7 @@ data data data data data ...
 <blockquote>
 <p>从一台服务器分发文件（大小 F）到 N 个 peer 需要多少时间？</p>
 </blockquote>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-17.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-17.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <h4 id="c-s模式">C/S模式</h4>
 <ul>
 <li>
@@ -1509,7 +1509,7 @@ data data data data data ...
 <ul>
 <li>\(NF/(u_s + \sum u_i)\)：分子随着N线性变化，但分母也在变</li>
 </ul>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-18.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-18.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <blockquote>
 <p>P2P 详细内容：略</p>
 </blockquote>
@@ -1569,7 +1569,7 @@ data data data data data ...
 <p>评述：相当简单，但是这个方法<strong>不可扩展</strong></p>
 <hr>
 <p>选项2: <mark>通过CDN，<strong>全网部署缓存节点</strong></mark>，存储服务内容，就近为用户提供服务，提高用户体验</p>
-<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-177.webp" alt="alt text" loading="lazy"></p>
+<p><img src="/assets/img/posts/%E5%BA%94%E7%94%A8%E5%B1%82/image-177.webp" alt="alt text" loading="lazy" class="center-img"></p>
 <p>部署缓存节点策略：</p>
 <ul>
 <li>深入部署模式
@@ -1673,12 +1673,12 @@ data data data data data ...
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786162127971"></script>
-<script src="/assets/js/main.js?v=1786162127971" defer></script>
-<script src="/assets/js/search.js?v=1786162127971" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786162127971"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
 </body>
 </html>

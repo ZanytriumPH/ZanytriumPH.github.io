@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>同步 · Zwing&#39;s blog</title>
+<meta name="description" content="线程同步原语：条件变量、信号量与等待队列">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">同步</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-08T16:12:00.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-09 00:12:00</time>
+            <time class="meta-item" datetime="2026-08-08T16:25:54+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-08 16:25:54</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 5591 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 19 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#操作系统"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>操作系统</a>
+              <a class="tag-chip" href="/tags.html#操作系统"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>操作系统</a> <a class="tag-chip" href="/tags.html#并发"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>并发</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><p>为了达成/避免一些状态，我们需要线程受控制</p>
+<ul>
+<li><strong>同步</strong>(Synchronization)
+<ul>
+<li>控制并发，使得 “两个或两个以上随时间变化的量在变化过程中保持一定的相对关系”</li>
+<li>互斥也是一种同步</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">int</span> x = <span class="hljs-number">0</span>, y = <span class="hljs-number">0</span>;
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">T1</span><span class="hljs-params">()</span> {
+    lock(); x = <span class="hljs-number">1</span>; unlock(); lock(); <span class="hljs-type">int</span> t = y; unlock();
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">T2</span><span class="hljs-params">()</span> {
+    lock(); y = <span class="hljs-number">1</span>; unlock(); lock(); <span class="hljs-type">int</span> t = x; unlock();
+}
+</code></pre>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%90%8C%E6%AD%A5/image-11.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p>无法实现只想要进入某个状态，简单的互斥（加锁、解锁）并不能控制线程的执行顺序</p>
+<h2 id="1-生产者-消费者问题">1 生产者-消费者问题</h2>
+<ul>
+<li>一个或多个线程共享一个数据缓冲区问题，该缓冲区容量有上限（有界缓冲区）</li>
+<li>线程分为两类：一类生产数据（生产者），一类消费数据（消费者）</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%90%8C%E6%AD%A5/image-12.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>一个简化版问题（打印括号）</div><p>生产 = 打印左括号 (push into buffer)
+消费 = 打印右括号 (pop from buffer)
+缓冲区：括号的嵌套深度</p>
+</div><h3 id="1-1-没学过并发编程的尝试">1.1 没学过并发编程的尝试</h3>
+<pre><code class="language-c"><span class="hljs-type">int</span> n; <span class="hljs-comment">//缓冲区大小</span>
+<span class="hljs-type">int</span> depth = <span class="hljs-number">0</span>; <span class="hljs-comment">//当前使用了多少空间</span>
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">produce</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+    retry:
+        <span class="hljs-type">int</span> ready = (depth &lt; n); <span class="hljs-comment">//是否还有空间</span>
+        <span class="hljs-keyword">if</span> (!ready) <span class="hljs-keyword">goto</span> retry; <span class="hljs-comment">//没有空间，自旋等待</span>
+
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot; &quot;</span>); <span class="hljs-comment">//只有还有空间才能打印</span>
+        depth++; <span class="hljs-comment">//打印之后，缓冲区使用的空间加一</span>
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">consume</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+    retry:
+        <span class="hljs-type">int</span> ready = (depth &gt; <span class="hljs-number">0</span>); <span class="hljs-comment">//是否有数据</span>
+        <span class="hljs-keyword">if</span> (!ready) <span class="hljs-keyword">goto</span> retry; <span class="hljs-comment">//没有数据，自旋等待</span>
+
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot; &quot;</span>); <span class="hljs-comment">//有数据才能打印</span>
+        depth--; <span class="hljs-comment">//打印之后，缓冲区使用的空间减一</span>
+    }
+}
+</code></pre>
+<ul>
+<li>该尝试显然是错的，因为共享变量 <code>depth</code> 的访问部分是临界区代码，应该用互斥锁保护，否则出现竞态条件，违背安全性</li>
+</ul>
+<h3 id="1-2-生产者-消费者问题解决尝试-1">1.2 生产者-消费者问题解决尝试 1</h3>
+<ul>
+<li>利用互斥锁保护共享变量 <code>depth</code>，使其访问都是原子的</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">produce</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+    retry:
+        mutex_lock(&amp;lk);
+        <span class="hljs-type">int</span> ready = (depth &lt; n);
+        mutex_unlock(&amp;lk);
+        <span class="hljs-keyword">if</span> (!ready) <span class="hljs-keyword">goto</span> retry;
+        <span class="hljs-comment">// 此时的 ready 为 true 的话, depth &lt; n 一定 hold 的吗？不一定！</span>
+        <span class="hljs-comment">// 语句 mutex_unlock(&amp;lk); 和 if (!ready) 之间可能 depth 已经被别的线程篡改了</span>
+
+        mutex_lock(&amp;lk);
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot; &quot;</span>);
+        depth++;
+        mutex_unlock(&amp;lk);
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">consume</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+    retry:
+        mutex_lock(&amp;lk);
+        <span class="hljs-type">int</span> ready = (depth &gt; <span class="hljs-number">0</span>);
+        mutex_unlock(&amp;lk);
+        <span class="hljs-keyword">if</span> (!ready) <span class="hljs-keyword">goto</span> retry;
+
+        mutex_lock(&amp;lk);
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;)&quot;</span>);
+        depth--;
+        mutex_unlock(&amp;lk);
+    }
+}
+</code></pre>
+<h3 id="1-3-生产者-消费者问题解决尝试-2">1.3 生产者-消费者问题解决尝试 2</h3>
+<ul>
+<li>之前的问题在于 <code>unlock</code> 和再次判断可能被打扰，那直接把 <code>unlock</code> 推迟</li>
+<li>虽然正确，但是会有性能问题</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">produce</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+    retry:
+        mutex_lock(&amp;lk);
+        <span class="hljs-type">int</span> ready = (depth &lt; n);
+
+        <span class="hljs-comment">// 分支 1，不满足，先释放锁再自旋</span>
+        <span class="hljs-keyword">if</span> (!ready) {
+            mutex_unlock(&amp;lk); 
+            <span class="hljs-keyword">goto</span> retry;
+        }
+
+        <span class="hljs-comment">// 分支 2，满足，先生产后释放锁</span>
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;(&quot;</span>);
+        depth++;
+        mutex_unlock(&amp;lk);
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">consume</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>) {
+    retry:
+        mutex_lock(&amp;lk);
+        <span class="hljs-type">int</span> ready = (depth &gt; <span class="hljs-number">0</span>);
+        <span class="hljs-keyword">if</span> (!ready) {
+            mutex_unlock(&amp;lk);
+            <span class="hljs-keyword">goto</span> retry;
+        }
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;)&quot;</span>);
+        depth--;
+        mutex_unlock(&amp;lk);
+    }
+}
+</code></pre>
+<h3 id="1-4-生产者-消费者问题解决尝试-3">1.4 生产者-消费者问题解决尝试 3</h3>
+<ul>
+<li>解决这个性能问题的方法我们也已经知晓：利用操作系统的调度进行阻塞(wait)和唤醒(wakeup)</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">produce</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+    retry:
+        mutex_lock(&amp;lk);
+        <span class="hljs-type">int</span> ready = (depth &lt; n);
+        <span class="hljs-keyword">if</span> (!ready) {
+            mutex_unlock(&amp;lk); <span class="hljs-comment">// 老问题，唤醒会丢失</span>
+            wait(&amp;producer_waiting_list);
+            <span class="hljs-keyword">goto</span> retry;
+        }
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;(&quot;</span>);
+        depth++;
+        wakeup(&amp;consumer_waiting_list);
+        mutex_unlock(&amp;lk);
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">consume</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+    retry:
+        mutex_lock(&amp;lk);
+        <span class="hljs-type">int</span> ready = (depth &gt; <span class="hljs-number">0</span>);
+        <span class="hljs-keyword">if</span> (!ready) {
+            mutex_unlock(&amp;lk);
+            wait(&amp;consumer_waiting_list);
+            <span class="hljs-keyword">goto</span> retry;
+        }
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;)&quot;</span>);
+        depth--;
+        wakeup(&amp;producer_waiting_list); <span class="hljs-comment">// 老问题，唤醒会丢失</span>
+        mutex_unlock(&amp;lk);
+    }
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>生产者</th>
+<th>消费者</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>if (!ready)</code> 缓冲区满，需自旋</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>mutex_unlock(&amp;lk);</code>释放锁</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td><code>mutex_lock(&amp;lk);</code>…<code>depth--;</code> 拿锁并消费</td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td><code>wakeup(&amp;producer_waiting_list);</code>唤醒丢失</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>wait(&amp;producer_waiting_list);</code> 死锁</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-5-生产者-消费者问题解决尝试-4">1.5 生产者-消费者问题解决尝试 4</h3>
+<ul>
+<li>采用 futex 解决唤醒丢失问题</li>
+<li><strong>释放锁和进入休眠必须是绑在一起的原子操作</strong>
+<ul>
+<li>条件变量</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">int</span> cnd1 = <span class="hljs-number">0</span>; <span class="hljs-comment">// 生产者能够生产的条件</span>
+<span class="hljs-type">int</span> cnd2 = <span class="hljs-number">0</span>; <span class="hljs-comment">// 消费者能够生产的条件</span>
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">produce</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        retry:
+            mutex_lock(&amp;lk);
+            <span class="hljs-type">int</span> ready = (depth &lt; n);
+            <span class="hljs-keyword">if</span> (!ready) {
+                <span class="hljs-type">int</span> val = cnd1;         <span class="hljs-comment">// &lt;-- 约束</span>
+                mutex_unlock(&amp;lk);
+                <span class="hljs-comment">// 如果这中间发生了改变，就不休眠</span>
+                futex_wait(&amp;cnd1, val); <span class="hljs-comment">// &lt;-- 约束</span>
+                <span class="hljs-keyword">goto</span> retry; 
+            }
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;(&quot;</span>);
+        depth++;
+        <span class="hljs-type">atomic_add</span>(&amp;cnd2, <span class="hljs-number">1</span>);
+        futex_wake(&amp;cnd1); <span class="hljs-comment">// 唤醒生产者</span>
+        mutex_unlock(&amp;lk);
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">consume</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        retry:
+            mutex_lock(&amp;lk);
+            <span class="hljs-type">int</span> ready = (depth &gt; <span class="hljs-number">0</span>);
+            <span class="hljs-keyword">if</span> (!ready) {
+                <span class="hljs-type">int</span> val = cnd2;
+                mutex_unlock(&amp;lk);
+                futex_wait(&amp;cnd2, val);
+                <span class="hljs-keyword">goto</span> retry;
+            }
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;)&quot;</span>);
+        depth--;
+        <span class="hljs-type">atomic_add</span>(&amp;cnd1, <span class="hljs-number">1</span>);
+        futex_wake(&amp;cnd1); <span class="hljs-comment">// 唤醒消费者</span>
+        mutex_unlock(&amp;lk);
+    }
+}
+</code></pre>
+<h3 id="1-6-条件变量">1.6 条件变量</h3>
+<p>条件变量：用于标记某个用于同步条件的变量，其有两个相关的操作：</p>
+<ul>
+<li><code>cond_wait(cond_t *cv, mutex_t *lk)</code>
+<ul>
+<li>调用之前默认假设 <code>lk</code> 已经持有锁 <code>lk</code></li>
+<li><strong>调用之后原子的阻塞线程和释放锁</strong></li>
+<li>被唤醒时重新抢锁</li>
+</ul>
+</li>
+<li><code>cond_signal(cond_t *cv)</code>
+<ul>
+<li>唤醒一个等在条件变量 <code>cv</code> 上的一个阻塞线程</li>
+<li>如果没有线程阻塞在这个条件变量上，什么也不做</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;pthread.h&gt;</span></span>
+
+<span class="hljs-type">pthread_cond_t</span> cv;
+<span class="hljs-type">int</span> <span class="hljs-title function_">pthread_cond_init</span><span class="hljs-params">(<span class="hljs-type">pthread_cond_t</span> *cv, <span class="hljs-literal">NULL</span>)</span>;
+<span class="hljs-type">int</span> <span class="hljs-title function_">pthread_cond_destroy</span><span class="hljs-params">(<span class="hljs-type">pthread_cond_t</span> *cv)</span>;
+
+<span class="hljs-type">int</span> <span class="hljs-title function_">pthread_cond_wait</span><span class="hljs-params">(<span class="hljs-type">pthread_cond_t</span> *cv, <span class="hljs-type">pthread_mutex_t</span> *mutex)</span>;
+<span class="hljs-type">int</span> <span class="hljs-title function_">pthread_cond_signal</span><span class="hljs-params">(<span class="hljs-type">pthread_cond_t</span> *cv)</span>;
+</code></pre>
+<ul>
+<li>条件变量有两个相关操作的实现</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">conditional_variabie</span> {</span>
+    <span class="hljs-type">unsigned</span> value;
+} <span class="hljs-type">cond_t</span>;
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">cond_wait</span><span class="hljs-params">(<span class="hljs-type">cond_t</span> *cv, <span class="hljs-type">mutex_t</span> *lk)</span> {
+    <span class="hljs-type">int</span> val = <span class="hljs-type">atomic_load</span>(&amp;cv-&gt;value);
+
+    mutex_unlock(lk);
+    futex_wait(&amp;cv-&gt;value, val);
+    mutex_lock(lk); <span class="hljs-comment">// 回来后仍认为我自己持有锁</span>
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">cond_signal</span><span class="hljs-params">(<span class="hljs-type">cond_t</span> *cv)</span> {
+    atomic_fetch_add(&amp;cv-&gt;value, <span class="hljs-number">1</span>);
+    futex_wake(&amp;cv-&gt;value);
+}
+</code></pre>
+<ul>
+<li>使用条件变量解决之前的生产者-消费者问题</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">cond_t</span> cv_p = COND_INIT();
+<span class="hljs-type">cond_t</span> cv_c = COND_INIT();
+<span class="hljs-type">mutex_t</span> lk = MUTEX_INIT();
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">produce</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        mutex_lock(&amp;lk);
+        <span class="hljs-keyword">if</span> (!(depth &lt; n)) {
+            cond_wait(&amp;cv_p, &amp;lk);
+        }
+
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;(&quot;</span>);
+        depth++;
+        cond_signal(&amp;cv_c); <span class="hljs-comment">// 唤醒生产者</span>
+        mutex_unlock(&amp;lk);
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">consume</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        mutex_lock(&amp;lk);
+        <span class="hljs-keyword">if</span> (!(depth &gt; <span class="hljs-number">0</span>)) {
+            cond_wait(&amp;cv_c, &amp;lk);
+        }
+
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;)&quot;</span>);
+        depth--;
+        cond_signal(&amp;cv_p); <span class="hljs-comment">// 唤醒消费者</span>
+        mutex_unlock(&amp;lk);
+    }
+}
+</code></pre>
+<div class="callout callout-bug"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.88 1.88"/><path d="M14.12 3.88L16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>该实现是错的！</div><p>考虑如下情况：<strong>一个生产者，两个消费者 \(C_1,C_2\)</strong>，首先消费者 \(C_1\) 等待一个空的 buffer，然后生产者生产一个数据，调用唤醒函数唤醒 \(C_1\)，但此时如果 \(C_2\) 抢先一步进入临界区，并消费掉了数据后返回，然后 \(C_1\) 才被真正唤醒进入临界区，但此时，临界区已经没有数据可以消费了，错误！</p>
+</div><h3 id="1-7-hansen-mesa-vs-hoare">1.7 Hansen/Mesa VS Hoare</h3>
+<p>产生上述问题的原因是由于调用 Signal 通知某个线程，和那个线程 wait 被唤醒不是原子的，这就是 <strong>Hansen (or Mesa) 语义</strong></p>
+<p>与之相对的，<code>cond_signal</code> 和 <code>cond_wait</code> 之间是原子的则称为 <strong>Hoare 语义</strong></p>
+<ul>
+<li><code>cond_signal</code> 程序将互斥锁转移到被唤醒的程序，并阻塞自己（只有等被唤醒的程序返回或者再次阻塞才会返回该 signal 线程，当然互斥锁也需要一并转移回它），因此其他线程无法再进入临界区</li>
+</ul>
+<p>Hoare 语义下的线程能够在唤醒后知道其所期待的那个条件一定成立，这个性质由原子性保证，也就是因为这个原因，在 Hoare 语义下其实之前的解决方案是正确的</p>
+<ul>
+<li>Hoare 语义下很多程序性质非常容易证明，但不要实现 Hoare 语义是复杂的</li>
+<li>Hansen/Mesa 虽然不保证安全性，但是实现简单（原子性不保证是自然的，无需调度器做出任何承诺）</li>
+</ul>
+<p>Hansen/Mesa 语义下的解决办法：唤醒后重新尝试判断条件是否满足，即判定条件那里使用 while，而不是 if，这也是为什么之前的尝试需要反复 goto retry 的原因</p>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">produce</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        mutex_lock(&amp;lk);
+        <span class="hljs-keyword">while</span>(!(depth &lt; n)) { <span class="hljs-comment">// &lt;--</span>
+            cond_wait(&amp;cv_p, &amp;lk);
+        }
+
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;&quot;</span>);
+        depth++;
+        cond_signal(&amp;cv_c); <span class="hljs-comment">// 唤醒生产者</span>
+        mutex_unlock(&amp;lk);
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">consume</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        mutex_lock(&amp;lk);
+        <span class="hljs-keyword">while</span>(!(depth &gt; <span class="hljs-number">0</span>)) { <span class="hljs-comment">// &lt;--</span>
+            cond_wait(&amp;cv_c, &amp;lk);
+        }
+
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;&quot;</span>);
+        depth--;
+        cond_signal(&amp;cv_p); <span class="hljs-comment">// 唤醒消费者</span>
+        mutex_unlock(&amp;lk);
+    }
+}
+</code></pre>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>Rule of thumb: cond_wait must always be called within a loop</div></div><h3 id="1-8-考虑使用一个变量">1.8 考虑使用一个变量</h3>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">produce</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        mutex_lock(&amp;lk);
+        <span class="hljs-keyword">while</span>(!(depth &lt; n)) {
+            cond_wait(&amp;cv, &amp;lk);
+        }
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;(&quot;</span>);
+        depth++;
+        cond_signal(&amp;cv);
+        mutex_unlock(&amp;lk);
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">consume</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        mutex_lock(&amp;lk);
+        <span class="hljs-keyword">while</span>(!(depth &gt; <span class="hljs-number">0</span>)) {
+            cond_wait(&amp;cv, &amp;lk);
+        }
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;)&quot;</span>);
+        depth--;
+        cond_signal(&amp;cv);
+        mutex_unlock(&amp;lk);
+    }
+}
+</code></pre>
+<p>考虑如下情形：</p>
+<ul>
+<li>有三个线程：消费者 \(C_1\)、\(C_2\) 和生产者 \(P_1\)，此时 \(C_1\)、\(C_2\) 首先依次进入临界区，发现数据为空，都阻塞等待</li>
+<li>然后 \(P_1\) 进入临界区，生产一个 item 之后唤醒一个线程，如 \(C_1\)，在 \(C_1\) 唤醒之前，\(P_1\) 再次抢先一步进入临界区，发现没有空闲（假设缓冲区为 1），阻塞自己</li>
+<li>\(C_1\) 此时醒了并进入临界区，消费了这个数据之后，试图唤醒其他线程，但唤醒谁是没有保障的（因为都是同一个条件变量）</li>
+<li>如果唤醒的是 \(C_2\)，那么 \(C_2\) 进入临界区，发现数据为空，阻塞等待，然后 \(C_1\) 也尝试进入临界区，阻塞等待，而 \(P_1\) 没人唤醒它，也处于阻塞等待状态</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%90%8C%E6%AD%A5/image-13.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>结合多个好处</div><p>多个条件变量使得可以合理的 signal 相应的线程，但设计复杂，单个条件变量逻辑上又会出错，有没有比较好的办法</p>
+<ul>
+<li><strong>力大砖飞（条件覆盖）：<code>cond_broadcast(cond_t *cv)</code></strong>
+一次唤醒所有线程即可，那些需要被正确唤醒的自然会醒来做相应的事情，而那些不该唤醒的，反正需要 while 循环一次在此判定是否符合条件，不符合条件就再 “睡” 即可，因此不会影响正确性</li>
+<li>Posix 版本：<code>int pthread_cond_broadcast(pthread_cond_t *cv);</code></li>
+</ul>
+</div><p>条件覆盖下的生产者-消费者解决方案：</p>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">produce</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        mutex_lock(&amp;lk);
+        <span class="hljs-keyword">while</span>(!(depth &lt; n)) {
+            cond_wait(&amp;cv, &amp;lk);
+        }
+
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;(&quot;</span>);
+        depth++;
+        cond_broadcast(&amp;cv); <span class="hljs-comment">// &lt;--</span>
+        mutex_unlock(&amp;lk);
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">consume</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        mutex_lock(&amp;lk);
+        <span class="hljs-keyword">while</span>(!(depth &gt; <span class="hljs-number">0</span>)) {
+            cond_wait(&amp;cv, &amp;lk);
+        }
+
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;)&quot;</span>);
+        depth--;
+        cond_broadcast(&amp;cv); <span class="hljs-comment">// &lt;--</span>
+        mutex_unlock(&amp;lk);
+    }
+}
+</code></pre>
+<blockquote>
+<p>[!summary] 条件变量的使用经验法则</p>
+<ul>
+<li>除了条件变量外，还得有共享的状态用来进行判定是否可以 “生产” 或者 “消费”</li>
+<li>使用互斥锁来保护共享的状态以及条件变量的操作</li>
+<li>在做 wait/signal/broadcast 时需要持有互斥锁</li>
+<li>每次从 wait 中唤醒，要重新进行条件检查（wait within a while loop）</li>
+<li>针对不同的条件使用不同的条件变量（除非使用 broadcast）</li>
+</ul>
+</blockquote>
+<h2 id="2-条件变量的应用">2 条件变量的应用</h2>
+<h3 id="2-1-利用计算图进行并行化">2.1 利用计算图进行并行化</h3>
+<p>找到程序算法中的计算依赖图，就可以利用 <code>wait</code> 和 <code>signal</code> 来将算法进行并行化</p>
+<ul>
+<li>定义计算图 \(G = (V, E)\)，其中 \(V\) 是计算事件集，\((u, v) \in E\) 意味着计算事件 \(u\) 一定要在 \(v\) 之前，即 \(v\) 需要用到 \(u\) 的计算结果，\(u\) 和 \(v\) 只能串行执行，没有依赖关系（没有从 \(u\) 到 \(v\) 的路径）的可以并行计算</li>
+</ul>
+<ul>
+<li>给定一个 \(G\)（给定一个问题，首先构建出这样一个图），为每个节点（对应一个线程）完成如下设置</li>
+<li>\(v\) 节点能进行计算所需要 \(\texttt{wait}\) 的同步条件：每一个 \(\forall u \in V, \text{s.t. } (u, v) \in E\) 中的 \(u\) 都已经完成</li>
+<li>\(u\) 完成后，对 \(\forall v \in V, \text{s.t. } (u, v) \in E\) 中的 \(v\) 进行 \(\texttt{signal}\)（或者更加简单的直接用 \(\texttt{broadcast}\)）</li>
+</ul>
+<h3 id="2-2-例子-编辑距离问题">2.2 例子：编辑距离问题</h3>
+<pre><code class="language-c"><span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span> to m
+    dist[i, <span class="hljs-number">0</span>] := i
+<span class="hljs-keyword">for</span> j := <span class="hljs-number">0</span> to n
+    dist[<span class="hljs-number">0</span>, j] := j
+<span class="hljs-keyword">for</span> i := <span class="hljs-number">1</span> to m
+    <span class="hljs-keyword">for</span> j := <span class="hljs-number">1</span> to n
+        delDist := dist[i - <span class="hljs-number">1</span>, j] + <span class="hljs-number">1</span>
+        insDist := dist[i, j - <span class="hljs-number">1</span>] + <span class="hljs-number">1</span>
+        subDist := dist[i - <span class="hljs-number">1</span>, j - <span class="hljs-number">1</span>] + Diff(A[i], B[j])
+        dist[i, j] := Min(delDist, insDist, subDist)
+<span class="hljs-keyword">return</span> dist
+</code></pre>
+<ul>
+<li>考虑 \(dist(i,j)\) 依赖于那些计算的解？\(dist(i-1,j)\)、\(dist(i,j-1)\) 和 \(dist(i-1,j-1)\)</li>
+<li>每一条斜边的节点都是可以其上一轮斜边对应的节点做完之后就可以继续做了（当然，是否为每个节点都设置一个线程具有性能上的考量，线程太多会增加调度成本，线程太少，并发度小）</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%90%8C%E6%AD%A5/image-14.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<h3 id="2-3-一个比较通用的并发算法设计框架">2.3 一个比较通用的并发算法设计框架</h3>
+<ul>
+<li>（生产者）可以把调度的事情全部分给一个线程，而不是一次性把所有线程都直接放进内存，这个调度线程维护一个计算图，每次都会根据当前已经做完的计算机点，和依赖关系，调度可以运行的线程，把他们放进 ready 列表准备运行（这就是线程池）</li>
+<li>（消费者）被调度的运行的线程就执行计算，计算结束后通知调度线程，告知条件可能发生变化，可以重新计算下一批就可以计算的线程</li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">T_worker</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>) {
+        <span class="hljs-built_in">consume</span>().<span class="hljs-built_in">run</span>();
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">T_scheduler</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">while</span> (!jobs.<span class="hljs-built_in">empty</span>()) {
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> j : jobs.<span class="hljs-built_in">find_ready</span>()) {
+            <span class="hljs-built_in">produce</span>(j);
+        }
+    }
+}
+</code></pre>
+<p>一个更加复杂的例子：打印 fish</p>
+<ul>
+<li>有三种线程
+<ul>
+<li>\(T_a\) 若干: 无限循环打印 <code>&lt;</code></li>
+<li>\(T_b\) 若干: 无限循环打印 <code>&gt;</code></li>
+<li>\(T_c\) 若干: 无限循环打印 <code>-</code></li>
+</ul>
+</li>
+<li>任务：对线程同步，使得屏幕打印出 <code>&lt;&gt;&lt;_</code> 和 <code>&gt;&lt;&gt;_</code> 的组合</li>
+<li>解决方案：使用条件变量，只要回答三个问题
+<ul>
+<li>打印 “&lt;” 的条件？打印 “&gt;” 的条件？打印 “_” 的条件？</li>
+</ul>
+</li>
+<li>引入 “有限状态机”
+<ul>
+<li>判断上述三个 “条件” 是否成立的依据，是当前屏幕已经打印了什么字符</li>
+</ul>
+</li>
+<li>状态机的转换逻辑正是编写条件变量判断语句的基础</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>当前状态 <code>state</code></th>
+<th>当前已打印前缀</th>
+<th>允许被唤醒的线程 (打印字符)</th>
+<th>打印后的新状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 (初始)</td>
+<td>(空)</td>
+<td><code>T_a</code> 打印 <code>&lt;</code></td>
+<td>变为 1</td>
+</tr>
+<tr>
+<td>0</td>
+<td>(空)</td>
+<td><code>T_b</code> 打印 <code>&gt;</code></td>
+<td>变为 4</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>&lt;</code></td>
+<td><code>T_b</code> 只能打印 <code>&gt;</code></td>
+<td>变为 2</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>&lt;&gt;</code></td>
+<td><code>T_a</code> 只能打印 <code>&lt;</code></td>
+<td>变为 3</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>&lt;&gt;&lt;</code></td>
+<td><code>T_c</code> 只能打印 <code>_</code></td>
+<td>变为 0 (完成)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>&gt;</code></td>
+<td><code>T_a</code> 只能打印 <code>&lt;</code></td>
+<td>变为 5</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>&gt;&lt;</code></td>
+<td><code>T_b</code> 只能打印 <code>&gt;</code></td>
+<td>变为 6</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>&gt;&lt;&gt;</code></td>
+<td><code>T_c</code> 只能打印 <code>_</code></td>
+<td>变为 0 (完成)</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-cpp">mutex mtx;                 <span class="hljs-comment">// 互斥锁，保护共享资源 state</span>
+condition_variable cv;     <span class="hljs-comment">// 条件变量，用于线程间的阻塞与唤醒</span>
+<span class="hljs-type">int</span> state = <span class="hljs-number">0</span>;             <span class="hljs-comment">// 共享变量：当前的状态机状态</span>
+
+<span class="hljs-comment">// 线程 Ta: 专门打印 &quot;&lt;&quot;</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">print_less_than</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+        <span class="hljs-function">unique_lock&lt;mutex&gt; <span class="hljs-title">lock</span><span class="hljs-params">(mtx)</span></span>;
+        
+        <span class="hljs-comment">// 核心：打印 &quot;&lt;&quot; 的条件是什么？</span>
+        <span class="hljs-comment">// 只有当状态为 0, 2, 4 时，才允许打印 &quot;&lt;&quot;，否则线程在此阻塞等待</span>
+        cv.<span class="hljs-built_in">wait</span>(lock, [] { <span class="hljs-keyword">return</span> state == <span class="hljs-number">0</span> || state == <span class="hljs-number">2</span> || state == <span class="hljs-number">4</span>; });
+        
+        cout &lt;&lt; <span class="hljs-string">&quot;&lt;&quot;</span>;
+        
+        <span class="hljs-comment">// 根据当前状态，推进到下一个状态</span>
+        <span class="hljs-keyword">if</span> (state == <span class="hljs-number">0</span>) state = <span class="hljs-number">1</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (state == <span class="hljs-number">2</span>) state = <span class="hljs-number">3</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (state == <span class="hljs-number">4</span>) state = <span class="hljs-number">5</span>;
+        
+        <span class="hljs-comment">// 状态已改变，唤醒其他可能在等待的线程</span>
+        cv.<span class="hljs-built_in">notify_all</span>();
+    }
+}
+
+<span class="hljs-comment">// 线程 Tb: 专门打印 &quot;&gt;&quot;</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">print_greater_than</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+        <span class="hljs-function">unique_lock&lt;mutex&gt; <span class="hljs-title">lock</span><span class="hljs-params">(mtx)</span></span>;
+        
+        <span class="hljs-comment">// 核心：打印 &quot;&gt;&quot; 的条件是什么？</span>
+        <span class="hljs-comment">// 只有当状态为 0, 1, 5 时，才允许打印 &quot;&gt;&quot;，否则线程阻塞</span>
+        cv.<span class="hljs-built_in">wait</span>(lock, [] { <span class="hljs-keyword">return</span> state == <span class="hljs-number">0</span> || state == <span class="hljs-number">1</span> || state == <span class="hljs-number">5</span>; });
+        
+        cout &lt;&lt; <span class="hljs-string">&quot;&gt;&quot;</span>;
+        
+        <span class="hljs-comment">// 状态转移</span>
+        <span class="hljs-keyword">if</span> (state == <span class="hljs-number">0</span>) state = <span class="hljs-number">4</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (state == <span class="hljs-number">1</span>) state = <span class="hljs-number">2</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (state == <span class="hljs-number">5</span>) state = <span class="hljs-number">6</span>;
+        
+        cv.<span class="hljs-built_in">notify_all</span>();
+    }
+}
+
+<span class="hljs-comment">// 线程 Tc: 专门打印 &quot;_&quot;</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">print_underscore</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+        <span class="hljs-function">unique_lock&lt;mutex&gt; <span class="hljs-title">lock</span><span class="hljs-params">(mtx)</span></span>;
+        
+        <span class="hljs-comment">// 核心：打印 &quot;_&quot; 的条件是什么？</span>
+        <span class="hljs-comment">// 只有当状态为 3 (&quot;&lt;&gt;&lt;&quot;) 或 6 (&quot;&gt;&lt;&gt;&quot;) 时，才允许收尾</span>
+        cv.<span class="hljs-built_in">wait</span>(lock, [] { <span class="hljs-keyword">return</span> state == <span class="hljs-number">3</span> || state == <span class="hljs-number">6</span>; });
+        
+        cout &lt;&lt; <span class="hljs-string">&quot;_&quot;</span> &lt;&lt; endl; <span class="hljs-comment">// 打印下划线并换行，方便观察</span>
+        
+        <span class="hljs-comment">// 一条鱼打印完毕，状态重置为 0，开始新一轮</span>
+        state = <span class="hljs-number">0</span>;
+        
+        cv.<span class="hljs-built_in">notify_all</span>();
+    }
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// 创建若干个线程来模拟混乱的并发环境</span>
+    vector&lt;thread&gt; threads;
+    
+    <span class="hljs-comment">// 比如：各创建 3 个只会死循环打印自己字符的线程</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">3</span>; ++i) {
+        threads.<span class="hljs-built_in">push_back</span>(<span class="hljs-built_in">thread</span>(print_less_than));
+        threads.<span class="hljs-built_in">push_back</span>(<span class="hljs-built_in">thread</span>(print_greater_than));
+        threads.<span class="hljs-built_in">push_back</span>(<span class="hljs-built_in">thread</span>(print_underscore));
+    }
+
+    <span class="hljs-comment">// 主线程等待所有子线程结束 (虽然这里是死循环不会结束)</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; t : threads) {
+        t.<span class="hljs-built_in">join</span>();
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<h2 id="3-信号量">3 信号量</h2>
+<ul>
+<li>条件变量是无记忆的，因此需要程序员手动进行额外的条件判定</li>
+<li>一个很自然的需求就是<mark>能否有一个同步原语能够自带 “状态”，然后根据预设好的约定，“状态” 不满足就阻塞，否则就唤醒</mark></li>
+<li>一个自带 “整数” 状态的同步原语就是信号量</li>
+</ul>
+<p><strong>信号量代表着一个整数值变量，只能通过两个原子操作能够改变这个变量</strong>：</p>
+<ul>
+<li><code>P(sem_t *sem)</code> 也写作 decrease/down/wait/acquire
+<ul>
+<li>如果 <code>sem</code> 的值不是正数就阻塞自己，否则将 <code>sem</code> 的值减一后返回运行</li>
+</ul>
+</li>
+<li><code>V(sem_t *sem)</code> 也写作 increase/up/post/signal/release
+<ul>
+<li>将信号量 <code>sem</code> 的值加 1，如果有一个或多个线程阻塞在这个信号量上，选择一个唤醒</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;semaphore.h&gt;</span></span>
+<span class="hljs-type">sem_t</span> sem;
+<span class="hljs-type">int</span> <span class="hljs-title function_">sem_init</span><span class="hljs-params">(<span class="hljs-type">sem_t</span> *sem, <span class="hljs-type">int</span> pshared, <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> value)</span>;
+<span class="hljs-type">int</span> <span class="hljs-title function_">sem_destroy</span><span class="hljs-params">(<span class="hljs-type">sem_t</span> *sem)</span>;
+<span class="hljs-type">int</span> <span class="hljs-title function_">sem_wait</span><span class="hljs-params">(<span class="hljs-type">sem_t</span> *sem)</span>;
+<span class="hljs-type">int</span> <span class="hljs-title function_">sem_post</span><span class="hljs-params">(<span class="hljs-type">sem_t</span> *sem)</span>;
+</code></pre>
+<h3 id="3-1-信号量的一种实现">3.1 信号量的一种实现</h3>
+<ul>
+<li>利用互斥锁和条件变量的一种信号量实现</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> _<span class="hljs-title">sem_t</span> {</span>
+    <span class="hljs-type">int</span> value;
+    <span class="hljs-type">pthread_cond_t</span> cond;
+    <span class="hljs-type">pthread_mutex_t</span> lock;
+} <span class="hljs-type">sem_t</span>;
+
+<span class="hljs-comment">// only one thread can call this</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">sem_init</span><span class="hljs-params">(<span class="hljs-type">sem_t</span> *s, <span class="hljs-type">int</span> value)</span> {
+    s-&gt;value = value;
+    cond_init(&amp;s-&gt;cond);
+    mutex_init(&amp;s-&gt;lock);
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">sem_wait</span><span class="hljs-params">(<span class="hljs-type">sem_t</span> *s)</span> {
+    mutex_lock(&amp;s-&gt;lock);
+    <span class="hljs-keyword">while</span> (s-&gt;value &lt;= <span class="hljs-number">0</span>)
+        cond_wait(&amp;s-&gt;cond, &amp;s-&gt;lock);
+    s-&gt;value--;
+    mutex_unlock(&amp;s-&gt;lock);
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">sem_post</span><span class="hljs-params">(<span class="hljs-type">sem_t</span> *s)</span> {
+    mutex_lock(&amp;s-&gt;lock);
+    s-&gt;value++;
+    cond_signal(&amp;s-&gt;cond);
+    mutex_unlock(&amp;s-&gt;lock);
+}
+</code></pre>
+<h3 id="3-2-信号量的使用">3.2 信号量的使用</h3>
+<p>信号量是非常易用的同步原语，可以非常容易实现<strong>互斥</strong>和<strong>控制顺序</strong></p>
+<ul>
+<li>比如实现互斥（二值信号量）</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">sem_t</span> sem;
+<span class="hljs-comment">// set sem intial value to be X, X = 1</span>
+sem_init(<span class="hljs-type">sem_t</span> &amp;sem, <span class="hljs-number">0</span>, X); 
+<span class="hljs-type">void</span> <span class="hljs-title function_">func</span><span class="hljs-params">()</span> {
+    P(&amp;sem);
+    <span class="hljs-comment">// critical section</span>
+    V(&amp;sem);
+    <span class="hljs-comment">// reminder section</span>
+}
+</code></pre>
+<ul>
+<li>实现顺序控制：下面程序使得 \(T_1\) 得等 \(T_2\) 完成之后才能继续</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-comment">// T1</span>
+<span class="hljs-type">sem_t</span> sem;
+<span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span> {
+  <span class="hljs-comment">//set sem intial value to be X, X = 0</span>
+  sem_init(<span class="hljs-type">sem_t</span> &amp;sem, <span class="hljs-number">0</span>, X);
+  <span class="hljs-type">pthread_t</span> c;
+  create_thread(&amp;c, child);
+  <span class="hljs-comment">// wait for thread</span>
+  P(&amp;sem);
+  do_something();
+  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-comment">// T2</span>
+<span class="hljs-type">void</span>* <span class="hljs-title function_">child</span><span class="hljs-params">(<span class="hljs-type">void</span> *arg)</span> {
+    do_something();
+    V(&amp;sem); <span class="hljs-comment">// signal here: child is done</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;
+}
+</code></pre>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>关于信号量的 “整数” 理解</div><p>对信号量的值赋予不同的初值可以有不同的用途</p>
+<p>可以将这个值看成初始 “资源数”</p>
+<ul>
+<li><strong>初始 “资源数” 为 1，意味着互斥</strong>，只有一个能够获得这个资源，其释放这个资源，其他线程才能获取这个资源</li>
+<li><strong>初始 “资源数” 为 0，意味着阻塞</strong>，当前线程必须等待，只有未来某个线程增加一个资源，该阻塞线程才能继续行进，因此实现了顺序控制</li>
+<li>更多的 “资源” 意味着当前有很多资源可以用来 “获取”，只有资源被获取完为 0，才会阻止下一个想要获取 “资源” 的线程。而只要已经获得资源的线程释放 “资源”，下一个才能获取这个释放的“资源”</li>
+<li>使用 <code>P()</code> 获取资源，使用 <code>V()</code> 增加（释放）资源</li>
+</ul>
+</div><h3 id="3-3-利用信号量解决生产者-消费者问题">3.3 利用信号量解决生产者-消费者问题</h3>
+<pre><code class="language-c"><span class="hljs-type">sem_t</span> empty; <span class="hljs-comment">// 缓冲区有多少空位</span>
+sem_init(<span class="hljs-type">sem_t</span> &amp;empty, <span class="hljs-number">0</span>, MAX);
+<span class="hljs-type">sem_t</span> full;  <span class="hljs-comment">// 缓冲区有多少资源</span>
+sem_init(<span class="hljs-type">sem_t</span> &amp;full, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">produce</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        P(&amp;empty); <span class="hljs-comment">// 减少空位</span>
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;(&quot;</span>);
+        V(&amp;full);  <span class="hljs-comment">// 增加资源</span>
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">consume</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        P(&amp;full);  <span class="hljs-comment">// 减少资源</span>
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;)&quot;</span>);
+        V(&amp;empty); <span class="hljs-comment">// 增加空位</span>
+    }
+}
+</code></pre>
+<div class="callout callout-bug"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.88 1.88"/><path d="M14.12 3.88L16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>一个注意点</div><p>P、V 操作之后都释放相应信号量里的互斥锁了，因此 P、V 操作之后的代码其实是没有锁保护的，如果之后的操作涉及共享资源（临界区），那么还要加互斥锁保护，这段代码里 <code>printf</code> 天生是线程安全的，所以没问题</p>
+</div><ul>
+<li>使用信号量 + 互斥锁解决更加一般的生成者-消费者问题</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">sem_t</span> mutex; <span class="hljs-comment">// 用于互斥的信号量（也可以用互斥锁）</span>
+sem_init(<span class="hljs-type">sem_t</span> &amp;mutex, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+<span class="hljs-type">sem_t</span> empty; <span class="hljs-comment">// 缓冲区有多少空</span>
+sem_init(<span class="hljs-type">sem_t</span> &amp;empty, <span class="hljs-number">0</span>, MAX);
+<span class="hljs-type">sem_t</span> full;  <span class="hljs-comment">// 缓冲区有多少资源</span>
+sem_init(<span class="hljs-type">sem_t</span> &amp;full, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">produce</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+    P(&amp;mutex);
+    P(&amp;empty);
+    produce_shared_buffer();
+    V(&amp;full);
+    V(&amp;mutex);
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">consume</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+    P(&amp;mutex); <span class="hljs-comment">// &lt;-- 产生死锁</span>
+    P(&amp;full);
+    consume_shared_buffer();
+    V(&amp;empty);
+    V(&amp;mutex);
+    }
+}
+</code></pre>
+<div class="callout callout-bug"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.88 1.88"/><path d="M14.12 3.88L16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>产生死锁</div><p>如果消费者先进行互斥，然后消费，发现没有数据，阻塞，但生产者由于互斥锁此时无法获得（<strong>把临界区堵了</strong>），无法进入临界区产生数据，因此生产者和消费者都阻塞，从而无法行进</p>
+</div><ul>
+<li><strong>正确方案：使用信号量 + 互斥锁解决更加一般的生成者-消费者问题</strong></li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">sem_t</span> mutex; <span class="hljs-comment">// 用于互斥的信号量（也可以用互斥锁）</span>
+sem_init(<span class="hljs-type">sem_t</span> &amp;mutex, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+<span class="hljs-type">sem_t</span> empty; <span class="hljs-comment">// 缓冲区有多少空位</span>
+sem_init(<span class="hljs-type">sem_t</span> &amp;empty, <span class="hljs-number">0</span>, MAX);
+<span class="hljs-type">sem_t</span> full;  <span class="hljs-comment">// 缓冲区有多少资源</span>
+sem_init(<span class="hljs-type">sem_t</span> &amp;full, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">produce</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+    P(&amp;empty); <span class="hljs-comment">// 条件允许才进入临界区</span>
+    P(&amp;mutex);
+    produce_shared_buffer();
+    V(&amp;mutex);
+    V(&amp;full);
+    }
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">consume</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+    P(&amp;full);  <span class="hljs-comment">// 条件允许才进入临界区</span>
+    P(&amp;mutex); 
+    consume_shared_buffer();
+    V(&amp;mutex);
+    V(&amp;empty);
+    }
+}
+</code></pre>
+<ul>
+<li><em>使用信号量优雅地实现编辑距离算法的并行化</em></li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-comment">// 定义计算图中的任务节点</span>
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Task</span> {
+    <span class="hljs-type">int</span> i, j;
+};
+
+<span class="hljs-type">const</span> <span class="hljs-type">int</span> M = <span class="hljs-number">100</span>; <span class="hljs-comment">// 字符串 A 的长度假设</span>
+<span class="hljs-type">const</span> <span class="hljs-type">int</span> N = <span class="hljs-number">100</span>; <span class="hljs-comment">// 字符串 B 的长度假设</span>
+string A, B;
+<span class="hljs-type">int</span> dist_matrix[M + <span class="hljs-number">1</span>][N + <span class="hljs-number">1</span>];
+
+<span class="hljs-comment">// 依赖图与任务状态</span>
+<span class="hljs-type">int</span> in_degree[M + <span class="hljs-number">1</span>][N + <span class="hljs-number">1</span>];   <span class="hljs-comment">// 记录每个节点的尚未完成的前置依赖数量</span>
+<span class="hljs-type">const</span> <span class="hljs-type">int</span> TOTAL_TASKS = M * N; <span class="hljs-comment">// 总核心计算任务数</span>
+<span class="hljs-type">const</span> <span class="hljs-type">int</span> NUM_WORKERS = <span class="hljs-number">4</span>;     <span class="hljs-comment">// 工作线程数量</span>
+
+<span class="hljs-comment">// 线程池组件</span>
+queue&lt;Task&gt; ready_queue;       <span class="hljs-comment">// 就绪队列：依赖已满足，等待 Worker 计算</span>
+queue&lt;Task&gt; completed_queue;   <span class="hljs-comment">// 完成队列：Worker 计算完放回，供 Scheduler 更新拓扑图</span>
+
+<span class="hljs-comment">// POSIX 同步原语</span>
+<span class="hljs-type">pthread_mutex_t</span> lock;
+<span class="hljs-type">sem_t</span> ready_sem;      <span class="hljs-comment">// 记录就绪队列中有多少个任务可供 Worker 执行</span>
+<span class="hljs-type">sem_t</span> completed_sem;  <span class="hljs-comment">// 记录完成队列中有多少个任务等待 Scheduler 调度</span>
+
+<span class="hljs-comment">// 工作线程 (Worker)</span>
+<span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-title">worker_thread</span><span class="hljs-params">(<span class="hljs-type">void</span>* arg)</span> </span>{
+    <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+        <span class="hljs-comment">// 信号量自带整数记忆，这里替代了复杂的 while 条件判断，不必担心虚假唤醒</span>
+        <span class="hljs-built_in">sem_wait</span>(&amp;ready_sem); 
+        
+        <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock);
+        Task t = ready_queue.<span class="hljs-built_in">front</span>();
+        ready_queue.<span class="hljs-built_in">pop</span>();
+        <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock);
+        
+        <span class="hljs-comment">// “毒丸”（Poison Pill）机制：收到特殊坐标即代表通知退出线程</span>
+        <span class="hljs-keyword">if</span> (t.i == <span class="hljs-number">-1</span> &amp;&amp; t.j == <span class="hljs-number">-1</span>) {
+            <span class="hljs-keyword">break</span>; 
+        }
+        
+        <span class="hljs-comment">// 核心计算（并行执行区，无需加锁）</span>
+        <span class="hljs-type">int</span> i = t.i, j = t.j;
+        <span class="hljs-type">int</span> delDist = dist_matrix[i - <span class="hljs-number">1</span>][j] + <span class="hljs-number">1</span>;
+        <span class="hljs-type">int</span> insDist = dist_matrix[i][j - <span class="hljs-number">1</span>] + <span class="hljs-number">1</span>;
+        <span class="hljs-type">int</span> subDist = dist_matrix[i - <span class="hljs-number">1</span>][j - <span class="hljs-number">1</span>] + (A[i - <span class="hljs-number">1</span>] == B[j - <span class="hljs-number">1</span>] ? <span class="hljs-number">0</span> : <span class="hljs-number">1</span>);
+        dist_matrix[i][j] = <span class="hljs-built_in">min</span>({delDist, insDist, subDist});
+        
+        <span class="hljs-comment">// 计算完毕，放入完成队列</span>
+        <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock);
+        completed_queue.<span class="hljs-built_in">push</span>(t);
+        <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock);
+        
+        <span class="hljs-comment">// 增加完成信号量，唤醒 Scheduler 处理</span>
+        <span class="hljs-built_in">sem_post</span>(&amp;completed_sem);
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>;
+}
+
+<span class="hljs-comment">// 调度线程 (Scheduler)</span>
+<span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-title">scheduler_thread</span><span class="hljs-params">(<span class="hljs-type">void</span>* arg)</span> </span>{
+    <span class="hljs-type">int</span> local_completed_tasks = <span class="hljs-number">0</span>; 
+    
+    <span class="hljs-comment">// 只要核心计算任务没跑完，调度器就持续运转</span>
+    <span class="hljs-keyword">while</span> (local_completed_tasks &lt; TOTAL_TASKS) {
+        <span class="hljs-comment">// 等待 Worker 提交已完成的任务</span>
+        <span class="hljs-built_in">sem_wait</span>(&amp;completed_sem);
+        
+        <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock);
+        Task t = completed_queue.<span class="hljs-built_in">front</span>();
+        completed_queue.<span class="hljs-built_in">pop</span>();
+        <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock);
+        
+        local_completed_tasks++;
+        <span class="hljs-type">int</span> i = t.i, j = t.j;
+        
+        <span class="hljs-comment">// 更新其周边被依赖节点的入度，入度清零即可投入 ready_queue 并通知 Worker </span>
+        <span class="hljs-keyword">if</span> (i + <span class="hljs-number">1</span> &lt;= M) {
+            <span class="hljs-keyword">if</span> (--in_degree[i + <span class="hljs-number">1</span>][j] == <span class="hljs-number">0</span>) {
+                <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock);
+                ready_queue.<span class="hljs-built_in">push</span>({i + <span class="hljs-number">1</span>, j});
+                <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock);
+                <span class="hljs-built_in">sem_post</span>(&amp;ready_sem); <span class="hljs-comment">// 发放一个就绪信号</span>
+            }
+        }
+        <span class="hljs-keyword">if</span> (j + <span class="hljs-number">1</span> &lt;= N) {
+            <span class="hljs-keyword">if</span> (--in_degree[i][j + <span class="hljs-number">1</span>] == <span class="hljs-number">0</span>) {
+                <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock);
+                ready_queue.<span class="hljs-built_in">push</span>({i, j + <span class="hljs-number">1</span>});
+                <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock);
+                <span class="hljs-built_in">sem_post</span>(&amp;ready_sem);
+            }
+        }
+        <span class="hljs-keyword">if</span> (i + <span class="hljs-number">1</span> &lt;= M &amp;&amp; j + <span class="hljs-number">1</span> &lt;= N) {
+            <span class="hljs-keyword">if</span> (--in_degree[i + <span class="hljs-number">1</span>][j + <span class="hljs-number">1</span>] == <span class="hljs-number">0</span>) {
+                <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock);
+                ready_queue.<span class="hljs-built_in">push</span>({i + <span class="hljs-number">1</span>, j + <span class="hljs-number">1</span>});
+                <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock);
+                <span class="hljs-built_in">sem_post</span>(&amp;ready_sem);
+            }
+        }
+    }
+    
+    <span class="hljs-comment">// 当所有依赖图计算完毕，向 Worker 投递“毒丸”让其安全结束</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> k = <span class="hljs-number">0</span>; k &lt; NUM_WORKERS; k++) {
+        <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock);
+        ready_queue.<span class="hljs-built_in">push</span>({<span class="hljs-number">-1</span>, <span class="hljs-number">-1</span>});
+        <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock);
+        <span class="hljs-built_in">sem_post</span>(&amp;ready_sem); <span class="hljs-comment">// 唤醒所有正在休眠的 Worker</span>
+    }
+    
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>;
+}
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// 1. 初始化锁与信号量</span>
+    <span class="hljs-built_in">pthread_mutex_init</span>(&amp;lock, <span class="hljs-literal">nullptr</span>);
+    <span class="hljs-built_in">sem_init</span>(&amp;ready_sem, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);      <span class="hljs-comment">// 初始就绪任务量为0</span>
+    <span class="hljs-built_in">sem_init</span>(&amp;completed_sem, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);  <span class="hljs-comment">// 初始完成任务量为0</span>
+
+    <span class="hljs-comment">// (此处假设 A, B 已经被赋予值...省略赋值操作)</span>
+    
+    <span class="hljs-comment">// 2. 初始化 Edit Distance 动态规划的边界条件</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt;= M; i++) dist_matrix[i][<span class="hljs-number">0</span>] = i;
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> j = <span class="hljs-number">0</span>; j &lt;= N; j++) dist_matrix[<span class="hljs-number">0</span>][j] = j;
+
+    <span class="hljs-comment">// 3. 构建依赖图的入度状态</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">1</span>; i &lt;= M; i++) {
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> j = <span class="hljs-number">1</span>; j &lt;= N; j++) {
+            <span class="hljs-type">int</span> degree = <span class="hljs-number">0</span>;
+            <span class="hljs-keyword">if</span> (i &gt; <span class="hljs-number">1</span>) degree++; 
+            <span class="hljs-keyword">if</span> (j &gt; <span class="hljs-number">1</span>) degree++; 
+            <span class="hljs-keyword">if</span> (i &gt; <span class="hljs-number">1</span> &amp;&amp; j &gt; <span class="hljs-number">1</span>) degree++; 
+            in_degree[i][j] = degree;
+            
+            <span class="hljs-comment">// 初始入度为 0 的节点，直接投入就绪队列并释放信号量</span>
+            <span class="hljs-keyword">if</span> (degree == <span class="hljs-number">0</span>) {
+                ready_queue.<span class="hljs-built_in">push</span>({i, j});
+                <span class="hljs-built_in">sem_post</span>(&amp;ready_sem); 
+            }
+        }
+    }
+
+    <span class="hljs-comment">// 4. 启动线程池</span>
+    <span class="hljs-type">pthread_t</span> workers[NUM_WORKERS];
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; NUM_WORKERS; i++) {
+        <span class="hljs-built_in">pthread_create</span>(&amp;workers[i], <span class="hljs-literal">nullptr</span>, worker_thread, <span class="hljs-literal">nullptr</span>);
+    }
+
+    <span class="hljs-type">pthread_t</span> scheduler;
+    <span class="hljs-built_in">pthread_create</span>(&amp;scheduler, <span class="hljs-literal">nullptr</span>, scheduler_thread, <span class="hljs-literal">nullptr</span>);
+
+    <span class="hljs-comment">// 5. 等待所有线程执行结束</span>
+    <span class="hljs-built_in">pthread_join</span>(scheduler, <span class="hljs-literal">nullptr</span>);
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; NUM_WORKERS; i++) {
+        <span class="hljs-built_in">pthread_join</span>(workers[i], <span class="hljs-literal">nullptr</span>);
+    }
+
+    <span class="hljs-comment">// 6. 销毁同步原语</span>
+    <span class="hljs-built_in">pthread_mutex_destroy</span>(&amp;lock);
+    <span class="hljs-built_in">sem_destroy</span>(&amp;ready_sem);
+    <span class="hljs-built_in">sem_destroy</span>(&amp;completed_sem);
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<p>信号量也不是擅长所有问题，考虑之前的打印 fish 问题：</p>
+<ul>
+<li>有三种线程 无限打印 <code>&lt;</code>、<code>&gt;</code> 和 <code>-</code></li>
+<li>任务：对线程同步，使得屏幕打印出 <code>&lt;&gt;&lt;_</code> 和 <code>&gt;&lt;&gt;_</code> 的组合</li>
+<li>假设刚打印完一条完整的鱼 <code>&lt;&gt;&lt;_</code> 或 <code>&gt;&lt;&gt;_</code>，那么下一个应该是？
+<ul>
+<li>每种线程关联一个信号量，比如打印 <code>&lt;</code> 就是 <code>P(&lt;)</code></li>
+<li><strong>信号量的 V 操作具有指向性，不太好表达 “二选一”</strong></li>
+</ul>
+</li>
+<li>此外，<strong>信号量所记录的状态是整数形式，对于非整数的条件判定也不太适用</strong></li>
+</ul>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>互斥锁、条件变量、信号量</div><p>一般来说，信号量可以完成互斥锁的工作（其本身就可以看成一个更加高端的互斥锁）</p>
+<ul>
+<li>信号量也能很方便的完成某些线程控制</li>
+<li>但其不能胜任所有事情</li>
+</ul>
+<p>条件变量可以适用于任何同步条件，其和互斥锁一起可以实现信号量</p>
+</div><h2 id="4-读者-写者问题">4 读者-写者问题</h2>
+<ul>
+<li>多个线程想要读取某个数据，有一个或多个线程需要写某个数据</li>
+<li>简单的对所有线程加上互斥锁当然可以解决此问题，但是性能太低</li>
+<li>为此，我们需要实现一个新的 “读写锁” 来保护共享数据
+<ul>
+<li>其可以允许多个 “读者” 同时访问共享数据，只要他们中没有一个修改该数据</li>
+<li>一次只能有一个 “写者” 可以持有读写锁进入临界区，因此可以安全的读和写数据</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-1-读写锁的实现-1">4.1 读写锁的实现 1</h3>
+<ul>
+<li>读者-写者问题本质上就是分别给出当前读者和写者是否可以进入临界区的条件
+<ul>
+<li><strong>读者</strong>：<strong>临界区为空或者临界区有其他读者</strong></li>
+<li><strong>写者</strong>：<strong>只有临界区为空</strong>才可进入</li>
+</ul>
+</li>
+<li>要实现上述条件，需要记录当前临界区的 “读者” 数量</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> _<span class="hljs-title">rwlock_t</span> {</span>
+    <span class="hljs-type">sem_t</span> lock; <span class="hljs-comment">// 保护计数器的小锁</span>
+    <span class="hljs-type">sem_t</span> rwlk; <span class="hljs-comment">// 进入临界区获得锁</span>
+    <span class="hljs-type">int</span> readers;
+} <span class="hljs-type">rwlock_t</span>;
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">rwlock_init</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    sem_init(&amp;rw-&gt;lock, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>); <span class="hljs-comment">// 初始化 1，互斥</span>
+    sem_init(&amp;rw-&gt;rwlk, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+    rw-&gt;readers = <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">acquire_readlock</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    P(&amp;rw-&gt;lock); <span class="hljs-comment">// 先抢小锁</span>
+    <span class="hljs-keyword">if</span>(rw-&gt;readers == <span class="hljs-number">0</span>) {
+        <span class="hljs-comment">// 此时临界区还没有读者</span>
+        P(&amp;rw-&gt;rwlk); <span class="hljs-comment">//争抢进入临界区的锁</span>
+    }
+    <span class="hljs-comment">// rw-&gt;readers &gt; 0 或者得到了 rwlk，写者无法进入</span>
+    rw-&gt;readers++;
+    V(rw-&gt;lock); <span class="hljs-comment">// 释放小锁</span>
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">release_readlock</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span>{
+    P(&amp;rw-&gt;lock);
+    rw-&gt;readers--;
+    <span class="hljs-keyword">if</span>(rw-&gt;readers == <span class="hljs-number">0</span>){
+        V(&amp;rw-&gt;rwlk); <span class="hljs-comment">// 空了才释放大锁</span>
+    }
+    V(rw-&gt;lock);
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">acquire_writelock</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    P(&amp;rw-&gt;rwlk); <span class="hljs-comment">// 抢临界区大锁，小锁是为了 reader 计数</span>
+}
+<span class="hljs-type">void</span> <span class="hljs-title function_">release_writelock</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    V(&amp;rw-&gt;rwlk); <span class="hljs-comment">// 放临界区大锁</span>
+}
+</code></pre>
+<div class="callout callout-bug"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.88 1.88"/><path d="M14.12 3.88L16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>写者饿死</div><p>上述实现中，如果一直有读者反复进入临界区，那么写者就会进入不了临界区，从而饿死</p>
+<ul>
+<li>只有等只有最后一个读者退出临界区，其才会释放 <code>rwlk</code></li>
+<li>这个实现也被称为读者优先，显然对写不友好</li>
+</ul>
+</div><h3 id="4-2-读写锁的实现-2">4.2 读写锁的实现 2</h3>
+<ul>
+<li>一个改进想法：<strong>如果有写者想要进入临界区，那么其应该阻止后来的读者尝试进入临界区</strong></li>
+</ul>
+<pre><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> _<span class="hljs-title">rwlock_t</span> {</span>
+    <span class="hljs-type">sem_t</span> rlock;   <span class="hljs-comment">// 读操作时保护自身锁操作的锁</span>
+    <span class="hljs-type">sem_t</span> wlock;   <span class="hljs-comment">// 写操作时保护自身锁操作的锁</span>
+    <span class="hljs-type">sem_t</span> tryRead; <span class="hljs-comment">// 读者进入之前先看等待写者</span>
+    <span class="hljs-type">int</span> readers;
+    <span class="hljs-type">int</span> writers;   <span class="hljs-comment">// 想要进入的写者</span>
+    <span class="hljs-type">rwlock_t</span>;
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">rwlock_init</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    sem_init(&amp;rw-&gt;rlock, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+    sem_init(&amp;rw-&gt;wlock, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+    sem_init(&amp;rw-&gt;tryRead, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+    rw-&gt;readers = <span class="hljs-number">0</span>;
+    rw-&gt;writers = <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">acquire_readlock</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    P(&amp;rw-&gt;tryRead); <span class="hljs-comment">// &lt;-- 小锁之前</span>
+    P(&amp;rw-&gt;rlock);
+    <span class="hljs-keyword">if</span> (rw-&gt;readers == <span class="hljs-number">0</span>) {
+        P(&amp;rw-&gt;wlock);
+    }
+    rw-&gt;readers++;
+    V(&amp;rw-&gt;rlock);
+    V(&amp;rw-&gt;tryRead); <span class="hljs-comment">// &lt;--</span>
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">release_readlock</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    P(&amp;rw-&gt;rlock);
+    rw-&gt;readers--;
+    <span class="hljs-keyword">if</span> (rw-&gt;readers == <span class="hljs-number">0</span>) {
+        V(&amp;rw-&gt;wlock);
+    }
+    V(&amp;rw-&gt;rlock);
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">acquire_writelock</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    P(&amp;rw-&gt;wlock);
+    <span class="hljs-keyword">if</span> (rw-&gt;writers == <span class="hljs-number">0</span>) { <span class="hljs-comment">// 第一个写者</span>
+        P(&amp;rw-&gt;tryRead);
+    }
+    rw-&gt;writers++;
+    V(&amp;rw-&gt;wlock);
+    P(&amp;rw-&gt;wlock);
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">release_writelock</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    V(&amp;rw-&gt;rwlock);
+    P(&amp;rw-&gt;wlock);
+    rw-&gt;writers--;
+    <span class="hljs-keyword">if</span> (rw-&gt;writers == <span class="hljs-number">0</span>) {
+        V(&amp;rw-&gt;tryRead);
+    }
+    V(&amp;rw-&gt;wlock);
+}
+</code></pre>
+<div class="callout callout-bug"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.88 1.88"/><path d="M14.12 3.88L16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>读者饿死</div><p>上述实现中，如果一直有写者想要进入临界区，那么读者就会进入不了临界区，从而饿死</p>
+<ul>
+<li>只有等只有最后一个写者退出临界区，其才会释放 <code>tryRead</code>，后续读者才能进入</li>
+<li>这个实现也被称为写者优先，显然对读不友好</li>
+</ul>
+</div><h3 id="4-3-读写锁的实现-3">4.3 读写锁的实现 3</h3>
+<ul>
+<li>应该给<strong>线程排队</strong>！排在前面的优先尝试进入临界区 —— <code>ticket lock</code></li>
+<li>实现了一个较为公平的读写锁</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">lock_ticket</span> {</span>
+    <span class="hljs-type">int</span> ticket; <span class="hljs-comment">// 当前发放的最大票号</span>
+    <span class="hljs-type">int</span> turn;   <span class="hljs-comment">// 当前应该进入的票号</span>
+} <span class="hljs-type">ticket_t</span>;
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">lock_init</span><span class="hljs-params">(<span class="hljs-type">ticket_t</span>* tlk)</span> {
+    tlk-&gt;ticket = <span class="hljs-number">0</span>;
+    tlk-&gt;turn   = <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">ticket_lock</span><span class="hljs-params">(<span class="hljs-type">ticket_t</span>* tlk)</span> {
+    <span class="hljs-type">int</span> myturn = __sync_fetch_and_add(&amp;tlk-&gt;ticket, <span class="hljs-number">1</span>);
+    <span class="hljs-keyword">while</span> (tlk-&gt;turn != myturn); <span class="hljs-comment">// spin</span>
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">ticket_unlock</span><span class="hljs-params">(<span class="hljs-type">ticket_t</span>* tlk)</span> {
+    __sync_fetch_and_add(&amp;tlk-&gt;turn, <span class="hljs-number">1</span>);
+}
+
+<span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> _<span class="hljs-title">rwlock_t</span> {</span>
+    <span class="hljs-type">sem_t</span> rlock;  <span class="hljs-comment">// 读操作时保护自身操作的锁</span>
+    <span class="hljs-type">sem_t</span> rwlk;   <span class="hljs-comment">// 进入临界区获得锁</span>
+    <span class="hljs-type">ticket_t</span> <span class="hljs-built_in">queue</span>;  <span class="hljs-comment">// 维持一个先进先出的队列</span>
+    <span class="hljs-type">int</span> readers;
+} <span class="hljs-type">rwlock_t</span>;
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">rwlock_init</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    sem_init(&amp;rw-&gt;rlock, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+    sem_init(&amp;rw-&gt;rwlk, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+    lock_init(&amp;rw-&gt;<span class="hljs-built_in">queue</span>);
+    rw-&gt;readers = <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">acquire_readlock</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    ticket_lock(&amp;rw-&gt;<span class="hljs-built_in">queue</span>); <span class="hljs-comment">// &lt;--</span>
+    P(&amp;rw-&gt;rlock);
+    <span class="hljs-keyword">if</span> (rw-&gt;readers == <span class="hljs-number">0</span>) {
+        <span class="hljs-comment">// 此时临界区还没有读者</span>
+        P(&amp;rw-&gt;rwlk);  <span class="hljs-comment">// 争抢进入临界区的锁</span>
+    }
+    rw-&gt;readers++;
+    V(&amp;rw-&gt;rlock);
+    ticket_unlock(&amp;rw-&gt;<span class="hljs-built_in">queue</span>); <span class="hljs-comment">// &lt;--</span>
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">release_readlock</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    P(&amp;rw-&gt;rlock);
+    rw-&gt;readers--;
+    <span class="hljs-keyword">if</span> (rw-&gt;readers == <span class="hljs-number">0</span>) {
+        V(&amp;rw-&gt;rwlk);
+    }
+    V(&amp;rw-&gt;rlock);
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">acquire_writelock</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    ticket_lock(&amp;rw-&gt;<span class="hljs-built_in">queue</span>); <span class="hljs-comment">// &lt;--</span>
+    P(&amp;rw-&gt;rwlk);
+    ticket_unlock(&amp;rw-&gt;<span class="hljs-built_in">queue</span>); <span class="hljs-comment">// &lt;--</span>
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">release_writelock</span><span class="hljs-params">(<span class="hljs-type">rwlock_t</span> *rw)</span> {
+    V(&amp;rw-&gt;rwlk);
+}
+</code></pre>
+<ul>
+<li>读者-写者问题是一个非常普遍的问题，Posix 也给出了相应的读写锁</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;pthread.h&gt;</span></span>
+<span class="hljs-type">pthread_rwlock_t</span> rw;
+<span class="hljs-type">int</span> <span class="hljs-title function_">pthread_rwlock_init</span><span class="hljs-params">(&amp;rw, <span class="hljs-literal">NULL</span>)</span>;
+<span class="hljs-type">int</span> <span class="hljs-title function_">pthread_rwlock_destroy</span><span class="hljs-params">(&amp;rw)</span>;
+
+<span class="hljs-type">int</span> <span class="hljs-title function_">pthread_rwlock_rdlock</span><span class="hljs-params">(&amp;rw)</span>;
+<span class="hljs-type">int</span> <span class="hljs-title function_">pthread_rwlock_wrlock</span><span class="hljs-params">(&amp;rw)</span>;
+<span class="hljs-type">int</span> <span class="hljs-title function_">pthread_rwlock_unlock</span><span class="hljs-params">(&amp;rw)</span>;
+</code></pre>
+<ul>
+<li>用例</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">int</span> shared_config = <span class="hljs-number">100</span>; <span class="hljs-comment">// 全局共享资源</span>
+<span class="hljs-type">pthread_rwlock_t</span> rwlock; <span class="hljs-comment">// 声明读写锁</span>
+
+<span class="hljs-comment">// 读者线程逻辑</span>
+<span class="hljs-type">void</span>* <span class="hljs-title function_">reader_thread</span><span class="hljs-params">(<span class="hljs-type">void</span>* arg)</span> {
+    <span class="hljs-type">int</span> id = *(<span class="hljs-type">int</span>*)arg;
+    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>) {
+        pthread_rwlock_rdlock(&amp;rwlock);
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;读者 [%d] 读取值为: %d\n&quot;</span>, id, shared_config); <span class="hljs-comment">// 进入临界区</span>
+        pthread_rwlock_unlock(&amp;rwlock);
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;
+}
+
+<span class="hljs-comment">// 写者线程逻辑</span>
+<span class="hljs-type">void</span>* <span class="hljs-title function_">writer_thread</span><span class="hljs-params">(<span class="hljs-type">void</span>* arg)</span> {
+    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>) {
+        pthread_rwlock_wrlock(&amp;rwlock);
+        shared_config += <span class="hljs-number">10</span>;  <span class="hljs-comment">// 进入临界区</span>
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;==== 写者 更新值为: %d ====\n&quot;</span>, shared_config);
+        pthread_rwlock_unlock(&amp;rwlock);
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;
+}
+</code></pre>
+<h2 id="5-read-copy-update">5 Read-Copy-Update*</h2>
+<h3 id="5-1-新境界-无锁">5.1 新境界：无锁</h3>
+<ul>
+<li>锁的获取和释放都是有代价的
+<ul>
+<li>一般来说互斥锁上锁/释放的需要的 CPU cycles 比普通指令多一个数量级</li>
+<li>在短临界区的情况下，锁本身占据了最多的时间，成为了并发程序的瓶颈
+<ul>
+<li>实际上，在这种情况下，线程越多，反而性能越低</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>虽然在读者-写者情况下 “读-读” 可以避免互斥，“写-写” 天生需要互斥，但 “读-写” 呢？</li>
+</ul>
+<p>在数据的 “一致性” 要求不那么严的情况下（强一致性：当一个节点更新数据后，其他节点可以立即获取到最新的数据，读者可以不被写者阻塞</p>
+<ul>
+<li>当写者更新数据时，读者可以
+<ul>
+<li>要么读到一个旧数据（写操作之前的数据）</li>
+<li>要么读到最新的数据（写操作之后的数据）</li>
+<li>除此之外，不能获得中间状态！保证 “写” 的原子性！</li>
+</ul>
+</li>
+<li>当然系统最终是一致的，即当一个节点更新数据后，其他节点可能需要经过一段时间才能获得最新数据，但最终总能获得（最终一致性）</li>
+</ul>
+<ul>
+<li>对于 RCU 下的读者:
+<ul>
+<li>可以并发的和写者一起运行，而不会被阻塞</li>
+<li>因此读操作几乎没有开销</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>相对（简单的读写锁）而言，RCU 下的写操作需要一些额外的成本</li>
+<li>其适用于频繁的读，但不频繁的写场景（read-mostly）</li>
+</ul>
+<p>RCU 的核心在于更新数据时，分成 “removal” 和 “reclamation” 两个阶段</p>
+<ul>
+<li>“removal” 阶段会删去一个数据结构中某个项的引用（可能伴随将这些引用指向新的项），这个操作可以完全并发的和 “读” 者的操作进行</li>
+<li>“reclamation” 阶段对旧数据真正意义上清除，这个阶段需要 “同步”，不能存在还有读者还在使用这些旧数据</li>
+<li>更新分为两阶段使得 “写” 数据不会阻塞读者，对读者非常有利，而写数据只在 “reclamation” 阶段会增加一些时间成本</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%90%8C%E6%AD%A5/image-15.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<h3 id="5-2-rcu-的订阅-发布机制">5.2 RCU 的订阅-发布机制</h3>
+<ul>
+<li>简单的在写者处加锁，而读者处不加锁并不能保证 RCU 中 removal 的原子性</li>
+</ul>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%90%8C%E6%AD%A5/image-16.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<ul>
+<li>一个简单的做法就是加入内存屏障，保证写和读的顺序</li>
+<li><strong>将内存屏障直接包裹在一层 API 中</strong>
+<ul>
+<li><strong><code>rcu_assign_pointer</code> 发布更新</strong></li>
+<li><strong><code>rcu_dereference</code> 订阅数据</strong></li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-comment">/* 对应写者 */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">foo_update</span><span class="hljs-params">()</span>{
+    mutex_lock(&amp;lk);
+    new_gp = kmalloc(<span class="hljs-keyword">sizeof</span>(*p), GFP_KERNEL);
+
+    new_gp-&gt;a = <span class="hljs-number">1</span>;
+    new_gp-&gt;b = <span class="hljs-number">2</span>;
+    new_gp-&gt;c = <span class="hljs-number">3</span>;
+    foo *old_gp = gp;
+    rcu_assign_pointer(gp, new_fp); <span class="hljs-comment">// 发布更新</span>
+    mutex_unlock(&amp;lk);
+    kfree(old_gp);
+}
+
+<span class="hljs-comment">/* 对应读者 */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">foo_read</span><span class="hljs-params">()</span>{
+    foo *p = rcu_dereference(gp); <span class="hljs-comment">// 订阅数据</span>
+    <span class="hljs-keyword">if</span>(p != <span class="hljs-literal">NULL</span>)
+    do_something(p-&gt;a, p-&gt;b, p-&gt;c);
+}
+</code></pre>
+<h3 id="5-3-rcu-的宽限期">5.3 RCU 的宽限期</h3>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>第二阶段 reclamation 什么时候可以真正清除旧数据？</div><p>所有旧的读者都读完了旧数据！</p>
+</div><ul>
+<li>读者需要显式地标记读的区间</li>
+<li>写者需要等到所有的 “旧” 线程都读结束了，才能释放旧数据，因此需要显式地表达 “等”</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-comment">/* 对应写者 */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">foo_update</span><span class="hljs-params">()</span>{
+    mutex_lock(&amp;lk);
+    new_gp = kmalloc(<span class="hljs-keyword">sizeof</span>(*p), GFP_KERNEL);
+    new_gp-&gt;a = <span class="hljs-number">1</span>;
+    new_gp-&gt;b = <span class="hljs-number">2</span>;
+    new_gp-&gt;c = <span class="hljs-number">3</span>;
+    foo *old_gp = gp;
+    rcu_assign_pointer(gp, new_fp);
+    mutex_unlock(&amp;lk);
+    synchronize_rcu(); <span class="hljs-comment">// 等待旧读者结束</span>
+    kfree(old_gp);
+}
+
+<span class="hljs-comment">/* 读者 */</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">foo_read</span><span class="hljs-params">()</span>{
+    rcu_read_lock();   <span class="hljs-comment">// 标记了读的区间</span>
+    foo *p = rcu_dereference(gp);
+    <span class="hljs-keyword">if</span>(p != <span class="hljs-literal">NULL</span>)
+    do_something(p-&gt;a, p-&gt;b, p-&gt;c);
+    rcu_read_unlock(); <span class="hljs-comment">// 标记了读的区间</span>
+}
+</code></pre>
+<p><img src="/assets/img/posts/%E5%B9%B6%E5%8F%91-%E5%90%8C%E6%AD%A5/image-17.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p>如何实现宽限期的机制？（注意不能用锁或条件变量，否则 RCU 就没意义了！）</p>
+<ul>
+<li>每个读者进入 read-side 的临界区前执行关中断（<code>rcu_read_lock()</code>）</li>
+<li>读者离开 read-side 的临界区前执行开中断（<code>rcu_read_unlock()</code>）</li>
+<li>这样，写者只要侦测到所有 CPU 都做完一次 context-switch， 就可以安全的释放旧数据了
+<ul>
+<li>关中断（即读者在临界区期间）CPU 不会 context-switch</li>
+</ul>
+</li>
+<li>如果写者不想阻塞
+<ul>
+<li>那么可以通过 <code>call_rcu()</code> 注册一个回调函数，这样可以免除被等待宽限期</li>
+<li>所有旧的读者读完了，会自动调用 <code>call_rcu()</code> 所注册的函数</li>
+</ul>
+</li>
+</ul>
+<h2 id="6-哲学家就餐问题">6 哲学家就餐问题</h2>
+<p>五位哲学家围坐在一张圆形餐桌旁，每位哲学家之间各有一只筷子，哲学家必须同时得到左右手的筷子才能吃东西</p>
+<h3 id="6-1-解决尝试-1">6.1 解决尝试 1</h3>
+<ul>
+<li>每个哲学家都先拿起自己左边的筷子，然后再拿起右边的筷子，然后吃</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> N 5</span>
+
+<span class="hljs-type">sem_t</span> forks[N];
+<span class="hljs-type">int</span> <span class="hljs-title function_">left</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span> { <span class="hljs-keyword">return</span> i; }
+<span class="hljs-type">int</span> <span class="hljs-title function_">right</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span> { <span class="hljs-keyword">return</span> (i+<span class="hljs-number">1</span>)%N; }
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">philosopher</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span> {
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) {
+        think();
+        P(forks[left(i)]);  <span class="hljs-comment">// Pick up left fork</span>
+        P(forks[right(i)]); <span class="hljs-comment">// Pick up right fork</span>
+        eat();
+        V(forks[left(i)]);  <span class="hljs-comment">// Put down left fork</span>
+        V(forks[right(i)]); <span class="hljs-comment">// Put down right fork</span>
+    }
+}
+</code></pre>
+<div class="callout callout-bug"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.88 1.88"/><path d="M14.12 3.88L16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>所有人同时都拿到左边的筷子，然后等待右边的筷子：死锁</div></div><h3 id="6-2-解决尝试-2">6.2 解决尝试 2</h3>
+<ul>
+<li>问题在于自己拿不到筷子还不断持有筷子，尝试拿不到时放下筷子</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-comment">// 尝试 P 操作</span>
+<span class="hljs-type">int</span> <span class="hljs-title function_">tryP</span><span class="hljs-params">(<span class="hljs-type">sem_t</span> *s)</span>{
+    <span class="hljs-comment">// sem_wait 的非阻塞版本，如果返回 0，正常等到条件</span>
+    <span class="hljs-comment">// 否则不会阻塞，而是返回 -1</span>
+    <span class="hljs-keyword">return</span> sem_trywait(s);
+}
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">philosopher</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span>{
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>){
+        think();
+        <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>){
+            P(forks[left(i)]); <span class="hljs-comment">// Pick up left fork</span>
+            <span class="hljs-type">int</span> ret = tryP(forks[right(i)]); <span class="hljs-comment">// Try to pick up right fork;</span>
+            <span class="hljs-keyword">if</span> (ret != <span class="hljs-number">0</span>){
+                V(forks[left(i)]); <span class="hljs-comment">// Put down left fork</span>
+                sleep(sometime);
+            }
+            <span class="hljs-keyword">else</span>{
+                <span class="hljs-keyword">break</span>;
+            }
+        }
+        eat();
+        V(forks[left(i)]);  <span class="hljs-comment">// Put down left fork</span>
+        V(forks[right(i)]); <span class="hljs-comment">// Put down right fork</span>
+    }
+}
+</code></pre>
+<div class="callout callout-bug"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2l1.88 1.88"/><path d="M14.12 3.88L16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>有可能所有哲学家同时放下筷子，又同时拿起左手的筷子，再次同时放下：饿死！</div></div><div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>死锁和饿死</div><p>死锁和饿死都关乎活性，但并没有违背安全性</p>
+<ul>
+<li>饿死即为一个线程在有限时间内无法行进</li>
+<li>死锁是一类特殊的 “饿死”，其达成的条件是多个线程形成一个等待环，一个线程的行进需要环内的另外一个线程做某个动作：显然环状意味着这个等待条件永远无法发生</li>
+<li>死锁一定饿死，饿死并不一定死锁（比如运气不好，一直被其他线程抢占临界区）</li>
+</ul>
+</div><ul>
+<li><strong>改进：每个线程睡眠的时间随机</strong></li>
+</ul>
+<p>只需将上面的代码中的 <code>sleep(sometime)</code> 改为 <code>sleep(randomtime)</code></p>
+<ul>
+<li>已经可以说解决问题了！但是在某些特别安全攸关的场景可能不那么可靠</li>
+</ul>
+<h3 id="6-3-解决尝试-3">6.3 解决尝试 3</h3>
+<ul>
+<li>哲学家拿起筷子就已经发生数据竞争了，不如一开始就上锁</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">ticket_t</span> turn;
+lock_init(&amp;turn);
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">philosopher</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span>{
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>){
+        think();
+        ticket_lock(&amp;turn); <span class="hljs-comment">// &lt;--</span>
+        P(forks[left(i)]);  <span class="hljs-comment">// Pick up left fork</span>
+        P(forks[right(i)]); <span class="hljs-comment">// Pick up right fork</span>
+        eat();
+        V(forks[left(i)]);  <span class="hljs-comment">// Put down left fork</span>
+        V(forks[right(i)]); <span class="hljs-comment">// Put down right fork</span>
+        ticket_unlock(&amp;turn);
+    }
+}
+</code></pre>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>一次只有一个哲学家吃饭！并发度不够！5 个哲学家的情况下，最大支持多少个哲学家同时吃饭？</div><p>每次 \(N - 1\) 个人，根据鸽巢原理，一定有一个人拿到两个筷子从而可以吃饭</p>
+</div><pre><code class="language-c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> N 5</span>
+<span class="hljs-type">sem_t</span> capacity = N - <span class="hljs-number">1</span>;
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">philosopher</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span>{
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>){
+        think();
+        P(capacity); <span class="hljs-comment">// &lt;--</span>
+        P(forks[left(i)]);  <span class="hljs-comment">// Pick up left fork</span>
+        P(forks[right(i)]); <span class="hljs-comment">// Pick up right fork;</span>
+        eat();
+        V(forks[left(i)]);  <span class="hljs-comment">// Put down left fork</span>
+        V(forks[right(i)]); <span class="hljs-comment">// Put down right fork;</span>
+        V(capacity);
+    }
+}
+</code></pre>
+<h3 id="6-4-解决尝试-4">6.4 解决尝试 4</h3>
+<ul>
+<li>一个更加简单的方案（无需额外互斥锁）：给筷子编号，总是先拿编号小的</li>
+<li>筷子的编号对应着哲学家编号 <code>i</code></li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">philosopher</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span>{
+    <span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>){
+        think();
+        <span class="hljs-keyword">if</span> (left(i) &lt; right(i)){
+            P(forks[left(i)]);  <span class="hljs-comment">// Pick up left fork</span>
+            P(forks[right(i)]); <span class="hljs-comment">// Pick up right fork</span>
+        } <span class="hljs-keyword">else</span> {
+            P(forks[right(i)]); <span class="hljs-comment">// Pick up right fork</span>
+            P(forks[left(i)]);  <span class="hljs-comment">// Pick up left fork</span>
+        }
+        eat();
+        V(forks[left(i)]);  <span class="hljs-comment">// Put down left fork</span>
+        V(forks[right(i)]); <span class="hljs-comment">// Put down right fork;</span>
+    }
+}
+</code></pre>
+<div class="callout callout-note"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>打破了死锁产生的个必要条件之一：环路等待</div><p>哲学家 0 拿 fork 0，哲学家 1 拿 fork 1，…，哲学家 4 也拿 fork 0，但已被拿走，哲学家 3 在拿了 fork 3 之后接着拿 fork 4，等其吃饭结束释放 fork 后又可供其他哲学家吃饭</p>
+</div><div class="callout callout-tip"><ul>
+<li>除了互斥这种简单的控制外，我们还需要控制线程的顺序、相对关系等（同步）</li>
+<li>条件变量可以帮助实现适用于任何同步条件（注意使用方法，需要配合互斥锁）
+<ul>
+<li>基于 <code>wait</code>、<code>signal</code> 原语可以实现算法的并发</li>
+</ul>
+</li>
+<li>信号量是更加容易使用的同步工具
+<ul>
+<li>其具有状态记忆，可以看成初始资源</li>
+</ul>
+</li>
+<li>RCU: 如何实现一个无锁算法</li>
+<li>同步经典问题：生产者-消费者问题、读者-写者问题（公平性问题）、哲学家进餐问题（死锁、饿死问题）</li>
+</ul>
+</div></div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：同步</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-09 00:12:00</p>
+      <p><strong>更新于</strong>：2026-08-08 16:25:54</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/并发-同步.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">同步</div>
+      <ul><li class="toc-l2"><a href="#1-生产者-消费者问题">1 生产者-消费者问题</a></li><li class="toc-l3"><a href="#1-1-没学过并发编程的尝试">1.1 没学过并发编程的尝试</a></li><li class="toc-l3"><a href="#1-2-生产者-消费者问题解决尝试-1">1.2 生产者-消费者问题解决尝试 1</a></li><li class="toc-l3"><a href="#1-3-生产者-消费者问题解决尝试-2">1.3 生产者-消费者问题解决尝试 2</a></li><li class="toc-l3"><a href="#1-4-生产者-消费者问题解决尝试-3">1.4 生产者-消费者问题解决尝试 3</a></li><li class="toc-l3"><a href="#1-5-生产者-消费者问题解决尝试-4">1.5 生产者-消费者问题解决尝试 4</a></li><li class="toc-l3"><a href="#1-6-条件变量">1.6 条件变量</a></li><li class="toc-l3"><a href="#1-7-hansen-mesa-vs-hoare">1.7 Hansen/Mesa VS Hoare</a></li><li class="toc-l3"><a href="#1-8-考虑使用一个变量">1.8 考虑使用一个变量</a></li><li class="toc-l2"><a href="#2-条件变量的应用">2 条件变量的应用</a></li><li class="toc-l3"><a href="#2-1-利用计算图进行并行化">2.1 利用计算图进行并行化</a></li><li class="toc-l3"><a href="#2-2-例子-编辑距离问题">2.2 例子：编辑距离问题</a></li><li class="toc-l3"><a href="#2-3-一个比较通用的并发算法设计框架">2.3 一个比较通用的并发算法设计框架</a></li><li class="toc-l2"><a href="#3-信号量">3 信号量</a></li><li class="toc-l3"><a href="#3-1-信号量的一种实现">3.1 信号量的一种实现</a></li><li class="toc-l3"><a href="#3-2-信号量的使用">3.2 信号量的使用</a></li><li class="toc-l3"><a href="#3-3-利用信号量解决生产者-消费者问题">3.3 利用信号量解决生产者-消费者问题</a></li><li class="toc-l2"><a href="#4-读者-写者问题">4 读者-写者问题</a></li><li class="toc-l3"><a href="#4-1-读写锁的实现-1">4.1 读写锁的实现 1</a></li><li class="toc-l3"><a href="#4-2-读写锁的实现-2">4.2 读写锁的实现 2</a></li><li class="toc-l3"><a href="#4-3-读写锁的实现-3">4.3 读写锁的实现 3</a></li><li class="toc-l2"><a href="#5-read-copy-update">5 Read-Copy-Update*</a></li><li class="toc-l3"><a href="#5-1-新境界-无锁">5.1 新境界：无锁</a></li><li class="toc-l3"><a href="#5-2-rcu-的订阅-发布机制">5.2 RCU 的订阅-发布机制</a></li><li class="toc-l3"><a href="#5-3-rcu-的宽限期">5.3 RCU 的宽限期</a></li><li class="toc-l2"><a href="#6-哲学家就餐问题">6 哲学家就餐问题</a></li><li class="toc-l3"><a href="#6-1-解决尝试-1">6.1 解决尝试 1</a></li><li class="toc-l3"><a href="#6-2-解决尝试-2">6.2 解决尝试 2</a></li><li class="toc-l3"><a href="#6-3-解决尝试-3">6.3 解决尝试 3</a></li><li class="toc-l3"><a href="#6-4-解决尝试-4">6.4 解决尝试 4</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/并发-互斥.html">&lt; 互斥</a>
+      <a class="pager-next" href="/posts/并发-并发问题.html">并发问题 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
+</body>
+</html>

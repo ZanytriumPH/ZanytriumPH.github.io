@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>进程 · Zwing&#39;s blog</title>
+<meta name="description" content="进程：拥有独立地址空间的运行实体与生命周期管理">
+<script>(function(){
+  var t=localStorage.getItem('theme');
+  if(!t)t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // 标记 JS 可用：CSS 的 .js 前缀规则（如 busuanzi 首帧隐藏）只对 JS 环境生效
+  document.documentElement.className+=' js';
+  // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
+  if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
+  if(sessionStorage.getItem('hero-anim-shown')){
+    document.documentElement.classList.add('no-hero-anim');
+  } else {
+    sessionStorage.setItem('hero-anim-shown','1');
+  }
+  // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
+  // 图片加载与首次绘制并行，不显示白天版背景图
+  function setHeroSrc(){
+    var bg=document.querySelector('.hero-bg');
+    if(bg&&bg.dataset.bgDark)bg.src=(t==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
+  else setHeroSrc();
+})();</script>
+<link rel="stylesheet" href="/assets/css/style.css?v=1786177585384">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786177585384" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786177585384">
+</head>
+<body>
+<img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
+<script>(function(){var bg=document.querySelector('.hero-bg');if(bg)bg.src=(document.documentElement.getAttribute('data-theme')==='dark'?bg.dataset.bgDark:bg.dataset.bgLight);})();</script>
+
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/">Zwing&#39;s blog</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="/">首页</a></li><li><a href="/archives.html">归档</a></li><li><a href="/tags.html">标签</a></li><li><a href="/categories.html">分类</a></li>
+          <li class="nav-dropdown">
+            <button class="nav-dropdown-toggle" id="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+              关于
+              <svg class="nav-dropdown-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              <li><a href="/about.html">我</a></li><li><a href="https://github.com/ZanytriumPH" target="_blank" rel="noopener">GitHub</a></li><li><a href="/friends.html">友链</a></li>
+            </ul>
+          </li>
+          <li class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="切换明暗模式" title="切换明暗模式">
+              <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="icon-btn" id="search-toggle" aria-label="搜索" title="搜索">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="search-panel" id="search-panel" data-base="/" hidden>
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="搜索文章…" autocomplete="off">
+      </div>
+      <ul class="search-results" id="search-results"></ul>
+    </div>
+<main class="container container-post">
+
+    
+    <button class="toc-toggle" id="toc-toggle" aria-label="展开或收起目录" aria-expanded="false" title="目录">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+    <button class="toc-bg-toggle" id="bg-toggle" type="button" aria-pressed="false" aria-label="背景" title="背景">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+    <div class="post-wrap">
+      <article class="post">
+        <header class="post-header">
+          
+          <h1 class="post-title">进程</h1>
+          <div class="post-meta">
+            <time class="meta-item" datetime="2026-08-08T16:10:00.000Z"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026-08-09 00:10:00</time>
+            <time class="meta-item" datetime="2026-08-08T16:25:54+08:00" title="最近修改时间"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>更新于 2026-08-08 16:25:54</time>
+            <span class="meta-item" title="文章字数"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>约 3369 字</span>
+            <span class="meta-item" title="预计阅读时间（按约 300 字/分钟估算）"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>预计阅读 12 分钟</span>
+            <span class="meta-views meta-item"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>本文访问量 <span id="busuanzi_value_page_pv">0</span></span>
+            <span class="meta-group">
+              <a class="meta-link" href="/categories.html#操作系统"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>操作系统</a>
+              <a class="tag-chip" href="/tags.html#操作系统"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>操作系统</a> <a class="tag-chip" href="/tags.html#虚拟化"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>虚拟化</a>
+            </span>
+          </div>
+        </header>
+        <div class="post-body markdown-body"><div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>拥有独立地址空间的运行实体，可以包含一个或多个线程</div></div><ul>
+<li>与线程的<strong>线程控制块</strong>（TCB）一样，进程也需要一些元信息，用来描述进程，方便操作系统管理，<strong>即进程控制块</strong>（PCB）</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%99%9A%E6%8B%9F%E5%8C%96-%E8%BF%9B%E7%A8%8B/image-24.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<ul>
+<li>一个进程是被某个进程所创建的，一个进程也可以创建多个进程</li>
+<li>可以构成一个进程树，其中父进程节点指向其所创建的子进程</li>
+</ul>
+<div class="callout callout-info"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>第一个进程 init</div><p>CPU reset \(\rightarrow\) Firmware 代码执行 \(\rightarrow\) 加载操作系统并初始化 \(\rightarrow\) 加载第一个进程</p>
+</div><ul>
+<li><code>init</code> 进程加载完之后，操作系统已经完成了所需要资源的管理，并在后台等待用户命令（syscall）或者中断的发生</li>
+</ul>
+<h2 id="1-进程的生命周期">1 进程的生命周期</h2>
+<ul>
+<li>单线程进程（和线程生命周期一致）：</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%99%9A%E6%8B%9F%E5%8C%96-%E8%BF%9B%E7%A8%8B/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE-2026-06-22-195011.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<ul>
+<li>多线程进程：</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%99%9A%E6%8B%9F%E5%8C%96-%E8%BF%9B%E7%A8%8B/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE-2026-06-22-195141.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<ul>
+<li>终止之后的进程的 “资源” 会被操作系统回收，并通知其父进程其终止状态</li>
+</ul>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>为什么要通知？</div><ul>
+<li>悬空指针：PCB 中父进程含有指针指向子进程 PCB，如果进程终止之后连 PCB 也都被回收，那么该指针就会指向一个 “已经” 被释放的内存</li>
+<li>已终止但其 PCB 信息还没被回收的进程被称为 “僵尸进程”</li>
+<li>父进程调用 <code>wait</code> 系统调用会得到子进程的退出通知（子进程退出前会阻塞父进程）和其退出状态，同时移除该子进程的 PCB</li>
+</ul>
+</div><ul>
+<li>但并不是每个父进程都老老实实的 <code>wait</code> 子进程的，其完全可能在子进程终止前就终止了：这时的子进程是没有父进程的！</li>
+<li>没有父进程的进程被称为 “孤儿进程”</li>
+</ul>
+<blockquote>
+<p>进程最重要的三类系统调用：fork（创建）、execve（改变）、exit（删除）</p>
+</blockquote>
+<h2 id="2-fork">2 fork</h2>
+<ul>
+<li>创建一个新的（子）进程
+<ul>
+<li>通过做一份当前进程完整的复制（内存、寄存器现场）</li>
+<li>子进程和父进程会各自独立地继续执行 <code>fork</code> 之后的指令</li>
+</ul>
+</li>
+<li>如何区分父子进程？
+<ul>
+<li><code>fork</code> 的返回值不同: 子进程返回 0，父进程返回子进程的 process ID</li>
+<li><code>fork</code> 出错返回 -1</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-type">int</span> x = <span class="hljs-number">42</span>;
+<span class="hljs-type">int</span> ret = fork();
+<span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) {
+    <span class="hljs-comment">//fork 失败</span>
+    <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Fork failed\n&quot;</span>);
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (ret == <span class="hljs-number">0</span>) {
+    <span class="hljs-comment">//子进程</span>
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Child process id: %d, and the value of x is %d \n&quot;</span>, ret, x);
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-comment">//父进程</span>
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Parent process id: %d, and the value of x is %d \n&quot;</span>, ret, x);
+}
+</code></pre>
+<ul>
+<li>立即复制状态机，所有信息的完整拷贝
+<ul>
+<li>内存、PCB（如打开的文件描述符号）</li>
+</ul>
+</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%99%9A%E6%8B%9F%E5%8C%96-%E8%BF%9B%E7%A8%8B/image-25.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<div class="callout callout-info"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>文件描述符</div><p>一个指向操作系统内对象的 “指针”</p>
+<ul>
+<li>对象只能通过操作系统允许的方式访问</li>
+<li>可以通过 <code>open</code> 取得，<code>close</code> 释放，<code>dup</code> 复制</li>
+<li>对于数据文件，文件描述符会 “记住” 上次访问文件的位置</li>
+</ul>
+</div><blockquote>
+<p>多线程的进程进行 fork 时，只有一个线程被复制，就是那个调用 fork 的线程</p>
+</blockquote>
+<pre><code class="language-c"><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+    <span class="hljs-type">pid_t</span> x = fork();
+    <span class="hljs-type">pid_t</span> y = fork();
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d %d\n&quot;</span>, x, y);
+}
+</code></pre>
+<pre><code class="language-planetext">时间线 →
+
+第 1 个 fork():
+
+    P0 ──────────┬────────── P0 (x=N1, 继续执行)
+                 │
+                 └────────── P1 (x=0,  继续执行)
+
+第 2 个 fork():  (P0 和 P1 各执行一次)
+
+    P0 (x=N1) ──┬──── P0 (x=N1, y=N2)
+                │
+                └──── P2 (x=N1, y=0)
+
+    P1 (x=0) ───┬──── P1 (x=0,  y=N3)
+                │
+                └──── P3 (x=0,  y=0)
+
+但实际输出顺序是不定的
+</code></pre>
+<pre><code class="language-c"><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">2</span>; i++) {
+        fork();
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Hello\n&quot;</span>);
+    }
+}
+</code></pre>
+<hr>
+<blockquote>
+<p><code>fork</code> 与 <code>stdout</code></p>
+</blockquote>
+<ol>
+<li><strong><code>fork()</code> 的内存复制：</strong> 当调用 <code>fork()</code> 创建子进程时，子进程会获得父进程数据空间、堆和栈的<strong>副本</strong>，这也包括了<strong>用户态空间中 C 标准库维护的 I/O 缓冲区</strong>。</li>
+<li><strong><code>stdout</code> 的缓冲策略：</strong>
+<ul>
+<li><strong>行缓冲：</strong> 当标准输出直接连接到终端（显示器）时，遇到换行符 <code>\n</code>，或者缓冲区满，或者进程结束时，缓冲区的数据才会被真正写入内核（系统调用 <code>write</code>）并显示出来。</li>
+<li><strong>全缓冲：</strong> 当标准输出重定向到文件或管道（如 <code>| cat</code>）时，缓冲策略变为全缓冲。此时遇到 <code>\n</code> <strong>不会</strong>触发刷新，只有当缓冲区填满或进程正常结束（<code>exit</code>）时，才会统一刷新。</li>
+</ul>
+</li>
+</ol>
+<p><strong>💻 场景一：直接运行 <code>./a.out</code> (输出 6)</strong></p>
+<p>此时标准输出连接到终端，使用<strong>行缓冲</strong>，因为 <code>printf</code> 里面有 <code>\n</code>，所以每次执行 <code>printf</code> 都会<strong>立即清空缓冲区并输出</strong>。</p>
+<ul>
+<li><strong>初始状态：</strong> 只有一个父进程 P0。</li>
+<li><strong>第一轮循环 (<code>i = 0</code>)：</strong>
+<ul>
+<li>P0 执行 <code>fork()</code>，创建子进程 P1。现在有 P0 和 P1 两个进程。</li>
+<li>P0 和 P1 分别执行 <code>printf(&quot;Hello\n&quot;)</code>。</li>
+<li><em>【关键】</em> 因为是行缓冲且带有 <code>\n</code>，两个进程各自立即输出 1 次 “Hello”，随后<strong>缓冲区被清空</strong>。</li>
+<li><em>本轮输出：2次。</em></li>
+</ul>
+</li>
+<li><strong>第二轮循环 (<code>i = 1</code>)：</strong>
+<ul>
+<li>P0 执行 <code>fork()</code> 创建 P2；P1 执行 <code>fork()</code> 创建 P3。现在有 P0, P1, P2, P3 四个进程。</li>
+<li>四个进程的缓冲区此时都是空的。</li>
+<li>这四个进程分别执行 <code>printf(&quot;Hello\n&quot;)</code>，立即输出。</li>
+<li><em>本轮输出：4次。</em></li>
+</ul>
+</li>
+<li><strong>最终结果：</strong> 2 + 4 = <strong>6</strong> 次。</li>
+</ul>
+<p><strong>💻 场景二：加上管道 <code>./a.out | cat</code> (输出 8)</strong></p>
+<p>此时标准输出通过管道传给 <code>cat</code>，系统将其识别为非交互式设备，缓冲策略变为<strong>全缓冲</strong>。<code>\n</code> 失去了立即刷新缓冲区的作用。</p>
+<ul>
+<li><strong>初始状态：</strong> 进程 P0。</li>
+<li><strong>第一轮循环 (<code>i = 0</code>)：</strong>
+<ul>
+<li>P0 执行 <code>fork()</code>，创建 P1。</li>
+<li>P0 和 P1 执行 <code>printf(&quot;Hello\n&quot;)</code>。</li>
+<li><em>【关键】</em> 因为是全缓冲，字符串 “Hello\n” 被写进了 P0 和 P1 各自的<strong>用户态缓冲区</strong>中，<strong>并没有被打印出来</strong>。</li>
+<li>此时 P0 缓冲区：<code>[&quot;Hello\n&quot;]</code></li>
+<li>此时 P1 缓冲区：<code>[&quot;Hello\n&quot;]</code></li>
+</ul>
+</li>
+<li><strong>第二轮循环 (<code>i = 1</code>)：</strong>
+<ul>
+<li>P0 执行 <code>fork()</code> 创建 P2。</li>
+<li><strong>高能预警：</strong> <code>fork()</code> 会复制父进程的内存！因此，子进程 P2 不仅复制了代码，还<strong>原封不动地复制了 P0 此时的缓冲区</strong>。所以 P2 诞生时，它的缓冲区里就已经有一个 “Hello\n” 了。</li>
+<li>P1 执行 <code>fork()</code> 创建 P3。同理，P3 复制了 P1 的缓冲区。</li>
+<li>现在有 P0, P1, P2, P3 四个进程。它们各自执行 <code>printf(&quot;Hello\n&quot;)</code>。</li>
+<li>新打印的 “Hello\n” 被追加到这四个进程各自的缓冲区中。</li>
+<li>此时四个进程的缓冲区状态：
+<ul>
+<li>P0 缓冲区：<code>[&quot;Hello\n&quot;, &quot;Hello\n&quot;]</code></li>
+<li>P1 缓冲区：<code>[&quot;Hello\n&quot;, &quot;Hello\n&quot;]</code></li>
+<li>P2 缓冲区：<code>[&quot;Hello\n&quot; (继承自P0), &quot;Hello\n&quot; (新加的)]</code></li>
+<li>P3 缓冲区：<code>[&quot;Hello\n&quot; (继承自P1), &quot;Hello\n&quot; (新加的)]</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>程序结束：</strong>
+<ul>
+<li>循环结束，四个进程依次调用 <code>exit()</code> 退出。</li>
+<li>进程退出时，C 语言底层的退出处理函数会自动清空并刷新尚未输出的缓冲区。</li>
+<li>四个进程各自把缓冲区里的 2 个 “Hello\n” 推给操作系统。</li>
+</ul>
+</li>
+<li><strong>最终结果：</strong> 4 个进程 × 每个进程缓冲了 2 个输出 = <strong>8</strong> 次。</li>
+</ul>
+<p><strong>📝 关于一个提示：<code>改为 &quot;Hello\t&quot; 试试</code></strong></p>
+<p>如果把换行符 <code>\n</code> 改为制表符 <code>\t</code>，即使是直接运行 <code>./a.out</code>，结果也会是 8。</p>
+<p><strong>原因非常直白：</strong></p>
+<ul>
+<li>即使连接到终端（行缓冲模式），制表符 <code>\t</code> 也<strong>无法触发缓冲区刷新</strong>（只有 <code>\n</code> 可以）。</li>
+<li>因此，缓冲区里的数据会一直憋着，直到进程结束。这导致即使没有管道，程序的行为也完全退化成了<strong>全缓冲</strong>的模式。其内部的缓冲区复制过程与 “场景二” 完全一致，最终也会输出 8 次。</li>
+</ul>
+<hr>
+<ul>
+<li>由于 <code>fork</code> 的能力，一个简单的应用就是可以用来<strong>给进程创建 “快照”</strong></li>
+<li>主进程 crash 了，启动快照重新执行</li>
+</ul>
+<h2 id="3-execve">3 execve</h2>
+<div class="callout callout-tip"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>将当前进程重置成一个可执行文件描述状态机的初始状态</div></div><pre><code class="language-c"><span class="hljs-type">int</span> <span class="hljs-title function_">execve</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span> *pathname, <span class="hljs-type">char</span> *<span class="hljs-type">const</span> argv[], <span class="hljs-type">char</span> *<span class="hljs-type">const</span> envp[])</span>;
+</code></pre>
+<ul>
+<li>加载 <code>pathname</code> 指定的可执行文件（数据段、代码段）</li>
+<li>重新初始化堆和栈</li>
+<li>PCB 中相应的 memory mappings 也会改变</li>
+<li>将 PC 寄存器设置到可执行文件代码段定义的入口点，该入口点最终会调用 main 函数</li>
+</ul>
+<blockquote>
+<p>对 <code>execve</code> 的成功调用没有返回值，因为新的进程镜像覆盖了调用进程镜像</p>
+</blockquote>
+<ul>
+<li>创建一个新的子进程的组合拳（一个简易 shell 的示意）</li>
+</ul>
+<pre><code class="language-c"><span class="hljs-keyword">extern</span> <span class="hljs-type">char</span> **environ; <span class="hljs-comment">// environment variables of current process</span>
+<span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>){
+    type_prompt();     <span class="hljs-comment">// display prompt on the screen</span>
+    read_command(&amp;filename, &amp;parameters); <span class="hljs-comment">//read the input command</span>
+    <span class="hljs-type">int</span> pid = fork();
+    <span class="hljs-keyword">if</span> (pid == <span class="hljs-number">-1</span>) {
+        perror(<span class="hljs-string">&quot;fork&quot;</span>);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (pid == <span class="hljs-number">0</span>) { <span class="hljs-comment">// Child</span>
+        execve(filename, parameters, environ);
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-type">int</span> status; <span class="hljs-comment">// Parent</span>
+        waitpid(pid, &amp;status, <span class="hljs-number">0</span>);
+    }
+}
+</code></pre>
+<h3 id="3-1-管道">3.1 管道*</h3>
+<ul>
+<li><code>execve</code> 不会改变 PCB 中的文件描述符，那些打开的文件描述符还会保持打开</li>
+<li>比如 shell 里开启的进程打印字符都会在同样的终端</li>
+<li>管道的实现（进程间的通信）</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%99%9A%E6%8B%9F%E5%8C%96-%E8%BF%9B%E7%A8%8B/image-26.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<p><strong>1. 建立水管：<code>pipe()</code> 系统调用</strong></p>
+<ul>
+<li>父进程调用 <code>int pipe(int pipefd[2]);</code>，让操作系统在内核里开辟了一块专门的内存缓冲区（图里黄色的 pipe 实体）。</li>
+<li>同时，系统给父进程返回了两个<strong>文件描述符（File Descriptors, FDs）</strong>：
+<ul>
+<li><code>fd[0]</code> 是<strong>读口</strong></li>
+<li><code>fd[1]</code> 是<strong>写口</strong></li>
+</ul>
+</li>
+<li>此时，父进程自己既能往里写，也能往外读。</li>
+</ul>
+<p><strong>2. 分身并继承：<code>fork()</code> 的魔法</strong></p>
+<ul>
+<li>父进程调用 <code>fork()</code> 产生了一个子进程。</li>
+<li>关键点来了！<code>fork()</code> 会完美克隆父进程的 PCB，<strong>子进程也会原封不动地继承这两个文件描述符 <code>fd[0]</code> 和 <code>fd[1]</code></strong>。</li>
+<li>现在，父子两个进程的 FD 都指向了内核中同一个管道（黄色的 pipe 实体）。</li>
+</ul>
+<p><strong>3. 确立单向水流：关闭多余端口</strong></p>
+<ul>
+<li>虽然现在父子进程都能读能写，但管道在设计上通常是<strong>单向通信</strong>的。为了防止混乱（比如父进程写的数据被自己不小心读回来了），需要剪断多余的连接。</li>
+<li><strong>在上图中：</strong>
+<ul>
+<li><strong>父进程</strong>想把数据发给子进程。所以父进程把自己的读口关掉（<code>close(fd[0])</code>），只保留写口。</li>
+<li><strong>子进程</strong>负责接收数据。所以子进程把自己的写口关掉（<code>close(fd[1])</code>），只保留读口。</li>
+</ul>
+</li>
+<li>至此，一条完美的单向数据流就建成了：<strong>父进程 <code>fd[1]</code> 写入 \(\rightarrow\) 管道缓冲 \(\rightarrow\) 子进程 <code>fd[0]</code> 读取</strong>。</li>
+</ul>
+<div class="callout callout-question"><div class="callout-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>为什么 execve 的特性这么重要？</div></div><p>底层原因：<strong><code>execve</code> 不会改变 PCB 中的文件描述符，原先打开的 FD 会继续保持打开状态。</strong></p>
+<p>这解释了你在 Linux 终端里常用的 <code>|</code> 符号（比如 <code>ls | cat</code>）是怎么工作的：</p>
+<ol>
+<li>Shell（父进程）先创建一个管道。</li>
+<li>Shell <code>fork</code> 出两个子进程 A 和 B。</li>
+<li>通过一系列操作，把 A 的标准输出绑到管道的写口，把 B 的标准输入绑到管道的读口。</li>
+<li><strong>最关键的一步</strong>：子进程 A 和 B 分别调用 <code>execve</code> 去加载真正的程序（比如 <code>ls</code> 和 <code>cat</code>）。</li>
+<li>由于 <code>execve</code> <strong>不会关闭</strong>之前配置好的管道 FD，所以当 <code>ls</code> 程序试图往屏幕打印东西时，数据实际上顺着保留下来的管道，偷偷流进了 <code>cat</code> 程序的嘴里！</li>
+</ol>
+<blockquote>
+<p>但如果是父进程打开了一个普通文件，在地址空间里有一个相应的 file 变量索引，但你的子进程重置了整个地址空间，因此那个文件描述符对应的 file 变量也没有了，此时你无法 close 这个文件了</p>
+<p>这会造成资源的泄漏，当然这些资源（PCB）都会随着进程的终止而最终被回收，但在运行期间还是有一些资源的损耗</p>
+</blockquote>
+<h3 id="3-2-写时复制-copy-on-write-cow">3.2 写时复制（Copy-On-Write，COW）</h3>
+<blockquote>
+<p><code>fork</code> 后面往往跟着 <code>execve</code> 来加载子进程，那么 <code>fork</code> 的过程还必要吗？</p>
+</blockquote>
+<ul>
+<li>早期的 <code>fork</code> 就是这么无脑的复制父进程的一切，这个过程是<strong>低效的</strong>：
+<ol>
+<li>有些内存是只读的，比如代码段、共享代码库，这些没必要复制</li>
+<li>立即执行 <code>execve</code> 会加载新的可执行文件，重置地址空间，之前的内存拷贝没有任何意义</li>
+</ol>
+</li>
+</ul>
+<p>对于那些可以改变的内存，人们给出了一个聪明的设计：写时复制</p>
+<ul>
+<li>即两个进程共享同一份物理内存</li>
+<li><mark>只有当一个进程尝试去写这个物理内存时才会真正在物理内存中复制一份副本用来给这个进程去写</mark></li>
+<li>问题是，写自己的内存是一个 “用户态” 事件，内核又怎么知道呢？</li>
+<li><mark>标记这个共享的内存为 “只读”，一旦发生 “写” 操作会发生权限错误陷入内核，操作系统获知这是一个 COW 事件，复制内存！</mark></li>
+</ul>
+<p><img src="/assets/img/posts/%E8%99%9A%E6%8B%9F%E5%8C%96-%E8%BF%9B%E7%A8%8B/image-27.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<h2 id="4-exit">4 exit</h2>
+<blockquote>
+<p>进程的终止：清理其所占内存空间（包括代码区、堆、栈），这个过程需要系统调用来做</p>
+</blockquote>
+<p>进程一般有 5 种退出机制</p>
+<ul>
+<li>正常退出：从 <code>main</code> 函数返回，调用库函数<code>exit</code>，调用 <code>_exit</code></li>
+<li>异常退出：调用 <code>abort</code>，由信号终止</li>
+</ul>
+<h3 id="4-1-exit">4.1 exit()</h3>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">exit</span><span class="hljs-params">(<span class="hljs-type">int</span> status)</span>; <span class="hljs-comment">// 从不返回</span>
+</code></pre>
+<ul>
+<li>调用 <code>atexit()</code>，指定在程序终止时<strong>执行自己的清理动作</strong></li>
+<li>关闭所有打开的流 (stdio)，这将导致写所有被缓冲的输出</li>
+<li>移除所有的临时文件</li>
+<li>最后调用 <code>_exit()</code> 函数终止进程</li>
+</ul>
+<h3 id="4-2-return-from-main">4.2 return from main()</h3>
+<ul>
+<li><code>main</code> 函数的返回值和调用 <code>exit()</code> 的传入参数是同样的语义</li>
+<li>0 是函数是符合预期终止，非 0 是函数出现了错误终止</li>
+</ul>
+<h3 id="4-3-_exit">4.3 _exit()</h3>
+<pre><code class="language-c"><span class="hljs-type">void</span> _exit(<span class="hljs-type">int</span> status);
+</code></pre>
+<ul>
+<li>所有属于这个进程的文件描述符都会被关闭</li>
+<li>所有该进程的子进程都会被 <code>init</code> 进程接管</li>
+<li>向该进程的父进程发送 <code>SIGCHLD</code> 信号，通知该父进程其已经终止</li>
+</ul>
+<blockquote>
+<p>注意：<code>_exit()</code> 只会终止当前的线程，但 libc 做了一层 wrapper，其实真实调用 <code>exit_group()</code>，关闭所有线程</p>
+</blockquote>
+<h3 id="4-4-abort">4.4 abort()</h3>
+<pre><code class="language-c"><span class="hljs-type">void</span> <span class="hljs-title function_">abort</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;
+</code></pre>
+<ul>
+<li><code>atexit</code> 注册的函数不会调用</li>
+<li>io 流不会关闭</li>
+<li>其行为就是产生一个 <code>SIGABRT</code> 信号发送给调用 <code>abort()</code> 的进程，然后该进程就会异常终止</li>
+</ul>
+<h3 id="4-5-信号-signal">4.5 信号（Signal）</h3>
+<blockquote>
+<p>区别于条件变量机制下的 <code>signal</code>，用于唤醒正在休眠等待的线程</p>
+</blockquote>
+<ul>
+<li>本质上是对中断的模拟</li>
+</ul>
+<p><img src="/assets/img/posts/%E8%99%9A%E6%8B%9F%E5%8C%96-%E8%BF%9B%E7%A8%8B/image-28.webp" alt="alt text" loading="lazy" class="center-img"></p>
+<blockquote>
+<p>默认信号处理程序通常直接终止进程</p>
+</blockquote>
+<pre><code class="language-c">signal(SIGNAL_NUMBER, handler); 
+</code></pre>
+<p><code>signal</code> 函数可以注册信号处理函数，只要传入相应的信号和函数名即可</p>
+<ul>
+<li><code>handler</code> 设为 <code>SIG_IGN</code> 时表示忽略这个信号</li>
+<li><code>signal(SIGCHLD, SIG_IGN)</code> 表示忽略子进程的终止信号，此时子进程结束会直接被内核完全清除（而不必先变为僵尸进程，然后再被回收）</li>
+</ul>
+<p>有了信号机制，可以完成很多异步的操作：</p>
+<ul>
+<li><code>signal(SIGCHLD, handler)</code>，可以在 <code>handler</code> 里进行 <code>wait</code>，而不是在 <code>main</code> 函数里 <code>wait</code>/<code>waitpid</code> 从而阻塞父进程</li>
+<li><code>signal(SIGIO, handler)</code> 可以不用等待 I/O 完成，先做其他事情，如果文件描述符所指向的数据传输完成，会产生 <code>SIGIO</code> 的事件，就可以通过回调函数 <code>handler</code> 来处理</li>
+</ul>
+<blockquote>
+<p>信号也是一种进程间通信（IPC）的机制之一，此外还有消息传递、共享内存、管道等</p>
+</blockquote>
+</div>
+        
+    <div class="post-copyright-sep"></div>
+    <blockquote class="post-copyright">
+      <p><strong>标题</strong>：进程</p>
+      <p><strong>作者</strong>：Zwing</p>
+      <p><strong>创建于</strong>：2026-08-09 00:10:00</p>
+      <p><strong>更新于</strong>：2026-08-08 16:25:54</p>
+      <p><strong>链接</strong>：https://zanytriumph.github.io/posts/虚拟化-进程.html</p>
+      <p><strong>版权声明</strong>：本文章采用 CC BY-NC-SA 4.0 进行许可</p>
+    </blockquote>
+      </article>
+      
+    <nav class="toc">
+      <div class="toc-title">目录</div>
+      <div class="page-title">进程</div>
+      <ul><li class="toc-l2"><a href="#1-进程的生命周期">1 进程的生命周期</a></li><li class="toc-l2"><a href="#2-fork">2 fork</a></li><li class="toc-l2"><a href="#3-execve">3 execve</a></li><li class="toc-l3"><a href="#3-1-管道">3.1 管道*</a></li><li class="toc-l3"><a href="#3-2-写时复制-copy-on-write-cow">3.2 写时复制（Copy-On-Write，COW）</a></li><li class="toc-l2"><a href="#4-exit">4 exit</a></li><li class="toc-l3"><a href="#4-1-exit">4.1 exit()</a></li><li class="toc-l3"><a href="#4-2-return-from-main">4.2 return from main()</a></li><li class="toc-l3"><a href="#4-3-_exit">4.3 _exit()</a></li><li class="toc-l3"><a href="#4-4-abort">4.4 abort()</a></li><li class="toc-l3"><a href="#4-5-信号-signal">4.5 信号（Signal）</a></li></ul>
+    </nav>
+      
+    <nav class="post-pager">
+      <a class="pager-prev" href="/posts/并发-并发问题.html">&lt; 并发问题</a>
+      <a class="pager-next" href="/posts/虚拟化-调度.html">调度 &gt;</a>
+    </nav>
+    </div>
+    
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
+</footer>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786177585384"></script>
+<script src="/assets/js/main.js?v=1786177585384" defer></script>
+<script src="/assets/js/search.js?v=1786177585384" defer></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786177585384"></script>
+</body>
+</html>
