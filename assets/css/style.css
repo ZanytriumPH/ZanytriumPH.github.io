@@ -1591,7 +1591,13 @@ html[data-theme="dark"].post-glass .post-wrap {
 .nf-link { color: var(--accent); }
 
 /* ---------- 页脚 ---------- */
+/* position: relative + z-index: 1 必须保留：盖在全屏 hero 背景图（.hero-bg，fixed z-index 0）之上，
+   否则滚动到底时页脚被背景图遮住（曾致页脚整块不可见）。
+   毛玻璃效果：Chrome 等浏览器正常渲染；Edge 走下方 html.edge 降级（禁用模糊，
+   保留半透明底 var(--card-glass)，低开销） */
 .site-footer {
+  position: relative;
+  z-index: 1;
   border-top: 1px solid var(--border-glass);
   padding: 14px 0 18px;
   margin-top: 40px;
