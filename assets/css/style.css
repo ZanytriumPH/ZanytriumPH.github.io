@@ -35,6 +35,7 @@ html[data-theme="light"] {
   --mark-text: inherit;
   --callout-bg: #f6f8fa;
   --callout-border: #d0d7de;
+  --link: #016A8E;
   --link-hover: #014c65;
   --toc-active: #016A8E;
   /* 表格隔行变色：半透明叠层（见 .markdown-body tbody），叠在页面或提示框底色上自动协调 */
@@ -42,6 +43,8 @@ html[data-theme="light"] {
 }
 
 html[data-theme="dark"] {
+  /* 暗色下主强调色整体提亮为亮蓝（墨蓝在深底上对比度不足）；提示框颜色独立不受影响 */
+  --accent: #6ed5f7;
   --bg: #0d1117;
   --bg-soft: #161b22;
   --card: #0d1117;
@@ -62,6 +65,7 @@ html[data-theme="dark"] {
   --mark-text: #ffe97d;
   --callout-bg: #161b22;
   --callout-border: #30363d;
+  --link: #6ed5f7;
   --link-hover: #7bdefe;
   --toc-active: #6ed5f7;
   /* 暗色下对微弱亮度变化不敏感，叠层略强于浅色主题 */
@@ -83,7 +87,7 @@ body {
   transition: background 0.25s ease, color 0.25s ease;
 }
 
-a { color: var(--accent); text-decoration: none; transition: color 0.15s; }
+a { color: var(--link); text-decoration: none; transition: color 0.15s; }
 a:hover { color: var(--link-hover); }
 
 code, pre, kbd {
@@ -501,6 +505,8 @@ html.post-glass .container-post { max-width: 924px; }
   font-weight: 700;
 }
 .page-ellipsis { color: var(--text-muted); padding: 0 2px; }
+/* 暗色下当前页为亮蓝底，白字对比度不足 → 改深色字 */
+html[data-theme="dark"] .page-num.active { color: #0d1117; }
 
 .post-card {
   position: relative; /* 置顶标识的定位基准 */
