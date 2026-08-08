@@ -4,6 +4,14 @@
 (() => {
   'use strict';
 
+  // ---- Edge 性能降级标记 ----
+  // Edge 合成器对「全屏背景图 + 大面积 backdrop-filter」逐帧重采样成本极高，
+  // 滚动时严重卡顿（Chrome 有合成优化不受影响）。检测到 Edge 给 <html> 加 .edge 类，
+  // 由 CSS 把大面积毛玻璃降级为半透明实色（变量里已有半透明底色，视觉依旧柔和）
+  if (/Edg\/\d+/.test(navigator.userAgent)) {
+    document.documentElement.classList.add('edge');
+  }
+
   // ---- 移动端导航 ----
   const navToggle = document.getElementById('nav-toggle');
   const navMenu = document.getElementById('nav-menu');
@@ -152,20 +160,25 @@
 
   // ---- 首页背景模糊（Redefine 效果）----
   // 帖子条目列表顶部到达屏幕中间时切换模糊；0↔18px 的突变由
-  // CSS 的 transition: filter 平滑过渡（见 style.css .hero-bg）
+  // CSS 的 transition: filter 平滑过渡（见 style.css .hero-bg）。
+  // 列表的文档绝对位置只在 resize / 首屏图片加载后计算一次（懒加载图片可能改变卡片高度），
+  // 滚动时仅比较 scrollY——旧实现每帧 getBoundingClientRect() 强制同步布局，Edge 上滚动卡顿
   if (heroBg) {
     const BLUR = 18;
     let ticking = false;
-    const updateBlur = () => {
+    let postsTopAbs = 0; // #posts 顶部在文档中的绝对位置（scrollY 无关，不随滚动变化）
+    const measure = () => {
       const posts = document.getElementById('posts');
-      let blur = '';
-      if (posts) {
-        const postsTop = posts.getBoundingClientRect().top + window.scrollY;
-        if (window.scrollY + window.innerHeight * 0.5 >= postsTop) blur = BLUR;
-      }
+      postsTopAbs = posts ? posts.getBoundingClientRect().top + window.scrollY : 0;
+    };
+    const updateBlur = () => {
+      const blur = window.scrollY + window.innerHeight * 0.5 >= postsTopAbs ? BLUR : '';
       heroBg.style.filter = blur ? `blur(${blur}px)` : '';
       ticking = false;
     };
+    window.addEventListener('resize', measure);
+    window.addEventListener('load', measure); // 懒加载图片加载后卡片高度可能变化
+    measure();
     window.addEventListener('scroll', () => {
       if (!ticking) { requestAnimationFrame(updateBlur); ticking = true; }
     }, { passive: true });
@@ -323,13 +336,18 @@
   }
 
   // ---- TOC 滚动高亮 + 目录跟随滚动 ----
-  // 以视口 20% 高度为参考线：滚动文章时，高亮参考线上方最近的标题，
-  // 并让目录自身滚动到该条目（当前阅读位置始终在目录中可见）
+  // 以视口 20% 高度为参考线：高亮参考线上方最近的标题，并让目录自身滚动到该条目。
+  // 用 IntersectionObserver 观测标题是否越过参考线——只在线被穿过的瞬间回调，
+  // 且 entry.boundingClientRect 是缓存值，无强制同步布局。
+  // （旧实现：scroll 每帧遍历全部标题 getBoundingClientRect()，长文章在 Edge 上滚动卡顿）
   const tocLinks = document.querySelectorAll('.toc li a');
   if (tocLinks.length) {
     const toc = document.querySelector('.toc');
     const ids = [...tocLinks].map(a => a.getAttribute('href').slice(1));
     const elMap = new Map(ids.map(id => [id, document.getElementById(id)]).filter(([, el]) => el));
+    const idList = [...elMap.keys()];
+    const prevOf = (id) => idList[Math.max(0, idList.indexOf(id) - 1)];
+    const REF = 0.2; // 参考线：视口高度 20% 处
     let currentId = null;
 
     function setActive(id) {
@@ -345,26 +363,24 @@
       toc.scrollTop = lTop - (tH - lH) / 2;
     }
 
-    function onScroll() {
-      const refLine = window.innerHeight * 0.2;
-      let bestId = null, bestTop = -Infinity;
-      for (const [id, el] of elMap) {
-        const top = el.getBoundingClientRect().top;
-        if (top <= refLine && top > bestTop) { bestTop = top; bestId = id; }
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        // 标题越过参考线 → 高亮它；未越过（向上回滚）→ 恢复前一条目
+        const crossed = entry.boundingClientRect.top <= window.innerHeight * REF;
+        setActive(crossed ? entry.target.id : prevOf(entry.target.id));
       }
-      // 页首尚未越过参考线 → 高亮第一个条目
-      if (!bestId) { setActive(ids[0]); return; }
-      // 接近文末 → 高亮最后一个条目（否则末尾标题可能够不到参考线）
-      const lastEl = elMap.get(ids[ids.length - 1]);
-      if (lastEl && lastEl.getBoundingClientRect().top < 0
-        && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 8) {
-        setActive(ids[ids.length - 1]);
-      } else {
-        setActive(bestId);
-      }
-    }
+    }, { rootMargin: `-${REF * 100}% 0px -${(1 - REF) * 100}% 0px`, threshold: 0 });
+    idList.forEach(id => observer.observe(elMap.get(id)));
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll(); // 初始化：定位当前章节
+    // 初始化：一次性定位当前章节（浏览器恢复滚动位置时也正确；仅此一次布局读取）
+    {
+      const refLine = window.innerHeight * REF;
+      let best = idList[0], bestTop = -Infinity;
+      for (const id of idList) {
+        const top = elMap.get(id).getBoundingClientRect().top;
+        if (top <= refLine && top > bestTop) { bestTop = top; best = id; }
+      }
+      setActive(best);
+    }
   }
 })();
