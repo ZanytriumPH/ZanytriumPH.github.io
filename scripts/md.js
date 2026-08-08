@@ -60,7 +60,7 @@ function slugify(text, used) {
  */
 function createMd(env) {
   const md = new MarkdownIt({
-    html: false,
+    html: true, // 保留原生 HTML(如 <table> 表格)——内容均来自本仓库 source/，无外部输入
     linkify: true,
     typographer: true,
     highlight: (code, lang) => {
