@@ -119,7 +119,8 @@ code, pre, kbd {
    小面积模糊（下拉菜单、圆形按钮等）成本低，保留 */
 html.edge .navbar,
 html.edge .glass-panel,
-html.edge.post-glass .post-wrap {
+html.edge.post-glass .post-wrap,
+html.edge .site-footer {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -730,7 +731,27 @@ html[data-theme="dark"] .page-num.active { color: #0d1117; }
   color: var(--text);
 }
 
-/* 统计卡片：字数 / 访问人数 / 总访问量 / 运行时间 */
+/* 统计卡片：公告（统计数据已移至页脚 .footer-stats） */
+.announcement-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--text) 80%, var(--text-secondary));
+}
+.announcement-title svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+}
+.announcement-text {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  /* 介于 --text 与 --text-secondary 之间：62% 主色 + 38% 次级色，明暗主题自动适配 */
+  color: color-mix(in srgb, var(--text) 62%, var(--text-secondary));
+  line-height: 1.7;
+}
 .stat-row {
   display: flex;
   justify-content: space-between;
@@ -1572,7 +1593,7 @@ html[data-theme="dark"].post-glass .post-wrap {
 /* ---------- 页脚 ---------- */
 .site-footer {
   border-top: 1px solid var(--border-glass);
-  padding: 24px 0 32px;
+  padding: 14px 0 18px;
   margin-top: 40px;
   background: var(--card-glass);
   backdrop-filter: blur(16px) saturate(160%);
@@ -1583,8 +1604,24 @@ html[data-theme="dark"].post-glass .post-wrap {
   margin: 0 auto;
   padding: 0 20px;
   text-align: center;
-  color: var(--text-muted);
+  /* 版权行颜色与页脚统计标签（如"文章总字数"）一致；统计数字另有 .footer-stats b 覆盖 */
+  color: var(--text-secondary);
   font-size: 0.85rem;
+}
+/* 页脚统计行：首页展示（文章总字数 / 访问人数 / 总访问量 / 已运行天数） */
+.footer-stats {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 26px;
+  margin-top: 8px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+.footer-stats b {
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums; /* 数字跳动时宽度不抖动 */
 }
 
 /* ---------- 其他 ---------- */
