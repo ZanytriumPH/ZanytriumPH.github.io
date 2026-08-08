@@ -229,6 +229,21 @@ function createMd(env) {
     return defaultImage(tokens, idx, options, env2, self);
   };
 
+  // === 7. 链接：新开标签页打开 ===
+  // 文章内 markdown 超链接默认在新标签页打开（外部与站内链接均适用）；
+  // 纯锚点（# 开头）保持当前页跳转，避免新开页面无法定位。
+  const defaultLinkOpen = md.renderer.rules.link_open ||
+    ((tokens, idx, options, env2, self) => self.renderToken(tokens, idx, options));
+  md.renderer.rules.link_open = (tokens, idx, options, env2, self) => {
+    const token = tokens[idx];
+    const href = token.attrGet('href') || '';
+    if (!href.startsWith('#')) {
+      token.attrSet('target', '_blank');
+      token.attrSet('rel', 'noopener noreferrer');
+    }
+    return defaultLinkOpen(tokens, idx, options, env2, self);
+  };
+
   // === 标题锚点：自动添加 id（用于 TOC 跳转） ===
   const headingOpen = md.renderer.rules.heading_open ||
     ((tokens, idx, options, env2, self) => self.renderToken(tokens, idx, options));
