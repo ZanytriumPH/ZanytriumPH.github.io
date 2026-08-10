@@ -13,11 +13,15 @@
   document.documentElement.className+=' js';
   // 文章页背景图模式恢复到上次选择（CSS 应用前设置，首帧即正确，无闪烁）
   if(localStorage.getItem('post-glass'))document.documentElement.classList.add('post-glass');
-  // hero 入场动画（背景缩放淡入 + 内容上浮）只在会话首次进入时播放：
+  // hero 入场动画（背景缩放淡入 + 内容上浮）只在「从首页进入的首次会话」播放：
+  // 直接进文章页等非首页页面时不播放——且同样打标记，避免后续导航到首页时
+  // 重播动画（本次会话的入口不是首页，整场会话都不播）；
   // 导航栏跳转是整页重载会重播动画，用 sessionStorage 标记禁用后续触发
-  if(sessionStorage.getItem('hero-anim-shown')){
-    document.documentElement.classList.add('no-hero-anim');
+  var heroPage = false;
+  if(heroPage && !sessionStorage.getItem('hero-anim-shown')){
+    sessionStorage.setItem('hero-anim-shown','1');
   } else {
+    document.documentElement.classList.add('no-hero-anim');
     sessionStorage.setItem('hero-anim-shown','1');
   }
   // hero 背景图按主题提前就位：img 初始无 src，DOM 解析完成后立即设好，
@@ -29,9 +33,9 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setHeroSrc);
   else setHeroSrc();
 })();</script>
-<link rel="stylesheet" href="/assets/css/style.css?v=1786202985654">
-<link rel="stylesheet" href="/assets/css/hljs.css?v=1786202985654" id="hljs-style">
-<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786202985654">
+<link rel="stylesheet" href="/assets/css/style.css?v=1786370328777">
+<link rel="stylesheet" href="/assets/css/hljs.css?v=1786370328777" id="hljs-style">
+<link rel="icon" type="image/png" href="/assets/img/logo.png?v=1786370328777">
 </head>
 <body>
 <img class="hero-bg hero-bg-hidden" data-bg-light="/assets/img/bg.webp" data-bg-dark="/assets/img/bg-dark.webp" alt="" fetchpriority="high">
@@ -413,12 +417,12 @@ AFTER <span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">ON</sp
 <footer class="site-footer">
   <div class="footer-inner">© 2025 - 2026 Zwing · 自定义构建 · 灵感来自 hexo-theme-redefine 与 Markdown Preview Enhanced</div>
 </footer>
-<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786202985654"></script>
-<script src="/assets/js/main.js?v=1786202985654" defer></script>
-<script src="/assets/js/search.js?v=1786202985654" defer></script>
+<script defer src="/assets/vendor/mermaid/mermaid.min.js?v=1786370328777"></script>
+<script src="/assets/js/main.js?v=1786370328777" defer></script>
+<script src="/assets/js/search.js?v=1786370328777" defer></script>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <script>window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };</script>
-<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786202985654"></script>
+<script defer src="/assets/vendor/mathjax/tex-svg.js?v=1786370328777"></script>
 </body>
 </html>
