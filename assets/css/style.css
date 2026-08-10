@@ -85,7 +85,13 @@ body {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   transition: background 0.25s ease, color 0.25s ease;
+  /* sticky footer：内容不足一屏时页脚仍贴住视口底部，不露出间隙 */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* svh 回退：老浏览器不支持 svh 时用 vh */
+  min-height: 100svh;
 }
+main { flex: 1 0 auto; width: 100%; }
 
 a { color: var(--link); text-decoration: none; transition: color 0.15s; }
 a:hover { color: var(--link-hover); }
